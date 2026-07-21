@@ -230,6 +230,66 @@
 
   /* ---------- Messages table ---------- */
 
+  .insights-box {
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 32px;
+  }
+
+  .insights-title {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .insights-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .insights-list li {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .insights-count {
+    margin-left: 6px;
+    font-size: 11px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .msg-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    margin-right: 6px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+  }
+
+  .msg-tag-money { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+  .msg-tag-time { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+  .msg-tag-question { background: #dbeafe; border-color: #bfdbfe; color: #1e40af; }
+  .msg-tag-piling { background: #ede9fe; border-color: #ddd6fe; color: #5b21b6; }
+  .msg-tag-catchup { background: var(--bg-panel); border-color: var(--line); color: var(--ink-soft); }
+
+  .msg-tag-cell { white-space: nowrap; }
+
   .msg-table {
     width: 100%;
     border-collapse: collapse;
@@ -981,6 +1041,12 @@
       return `${d}d ago`;
     }
 
+    const TAG_ORDER = ["money", "time", "question", "piling", "catchup"];
+    const TAG_LABEL = {
+      money: "💰 Money", time: "⏰ Time-sensitive", question: "❓ Needs an answer",
+      piling: "📌 Piling up", catchup: "💬 Catch up",
+    };
+
     function renderMessages() {
       const m = secure.messages || (typeof IMESSAGE !== "undefined" ? IMESSAGE : null);
       if (!m || !m.threads || !m.threads.length) {
@@ -993,12 +1059,41 @@
         return;
       }
 
-      const focus = m.threads.filter((t) => t.verdict === "focus");
+      const focus = m.threads
+        .filter((t) => t.verdict === "focus")
+        .slice()
+        .sort((a, b) => {
+          const ai = TAG_ORDER.indexOf(a.tag), bi = TAG_ORDER.indexOf(b.tag);
+          if (ai !== bi) return ai - bi;
+          if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+          return (b.unanswered || 0) - (a.unanswered || 0);
+        });
       const over = m.threads.filter((t) => t.verdict === "over");
+
+      const tagBadge = (tag) =>
+        `<span class="msg-tag msg-tag-${escapeHtml(tag || "catchup")}">${escapeHtml(TAG_LABEL[tag] || "💬 Catch up")}</span>`;
+
+      const insightsHtml = (m.insights || []).length
+        ? `<div class="insights-box">
+            <div class="insights-title">✨ Where to start</div>
+            <ul class="insights-list">
+              ${m.insights
+                .map(
+                  (i) => `<li>
+                    ${tagBadge(i.tag)}
+                    <b>${escapeHtml(i.name)}</b> — ${escapeHtml(i.text || "[no text]")}
+                    ${i.unanswered > 1 ? `<span class="insights-count">${i.unanswered} unanswered</span>` : ""}
+                  </li>`
+                )
+                .join("")}
+            </ul>
+          </div>`
+        : "";
 
       const row = (t) => `
         <tr>
           <td class="msg-name">${escapeHtml(t.name)}</td>
+          <td class="msg-tag-cell">${tagBadge(t.tag)}</td>
           <td class="msg-text">${escapeHtml(t.text || "[no text]")}</td>
           <td class="msg-when">${escapeHtml(timeAgo(t.ts))}</td>
           <td class="msg-unanswered">${t.unanswered}</td>
@@ -1006,7 +1101,7 @@
 
       const table = (rows) => `
         <table class="msg-table">
-          <thead><tr><th>Who</th><th>Last message</th><th>When</th><th>Unanswered</th></tr></thead>
+          <thead><tr><th>Who</th><th>Tag</th><th>Last message</th><th>When</th><th>Unanswered</th></tr></thead>
           <tbody>${rows.map(row).join("")}</tbody>
         </table>`;
 
@@ -1015,6 +1110,7 @@
           <h2>Texts</h2>
           <p>iMessage threads awaiting your reply, last ${m.windowDays || 20} days${m.generatedAt ? ` · updated ${escapeHtml(m.generatedAt)}` : ""}</p>
         </div>
+        ${insightsHtml}
         <div class="todo-section">
           <h3>Focus (${focus.length})</h3>
           ${focus.length ? table(focus) : `<div class="todo-empty">Nothing pressing.</div>`}
