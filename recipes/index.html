@@ -495,13 +495,8 @@
       <input id="search" type="text" placeholder="Search recipes…" autocomplete="off" />
     </div>
     <div class="filters">
-      <select id="filter-meal">
-        <option value="">Any meal</option>
-        <option value="dinner">Dinner</option>
-        <option value="lunch">Lunch</option>
-      </select>
       <select id="filter-category"><option value="">Any category</option></select>
-      <select id="filter-source"><option value="">Any source</option></select>
+      <select id="filter-source"><option value="">Any creator</option></select>
       <select id="filter-tag"><option value="">Any tag</option></select>
       <button class="clear-filters" id="clear-filters">Clear filters ✕</button>
     </div>
@@ -528,7 +523,7 @@
       query: "",
       activeId: null,
       picks: new Set(JSON.parse(localStorage.getItem("weekPicks") || "[]")),
-      filters: { meal: "", category: "", source: "", tag: "" },
+      filters: { category: "", source: "", tag: "" },
     };
 
     const listEl = document.getElementById("recipe-list");
@@ -560,7 +555,6 @@
       const f = state.filters;
       return RECIPES.filter((r) => {
         const tags = (r.tags || []).map((t) => t.toLowerCase());
-        if (f.meal && !tags.includes(f.meal)) return false;
         if (f.category && r.category !== f.category) return false;
         if (f.source && r.source !== f.source) return false;
         if (f.tag && !tags.includes(f.tag)) return false;
@@ -591,12 +585,11 @@
       fill(
         "filter-tag",
         uniq(RECIPES.flatMap((r) => r.tags || []).map((t) => t.toLowerCase()))
-          .filter((t) => t !== "lunch" && t !== "dinner")
       );
     }
 
     function syncFilterUi() {
-      const map = { meal: "filter-meal", category: "filter-category", source: "filter-source", tag: "filter-tag" };
+      const map = { category: "filter-category", source: "filter-source", tag: "filter-tag" };
       let any = false;
       for (const [key, id] of Object.entries(map)) {
         const el = document.getElementById(id);
@@ -755,7 +748,7 @@
       renderPicks();
     });
 
-    [["filter-meal", "meal"], ["filter-category", "category"], ["filter-source", "source"], ["filter-tag", "tag"]].forEach(
+    [["filter-category", "category"], ["filter-source", "source"], ["filter-tag", "tag"]].forEach(
       ([id, key]) => {
         document.getElementById(id).addEventListener("change", (e) => {
           state.filters[key] = e.target.value;
@@ -766,8 +759,8 @@
     );
 
     document.getElementById("clear-filters").addEventListener("click", () => {
-      state.filters = { meal: "", category: "", source: "", tag: "" };
-      ["filter-meal", "filter-category", "filter-source", "filter-tag"].forEach(
+      state.filters = { category: "", source: "", tag: "" };
+      ["filter-category", "filter-source", "filter-tag"].forEach(
         (id) => (document.getElementById(id).value = "")
       );
       syncFilterUi();
