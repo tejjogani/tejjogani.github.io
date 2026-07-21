@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Recipes</title>
+<style>
+  :root {
+    --bg: #faf8f4;
+    --bg-panel: #ffffff;
+    --ink: #1c1a17;
+    --ink-soft: #6b665e;
+    --line: #e7e2d8;
+    --accent: #7a8a5c;
+    --accent-soft: #eef1e6;
+    --radius: 16px;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+
+  aside {
+    border-right: 1px solid var(--line);
+    padding: 36px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: var(--bg);
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .brand h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 26px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .brand p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .search {
+    position: relative;
+  }
+
+  .search input {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg-panel);
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .search input:focus {
+    border-color: var(--accent);
+  }
+
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filters select {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg-panel);
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b665e' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+  }
+
+  .filters select:focus { border-color: var(--accent); }
+
+  .filters select.active-filter {
+    border-color: var(--accent);
+    background-color: var(--accent-soft);
+  }
+
+  .clear-filters {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-family: var(--sans);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    display: none;
+  }
+
+  .clear-filters.visible { display: inline; }
+
+  .recipe-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+  }
+
+  .recipe-item {
+    padding: 14px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .recipe-item:hover {
+    background: var(--bg-panel);
+    border-color: var(--line);
+  }
+
+  .recipe-item.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  .recipe-item .title {
+    font-size: 14.5px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    line-height: 1.3;
+  }
+
+  .recipe-item .meta {
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .recipe-item .meta .dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    display: inline-block;
+  }
+
+  .source-heading {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    padding: 10px 14px 2px;
+  }
+
+  .empty-list {
+    font-size: 13px;
+    color: var(--ink-soft);
+    padding: 12px 14px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* ---------- Week picks ---------- */
+
+  .recipe-item { position: relative; }
+
+  .pick-btn {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--bg-panel);
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+
+  .pick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .pick-btn.picked {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .recipe-item .title { padding-right: 30px; }
+
+  .picks-box {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg-panel);
+    padding: 12px 14px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .picks-box.has-picks { display: flex; }
+
+  .picks-box .picks-title {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+  .picks-box .picks-names {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .picks-actions { display: flex; gap: 8px; }
+
+  .picks-box button.action {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .picks-box button.action.secondary {
+    background: var(--bg-panel);
+    color: var(--ink-soft);
+    border-color: var(--line);
+    flex: 0 0 auto;
+  }
+
+  .picks-box .copied-note { font-size: 11.5px; color: var(--accent); display: none; }
+
+  /* ---------- Main panel ---------- */
+
+  main {
+    padding: 64px 72px;
+    overflow-y: auto;
+    max-width: 880px;
+  }
+
+  .recipe-header {
+    margin-bottom: 40px;
+  }
+
+  .recipe-header .category {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .recipe-header h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 1.15;
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .recipe-header .note {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+    line-height: 1.5;
+    max-width: 60ch;
+  }
+
+  .recipe-header .attribution {
+    font-size: 13px;
+    color: var(--ink-soft);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .recipe-header .attribution .tag {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+  }
+
+  .nutrition-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .nutrition-strip .macro {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 14px;
+    text-align: center;
+  }
+
+  .nutrition-strip .macro b {
+    display: block;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .nutrition-strip .macro span {
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .nutrition-strip .estimate-note {
+    align-self: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+
+  section.block {
+    margin-bottom: 32px;
+  }
+
+  section.block:last-child {
+    margin-bottom: 0;
+  }
+
+  .block h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 18px;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+
+  .ingredient-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ingredient-list li {
+    font-size: 14.5px;
+    line-height: 1.5;
+    padding-left: 22px;
+    position: relative;
+    color: var(--ink);
+  }
+
+  .ingredient-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .method-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: step;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .method-steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .method-steps li::before {
+    content: counter(step);
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--sans);
+  }
+
+  .no-selection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    color: var(--ink-soft);
+    font-family: var(--serif);
+    font-size: 20px;
+    text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    body { grid-template-columns: 1fr; }
+    aside { border-right: none; border-bottom: 1px solid var(--line); }
+    main { padding: 40px 24px; }
+    .content-grid { grid-template-columns: 1fr; gap: 32px; }
+    .recipe-header h2 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+  <aside>
+    <div class="brand">
+      <h1>Recipes</h1>
+      <p>A small, growing archive.</p>
+    </div>
+    <div class="search">
+      <input id="search" type="text" placeholder="Search recipes…" autocomplete="off" />
+    </div>
+    <div class="filters">
+      <select id="filter-meal">
+        <option value="">Any meal</option>
+        <option value="dinner">Dinner</option>
+        <option value="lunch">Lunch</option>
+      </select>
+      <select id="filter-category"><option value="">Any category</option></select>
+      <select id="filter-source"><option value="">Any source</option></select>
+      <select id="filter-tag"><option value="">Any tag</option></select>
+      <button class="clear-filters" id="clear-filters">Clear filters ✕</button>
+    </div>
+    <ul class="recipe-list" id="recipe-list"></ul>
+    <div class="picks-box" id="picks-box">
+      <div class="picks-title">This week</div>
+      <div class="picks-names" id="picks-names"></div>
+      <div class="picks-actions">
+        <button class="action" id="copy-picks">Copy for WhatsApp</button>
+        <button class="action secondary" id="clear-picks" title="Clear picks">✕</button>
+      </div>
+      <div class="copied-note" id="copied-note">Copied — text it to OpenClaw 🛒</div>
+    </div>
+    <div class="sidebar-footer" id="count"></div>
+  </aside>
+
+  <main id="main">
+    <div class="no-selection">Select a recipe</div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    const state = {
+      query: "",
+      activeId: null,
+      picks: new Set(JSON.parse(localStorage.getItem("weekPicks") || "[]")),
+      filters: { meal: "", category: "", source: "", tag: "" },
+    };
+
+    const listEl = document.getElementById("recipe-list");
+    const mainEl = document.getElementById("main");
+    const searchEl = document.getElementById("search");
+    const countEl = document.getElementById("count");
+    const picksBoxEl = document.getElementById("picks-box");
+    const picksNamesEl = document.getElementById("picks-names");
+
+    function savePicks() {
+      localStorage.setItem("weekPicks", JSON.stringify([...state.picks]));
+    }
+
+    function togglePick(id) {
+      state.picks.has(id) ? state.picks.delete(id) : state.picks.add(id);
+      savePicks();
+      renderList();
+      renderPicks();
+    }
+
+    function renderPicks() {
+      const picked = RECIPES.filter((r) => state.picks.has(r.id));
+      picksBoxEl.classList.toggle("has-picks", picked.length > 0);
+      picksNamesEl.textContent = picked.map((r) => r.title).join(" · ");
+    }
+
+    function filteredRecipes() {
+      const q = state.query.trim().toLowerCase();
+      const f = state.filters;
+      return RECIPES.filter((r) => {
+        const tags = (r.tags || []).map((t) => t.toLowerCase());
+        if (f.meal && !tags.includes(f.meal)) return false;
+        if (f.category && r.category !== f.category) return false;
+        if (f.source && r.source !== f.source) return false;
+        if (f.tag && !tags.includes(f.tag)) return false;
+        if (!q) return true;
+        const haystack = [r.title, r.category, r.source, ...(r.tags || [])]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+
+    function populateFilters() {
+      const fill = (id, values) => {
+        const sel = document.getElementById(id);
+        const current = sel.value;
+        while (sel.options.length > 1) sel.remove(1);
+        values.forEach((v) => {
+          const o = document.createElement("option");
+          o.value = v;
+          o.textContent = v;
+          sel.appendChild(o);
+        });
+        sel.value = current;
+      };
+      const uniq = (arr) => [...new Set(arr)].sort();
+      fill("filter-category", uniq(RECIPES.map((r) => r.category).filter(Boolean)));
+      fill("filter-source", uniq(RECIPES.map((r) => r.source).filter(Boolean)));
+      fill(
+        "filter-tag",
+        uniq(RECIPES.flatMap((r) => r.tags || []).map((t) => t.toLowerCase()))
+          .filter((t) => t !== "lunch" && t !== "dinner")
+      );
+    }
+
+    function syncFilterUi() {
+      const map = { meal: "filter-meal", category: "filter-category", source: "filter-source", tag: "filter-tag" };
+      let any = false;
+      for (const [key, id] of Object.entries(map)) {
+        const el = document.getElementById(id);
+        el.classList.toggle("active-filter", Boolean(state.filters[key]));
+        if (state.filters[key]) any = true;
+      }
+      document.getElementById("clear-filters").classList.toggle("visible", any);
+    }
+
+    function renderList() {
+      const recipes = filteredRecipes();
+      listEl.innerHTML = "";
+
+      if (recipes.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "empty-list";
+        empty.textContent = "No recipes match.";
+        listEl.appendChild(empty);
+        countEl.textContent = `${RECIPES.length} recipe${RECIPES.length === 1 ? "" : "s"} saved`;
+        return;
+      }
+
+      // Group by contributor, preserving first-seen order.
+      const groups = new Map();
+      recipes.forEach((r) => {
+        const key = r.source || "Unknown";
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(r);
+      });
+
+      groups.forEach((groupRecipes, source) => {
+        const heading = document.createElement("li");
+        heading.className = "source-heading";
+        heading.textContent = source;
+        listEl.appendChild(heading);
+
+        groupRecipes.forEach((r) => {
+          const li = document.createElement("li");
+          li.className = "recipe-item" + (r.id === state.activeId ? " active" : "");
+          const picked = state.picks.has(r.id);
+          li.innerHTML = `
+            <p class="title">${escapeHtml(r.title)}</p>
+            <div class="meta">
+              <span>${escapeHtml(r.category)}</span>
+            </div>
+            <button class="pick-btn${picked ? " picked" : ""}" title="${picked ? "Remove from this week" : "Pick for this week"}">${picked ? "✓" : "+"}</button>
+          `;
+          li.addEventListener("click", () => selectRecipe(r.id));
+          li.querySelector(".pick-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            togglePick(r.id);
+          });
+          listEl.appendChild(li);
+        });
+      });
+
+      countEl.textContent = `${RECIPES.length} recipe${RECIPES.length === 1 ? "" : "s"} saved`;
+    }
+
+    function selectRecipe(id) {
+      state.activeId = id;
+      renderList();
+      renderDetail();
+    }
+
+    function renderDetail() {
+      const recipe = RECIPES.find((r) => r.id === state.activeId);
+      if (!recipe) {
+        mainEl.innerHTML = `<div class="no-selection">Select a recipe</div>`;
+        return;
+      }
+
+      const ingredientsHtml = recipe.ingredientGroups
+        .map(
+          (g) => `
+        <section class="block">
+          <h3>${escapeHtml(g.heading)}</h3>
+          <ul class="ingredient-list">
+            ${g.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ul>
+        </section>`
+        )
+        .join("");
+
+      const methodHtml = recipe.methodGroups
+        .map(
+          (g) => `
+        <section class="block">
+          <h3>${escapeHtml(g.heading)}</h3>
+          <ol class="method-steps">
+            ${g.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}
+          </ol>
+        </section>`
+        )
+        .join("");
+
+      const n = recipe.nutrition;
+      const nutritionHtml = n && n.perServing
+        ? `<div class="nutrition-strip">
+            <div class="macro"><b>${escapeHtml(String(n.perServing.calories))}</b><span>kcal</span></div>
+            <div class="macro"><b>${escapeHtml(String(n.perServing.protein_g))}g</b><span>protein</span></div>
+            <div class="macro"><b>${escapeHtml(String(n.perServing.carbs_g))}g</b><span>carbs</span></div>
+            <div class="macro"><b>${escapeHtml(String(n.perServing.fat_g))}g</b><span>fat</span></div>
+            ${n.perServing.fiber_g != null ? `<div class="macro"><b>${escapeHtml(String(n.perServing.fiber_g))}g</b><span>fiber</span></div>` : ""}
+            <div class="estimate-note">per serving · ${escapeHtml(String(n.servings))} servings${n.estimated ? " · estimated" : ""}</div>
+          </div>`
+        : "";
+
+      mainEl.innerHTML = `
+        <div class="recipe-header">
+          <span class="category">${escapeHtml(recipe.category)}</span>
+          <h2>${escapeHtml(recipe.title)}</h2>
+          ${recipe.note ? `<p class="note">${escapeHtml(recipe.note)}</p>` : ""}
+          <div class="attribution">
+            <span>From ${escapeHtml(recipe.source)}</span>
+            <span class="tag">Added ${escapeHtml(recipe.dateAdded)}</span>
+          </div>
+          ${nutritionHtml}
+        </div>
+        <div class="content-grid">
+          <div>${ingredientsHtml}</div>
+          <div>${methodHtml}</div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    searchEl.addEventListener("input", (e) => {
+      state.query = e.target.value;
+      renderList();
+    });
+
+    document.getElementById("copy-picks").addEventListener("click", () => {
+      const picked = RECIPES.filter((r) => state.picks.has(r.id));
+      if (picked.length === 0) return;
+      const msg =
+        "This week's recipes: " +
+        picked.map((r) => r.title).join(", ") +
+        " (ids: " + picked.map((r) => r.id).join(", ") + ")";
+      navigator.clipboard.writeText(msg).then(() => {
+        const note = document.getElementById("copied-note");
+        note.style.display = "block";
+        setTimeout(() => (note.style.display = "none"), 2500);
+      });
+    });
+
+    document.getElementById("clear-picks").addEventListener("click", () => {
+      state.picks.clear();
+      savePicks();
+      renderList();
+      renderPicks();
+    });
+
+    [["filter-meal", "meal"], ["filter-category", "category"], ["filter-source", "source"], ["filter-tag", "tag"]].forEach(
+      ([id, key]) => {
+        document.getElementById(id).addEventListener("change", (e) => {
+          state.filters[key] = e.target.value;
+          syncFilterUi();
+          renderList();
+        });
+      }
+    );
+
+    document.getElementById("clear-filters").addEventListener("click", () => {
+      state.filters = { meal: "", category: "", source: "", tag: "" };
+      ["filter-meal", "filter-category", "filter-source", "filter-tag"].forEach(
+        (id) => (document.getElementById(id).value = "")
+      );
+      syncFilterUi();
+      renderList();
+    });
+
+    // Initial render
+    populateFilters();
+    syncFilterUi();
+    renderList();
+    renderPicks();
+    if (RECIPES.length > 0) {
+      selectRecipe(RECIPES[0].id);
+    }
+  </script>
+
+</body>
+</html>
