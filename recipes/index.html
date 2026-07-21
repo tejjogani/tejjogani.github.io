@@ -771,12 +771,30 @@
     text-align: center;
   }
 
+  .back-btn {
+    display: none;
+    margin-bottom: 18px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--bg-panel);
+    color: var(--ink-soft);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
   @media (max-width: 860px) {
     body { grid-template-columns: 1fr; }
     aside { border-right: none; border-bottom: 1px solid var(--line); }
     main { padding: 40px 24px; }
     .content-grid { grid-template-columns: 1fr; gap: 32px; }
     .recipe-header h2 { font-size: 32px; }
+
+    /* Master-detail: hide the list while a recipe is open, show a back button. */
+    body.mobile-detail aside { display: none; }
+    body.mobile-detail .back-btn { display: inline-block; }
   }
 </style>
 </head>
@@ -840,6 +858,7 @@
         document.getElementById("tab-" + t).classList.toggle("active", t === tab)
       );
       document.getElementById("recipes-side").style.display = tab === "recipes" ? "contents" : "none";
+      if (tab !== "recipes") document.body.classList.remove("mobile-detail");
       if (tab === "recipes") {
         renderList();
         renderDetail();
@@ -1246,10 +1265,23 @@
       countEl.textContent = `${RECIPES.length} recipe${RECIPES.length === 1 ? "" : "s"} saved`;
     }
 
+    function isMobile() {
+      return window.matchMedia("(max-width: 860px)").matches;
+    }
+
     function selectRecipe(id) {
       state.activeId = id;
       renderList();
       renderDetail();
+      if (isMobile()) {
+        document.body.classList.add("mobile-detail");
+        window.scrollTo(0, 0);
+      }
+    }
+
+    function backToList() {
+      document.body.classList.remove("mobile-detail");
+      window.scrollTo(0, 0);
     }
 
     function renderDetail() {
@@ -1296,6 +1328,7 @@
         : "";
 
       mainEl.innerHTML = `
+        <button class="back-btn" id="back-btn">← All recipes</button>
         <div class="recipe-header">
           <span class="category">${escapeHtml(recipe.category)}</span>
           <h2>${escapeHtml(recipe.title)}</h2>
@@ -1311,6 +1344,7 @@
           <div>${methodHtml}</div>
         </div>
       `;
+      document.getElementById("back-btn").addEventListener("click", backToList);
     }
 
     function escapeHtml(str) {
