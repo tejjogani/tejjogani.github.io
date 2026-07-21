@@ -1408,7 +1408,7 @@
     syncFilterUi();
     renderList();
     renderPicks();
-    if (RECIPES.length > 0) {
+    if (RECIPES.length > 0 && !isMobile()) {
       selectRecipe(RECIPES[0].id);
     }
   </script>
