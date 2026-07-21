@@ -228,6 +228,39 @@
   .trend .tlabel { font-size: 10.5px; color: var(--ink-soft); }
   .trend .tamt { font-size: 11px; color: var(--ink); font-variant-numeric: tabular-nums; }
 
+  /* ---------- Messages table ---------- */
+
+  .msg-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-bottom: 8px;
+  }
+
+  .msg-table th {
+    text-align: left;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .msg-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  .msg-table tr:last-child td { border-bottom: none; }
+
+  .msg-name { font-weight: 600; white-space: nowrap; }
+  .msg-text { color: var(--ink-soft); line-height: 1.4; }
+  .msg-when { white-space: nowrap; color: var(--ink-soft); font-size: 12px; }
+  .msg-unanswered { text-align: center; font-variant-numeric: tabular-nums; }
+
   /* ---------- Unlock ---------- */
 
   .unlock {
@@ -698,6 +731,7 @@
       <button id="tab-recipes" class="active">Recipes</button>
       <button id="tab-todos">Todos</button>
       <button id="tab-budget">Budget</button>
+      <button id="tab-messages">Texts</button>
     </div>
     <div id="recipes-side" style="display: contents">
     <div class="search">
@@ -730,6 +764,7 @@
   <script src="data.js"></script>
   <script src="todos.js"></script>
   <script src="budget.js"></script>
+  <script src="imessage.js"></script>
   <script>
     const state = {
       query: "",
@@ -741,7 +776,7 @@
 
     async function setTab(tab) {
       state.tab = tab;
-      ["recipes", "todos", "budget"].forEach((t) =>
+      ["recipes", "todos", "budget", "messages"].forEach((t) =>
         document.getElementById("tab-" + t).classList.toggle("active", t === tab)
       );
       document.getElementById("recipes-side").style.display = tab === "recipes" ? "contents" : "none";
@@ -752,8 +787,10 @@
         return; // unlock screen shown
       } else if (tab === "todos") {
         renderTodos();
-      } else {
+      } else if (tab === "budget") {
         renderBudget();
+      } else {
+        renderMessages();
       }
     }
 
@@ -765,7 +802,7 @@
     // Blobs ship as salt+iv+ciphertext only; key is derived from the
     // passphrase in-browser (PBKDF2) and lives in sessionStorage.
 
-    const secure = { todos: null, budget: null };
+    const secure = { todos: null, budget: null, messages: null };
 
     async function decryptBlob(enc, passphrase) {
       const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
@@ -782,6 +819,7 @@
     async function tryUnlock(passphrase) {
       if (typeof TODOS_ENC !== "undefined") secure.todos = await decryptBlob(TODOS_ENC, passphrase);
       if (typeof BUDGET_ENC !== "undefined") secure.budget = await decryptBlob(BUDGET_ENC, passphrase);
+      if (typeof IMESSAGE_ENC !== "undefined") secure.messages = await decryptBlob(IMESSAGE_ENC, passphrase);
       sessionStorage.setItem("dashKey", passphrase);
       return true;
     }
@@ -811,9 +849,15 @@
       input.focus();
     }
 
+    function hasEncBlob(tab) {
+      if (tab === "todos") return typeof TODOS_ENC !== "undefined";
+      if (tab === "budget") return typeof BUDGET_ENC !== "undefined";
+      if (tab === "messages") return typeof IMESSAGE_ENC !== "undefined";
+      return false;
+    }
+
     async function ensureUnlocked(tab) {
-      const needed = tab === "todos" ? typeof TODOS_ENC !== "undefined" && !secure.todos
-                                     : typeof BUDGET_ENC !== "undefined" && !secure.budget;
+      const needed = hasEncBlob(tab) && !secure[tab];
       if (!needed) return true;
       const cached = sessionStorage.getItem("dashKey");
       if (cached) {
@@ -924,6 +968,63 @@
         ${section("Done", t.done || [], true)}
       `;
       countEl.textContent = `${open.length} open todo${open.length === 1 ? "" : "s"}`;
+    }
+
+    function timeAgo(ts) {
+      if (!ts) return "";
+      const then = new Date(ts.replace(" ", "T"));
+      const diffMs = Date.now() - then.getTime();
+      const h = Math.floor(diffMs / 3600000);
+      if (h < 1) return "just now";
+      if (h < 24) return `${h}h ago`;
+      const d = Math.floor(h / 24);
+      return `${d}d ago`;
+    }
+
+    function renderMessages() {
+      const m = secure.messages || (typeof IMESSAGE !== "undefined" ? IMESSAGE : null);
+      if (!m || !m.threads || !m.threads.length) {
+        mainEl.innerHTML = `
+          <div class="todo-header">
+            <h2>Texts</h2>
+            <p>No pending threads — run the iMessage sift on WhatsApp to refresh this.</p>
+          </div>`;
+        countEl.textContent = "";
+        return;
+      }
+
+      const focus = m.threads.filter((t) => t.verdict === "focus");
+      const over = m.threads.filter((t) => t.verdict === "over");
+
+      const row = (t) => `
+        <tr>
+          <td class="msg-name">${escapeHtml(t.name)}</td>
+          <td class="msg-text">${escapeHtml(t.text || "[no text]")}</td>
+          <td class="msg-when">${escapeHtml(timeAgo(t.ts))}</td>
+          <td class="msg-unanswered">${t.unanswered}</td>
+        </tr>`;
+
+      const table = (rows) => `
+        <table class="msg-table">
+          <thead><tr><th>Who</th><th>Last message</th><th>When</th><th>Unanswered</th></tr></thead>
+          <tbody>${rows.map(row).join("")}</tbody>
+        </table>`;
+
+      mainEl.innerHTML = `
+        <div class="todo-header">
+          <h2>Texts</h2>
+          <p>iMessage threads awaiting your reply, last ${m.windowDays || 20} days${m.generatedAt ? ` · updated ${escapeHtml(m.generatedAt)}` : ""}</p>
+        </div>
+        <div class="todo-section">
+          <h3>Focus (${focus.length})</h3>
+          ${focus.length ? table(focus) : `<div class="todo-empty">Nothing pressing.</div>`}
+        </div>
+        <div class="todo-section">
+          <h3>Likely over (${over.length})</h3>
+          ${over.length ? table(over) : `<div class="todo-empty">Nothing here.</div>`}
+        </div>
+      `;
+      countEl.textContent = `${focus.length} to focus on`;
     }
 
     const listEl = document.getElementById("recipe-list");
@@ -1170,6 +1271,7 @@
     document.getElementById("tab-recipes").addEventListener("click", () => setTab("recipes"));
     document.getElementById("tab-todos").addEventListener("click", () => setTab("todos"));
     document.getElementById("tab-budget").addEventListener("click", () => setTab("budget"));
+    document.getElementById("tab-messages").addEventListener("click", () => setTab("messages"));
 
     // Initial render
     populateFilters();
