@@ -165,6 +165,110 @@
     padding: 8px 2px;
   }
 
+  /* ---------- Budget view ---------- */
+
+  .budget-total {
+    font-family: var(--serif);
+    font-size: 54px;
+    letter-spacing: -0.01em;
+    margin: 0 0 2px;
+  }
+
+  .budget-sub { font-size: 13px; color: var(--ink-soft); margin: 0 0 32px; }
+
+  .cat-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 90px;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 13.5px;
+  }
+
+  .cat-row .name { color: var(--ink); text-transform: capitalize; }
+
+  .cat-row .bar-track {
+    height: 10px;
+    border-radius: 99px;
+    background: var(--accent-soft);
+    overflow: hidden;
+  }
+
+  .cat-row .bar {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent);
+  }
+
+  .cat-row .amt { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .cat-row .over { color: #dc2626; font-weight: 600; }
+  .cat-row .under { color: var(--accent); }
+
+  .trend {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    height: 110px;
+    margin-top: 10px;
+  }
+
+  .trend .col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+
+  .trend .tbar {
+    width: 100%;
+    max-width: 46px;
+    border-radius: 8px 8px 4px 4px;
+    background: var(--accent-soft);
+    border: 1px solid var(--line);
+  }
+
+  .trend .col.current .tbar { background: var(--accent); border-color: var(--accent); }
+
+  .trend .tlabel { font-size: 10.5px; color: var(--ink-soft); }
+  .trend .tamt { font-size: 11px; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* ---------- Unlock ---------- */
+
+  .unlock {
+    max-width: 380px;
+    margin: 18vh auto 0;
+    text-align: center;
+  }
+
+  .unlock h2 { font-family: var(--serif); font-weight: 400; font-size: 28px; margin: 0 0 8px; }
+  .unlock p { font-size: 13px; color: var(--ink-soft); margin: 0 0 20px; }
+
+  .unlock input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg-panel);
+    font-family: var(--sans);
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+  }
+
+  .unlock input:focus { border-color: var(--accent); }
+
+  .unlock button {
+    margin-top: 12px;
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .unlock .err { color: #dc2626; font-size: 12.5px; margin-top: 10px; display: none; }
+
   .search {
     position: relative;
   }
@@ -593,6 +697,7 @@
     <div class="tabs">
       <button id="tab-recipes" class="active">Recipes</button>
       <button id="tab-todos">Todos</button>
+      <button id="tab-budget">Budget</button>
     </div>
     <div id="recipes-side" style="display: contents">
     <div class="search">
@@ -624,6 +729,7 @@
 
   <script src="data.js"></script>
   <script src="todos.js"></script>
+  <script src="budget.js"></script>
   <script>
     const state = {
       query: "",
@@ -633,17 +739,149 @@
       filters: { category: "", source: "", tag: "" },
     };
 
-    function setTab(tab) {
+    async function setTab(tab) {
       state.tab = tab;
-      document.getElementById("tab-recipes").classList.toggle("active", tab === "recipes");
-      document.getElementById("tab-todos").classList.toggle("active", tab === "todos");
+      ["recipes", "todos", "budget"].forEach((t) =>
+        document.getElementById("tab-" + t).classList.toggle("active", t === tab)
+      );
       document.getElementById("recipes-side").style.display = tab === "recipes" ? "contents" : "none";
       if (tab === "recipes") {
         renderList();
         renderDetail();
-      } else {
+      } else if (!(await ensureUnlocked(tab))) {
+        return; // unlock screen shown
+      } else if (tab === "todos") {
         renderTodos();
+      } else {
+        renderBudget();
       }
+    }
+
+    function money(n) {
+      return "$" + Math.round(n).toLocaleString("en-US");
+    }
+
+    // ---------- Encrypted data (todos/budget) ----------
+    // Blobs ship as salt+iv+ciphertext only; key is derived from the
+    // passphrase in-browser (PBKDF2) and lives in sessionStorage.
+
+    const secure = { todos: null, budget: null };
+
+    async function decryptBlob(enc, passphrase) {
+      const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw", new TextEncoder().encode(passphrase), "PBKDF2", false, ["deriveKey"]);
+      const key = await crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: b64(enc.salt), iterations: enc.iter, hash: "SHA-256" },
+        keyMaterial, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+      const pt = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: b64(enc.iv) }, key, b64(enc.ct));
+      return JSON.parse(new TextDecoder().decode(pt));
+    }
+
+    async function tryUnlock(passphrase) {
+      if (typeof TODOS_ENC !== "undefined") secure.todos = await decryptBlob(TODOS_ENC, passphrase);
+      if (typeof BUDGET_ENC !== "undefined") secure.budget = await decryptBlob(BUDGET_ENC, passphrase);
+      sessionStorage.setItem("dashKey", passphrase);
+      return true;
+    }
+
+    function renderUnlock(afterTab) {
+      mainEl.innerHTML = `
+        <div class="unlock">
+          <h2>🔒 Private</h2>
+          <p>Enter the dashboard passphrase to view todos &amp; budget.</p>
+          <input id="unlock-pass" type="password" placeholder="passphrase" autocomplete="current-password" />
+          <button id="unlock-btn">Unlock</button>
+          <div class="err" id="unlock-err">Wrong passphrase.</div>
+        </div>`;
+      countEl.textContent = "";
+      const input = document.getElementById("unlock-pass");
+      const go = async () => {
+        try {
+          await tryUnlock(input.value.trim());
+          setTab(afterTab);
+        } catch {
+          document.getElementById("unlock-err").style.display = "block";
+          input.select();
+        }
+      };
+      document.getElementById("unlock-btn").addEventListener("click", go);
+      input.addEventListener("keydown", (e) => e.key === "Enter" && go());
+      input.focus();
+    }
+
+    async function ensureUnlocked(tab) {
+      const needed = tab === "todos" ? typeof TODOS_ENC !== "undefined" && !secure.todos
+                                     : typeof BUDGET_ENC !== "undefined" && !secure.budget;
+      if (!needed) return true;
+      const cached = sessionStorage.getItem("dashKey");
+      if (cached) {
+        try { await tryUnlock(cached); return true; } catch { sessionStorage.removeItem("dashKey"); }
+      }
+      renderUnlock(tab);
+      return false;
+    }
+
+    function renderBudget() {
+      const b = secure.budget || (typeof BUDGET !== "undefined" ? BUDGET : { months: [], budgets: {} });
+      if (!b.months.length) {
+        mainEl.innerHTML = `
+          <div class="todo-header">
+            <h2>Budget</h2>
+            <p>No expenses yet — text OpenClaw "spent $12 on lunch" or send a statement PDF.</p>
+          </div>`;
+        countEl.textContent = "";
+        return;
+      }
+
+      const cur = b.months[b.months.length - 1];
+      const monthName = (ym) =>
+        new Date(ym + "-15T12:00:00").toLocaleDateString("en-US", { month: "short" });
+      const cats = Object.entries(cur.byCategory);
+      const maxCat = Math.max(...cats.map(([, v]) => v), 1);
+
+      const catRows = cats
+        .map(([cat, amt]) => {
+          const target = b.budgets[cat];
+          let delta = "";
+          if (target) {
+            delta =
+              amt > target
+                ? ` <span class="over">+${money(amt - target)}</span>`
+                : ` <span class="under">${money(target - amt)} left</span>`;
+          }
+          return `<div class="cat-row">
+            <span class="name">${escapeHtml(cat)}</span>
+            <div class="bar-track"><div class="bar" style="width:${Math.max(4, (amt / maxCat) * 100)}%"></div></div>
+            <span class="amt">${money(amt)}${delta}</span>
+          </div>`;
+        })
+        .join("");
+
+      const trendMonths = b.months.slice(-6);
+      const maxMonth = Math.max(...trendMonths.map((m) => m.total), 1);
+      const trend = trendMonths
+        .map(
+          (m, i) => `<div class="col${i === trendMonths.length - 1 ? " current" : ""}">
+            <span class="tamt">${money(m.total)}</span>
+            <div class="tbar" style="height:${Math.max(8, (m.total / maxMonth) * 70)}px"></div>
+            <span class="tlabel">${monthName(m.ym)}</span>
+          </div>`
+        )
+        .join("");
+
+      mainEl.innerHTML = `
+        <div class="todo-header">
+          <h2>Budget</h2>
+          <p>Aggregates only — ask OpenClaw on WhatsApp for any detail${b.generatedAt ? ` · updated ${escapeHtml(b.generatedAt)}` : ""}</p>
+        </div>
+        <p class="budget-total">${money(cur.total)}</p>
+        <p class="budget-sub">${monthName(cur.ym)} spending · ${cur.count} expense${cur.count === 1 ? "" : "s"}</p>
+        <div class="todo-section"><h3>By category</h3>${catRows}</div>
+        <div class="todo-section"><h3>Last ${trendMonths.length} months</h3><div class="trend">${trend}</div></div>
+      `;
+      countEl.textContent = `${monthName(cur.ym)}: ${money(cur.total)}`;
     }
 
     function ageDays(dateStr) {
@@ -653,7 +891,7 @@
     }
 
     function renderTodos() {
-      const t = typeof TODOS !== "undefined" ? TODOS : { inbox: [], inProgress: [], done: [] };
+      const t = secure.todos || (typeof TODOS !== "undefined" ? TODOS : { inbox: [], inProgress: [], done: [] });
       const open = (t.inbox || []).concat(t.inProgress || []);
 
       const itemHtml = (item, doneItem) => {
@@ -931,6 +1169,7 @@
 
     document.getElementById("tab-recipes").addEventListener("click", () => setTab("recipes"));
     document.getElementById("tab-todos").addEventListener("click", () => setTab("todos"));
+    document.getElementById("tab-budget").addEventListener("click", () => setTab("budget"));
 
     // Initial render
     populateFilters();
