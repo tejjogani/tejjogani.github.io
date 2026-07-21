@@ -66,6 +66,105 @@
     color: var(--ink-soft);
   }
 
+  /* ---------- Tabs ---------- */
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+  }
+
+  .tabs button {
+    flex: 1;
+    padding: 9px 0;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg-panel);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .tabs button.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
+
+  /* ---------- Todos view ---------- */
+
+  .todo-header h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 42px;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .todo-header p {
+    margin: 0 0 36px;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .todo-section { margin-bottom: 36px; }
+
+  .todo-section h3 {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+
+  .todo-list { list-style: none; margin: 0; padding: 0; }
+
+  .todo-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+
+  .todo-list .mark {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    align-self: center;
+  }
+
+  .todo-list li.done-item { opacity: 0.55; }
+  .todo-list li.done-item .mark { background: var(--accent); }
+  .todo-list li.done-item .text { text-decoration: line-through; }
+
+  .todo-list .text { flex: 1; }
+
+  .todo-list .age {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  .todo-list .age.stale { color: #b45309; font-weight: 600; }
+
+  .todo-empty {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-family: var(--serif);
+    padding: 8px 2px;
+  }
+
   .search {
     position: relative;
   }
@@ -488,9 +587,14 @@
 
   <aside>
     <div class="brand">
-      <h1>Recipes</h1>
-      <p>A small, growing archive.</p>
+      <h1>Tej's Kitchen</h1>
+      <p>Recipes, plans, and loose ends.</p>
     </div>
+    <div class="tabs">
+      <button id="tab-recipes" class="active">Recipes</button>
+      <button id="tab-todos">Todos</button>
+    </div>
+    <div id="recipes-side" style="display: contents">
     <div class="search">
       <input id="search" type="text" placeholder="Search recipes…" autocomplete="off" />
     </div>
@@ -510,6 +614,7 @@
       </div>
       <div class="copied-note" id="copied-note">Copied — text it to OpenClaw 🛒</div>
     </div>
+    </div>
     <div class="sidebar-footer" id="count"></div>
   </aside>
 
@@ -518,13 +623,70 @@
   </main>
 
   <script src="data.js"></script>
+  <script src="todos.js"></script>
   <script>
     const state = {
       query: "",
       activeId: null,
+      tab: "recipes",
       picks: new Set(JSON.parse(localStorage.getItem("weekPicks") || "[]")),
       filters: { category: "", source: "", tag: "" },
     };
+
+    function setTab(tab) {
+      state.tab = tab;
+      document.getElementById("tab-recipes").classList.toggle("active", tab === "recipes");
+      document.getElementById("tab-todos").classList.toggle("active", tab === "todos");
+      document.getElementById("recipes-side").style.display = tab === "recipes" ? "contents" : "none";
+      if (tab === "recipes") {
+        renderList();
+        renderDetail();
+      } else {
+        renderTodos();
+      }
+    }
+
+    function ageDays(dateStr) {
+      if (!dateStr) return null;
+      const days = Math.floor((Date.now() - new Date(dateStr + "T12:00:00")) / 86400000);
+      return days < 0 ? 0 : days;
+    }
+
+    function renderTodos() {
+      const t = typeof TODOS !== "undefined" ? TODOS : { inbox: [], inProgress: [], done: [] };
+      const open = (t.inbox || []).concat(t.inProgress || []);
+
+      const itemHtml = (item, doneItem) => {
+        const days = ageDays(item.added);
+        const stale = !doneItem && days != null && days > 7;
+        const age = doneItem
+          ? item.done ? `done ${escapeHtml(item.done)}` : ""
+          : days != null ? `${days}d${stale ? " · stale" : ""}` : "";
+        return `<li class="${doneItem ? "done-item" : ""}">
+          <span class="mark"></span>
+          <span class="text">${escapeHtml(item.text)}</span>
+          ${age ? `<span class="age${stale ? " stale" : ""}">${age}</span>` : ""}
+        </li>`;
+      };
+
+      const section = (title, items, doneItems) =>
+        `<div class="todo-section">
+          <h3>${title}</h3>
+          ${items.length
+            ? `<ul class="todo-list">${items.map((i) => itemHtml(i, doneItems)).join("")}</ul>`
+            : `<div class="todo-empty">${doneItems ? "Nothing yet." : "All clear ✨"}</div>`}
+        </div>`;
+
+      mainEl.innerHTML = `
+        <div class="todo-header">
+          <h2>Todos</h2>
+          <p>Text OpenClaw on WhatsApp to add or finish — this page follows along${t.generatedAt ? ` · updated ${escapeHtml(t.generatedAt)}` : ""}</p>
+        </div>
+        ${section("Open", open, false)}
+        ${section("Done", t.done || [], true)}
+      `;
+      countEl.textContent = `${open.length} open todo${open.length === 1 ? "" : "s"}`;
+    }
 
     const listEl = document.getElementById("recipe-list");
     const mainEl = document.getElementById("main");
@@ -766,6 +928,9 @@
       syncFilterUi();
       renderList();
     });
+
+    document.getElementById("tab-recipes").addEventListener("click", () => setTab("recipes"));
+    document.getElementById("tab-todos").addEventListener("click", () => setTab("todos"));
 
     // Initial render
     populateFilters();
