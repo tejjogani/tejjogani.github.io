@@ -139,7 +139,7 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 
 <main>
 
-<div class="eyebrow">Dashboard · data through 2026-07-23</div>
+<div class="eyebrow">Dashboard · data through 2026-07-24</div>
 <h1>Where the market is, and what the playbook says</h1>
 <div class="sub">Three tested signals → one stance. Everything here is explained in <a href="learn.html">the playbook</a>.</div>
 
@@ -147,24 +147,25 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 
 <div class="board">
   <div class="pill good"><div class="pl">Trend (10-mo MA)</div><div class="pv">ON · risk-on</div></div>
-  <div class="pill good"><div class="pl">Credit conditions (OAS)</div><div class="pv">EASY · 2.68%</div></div>
-  <div class="pill warn"><div class="pl">Volatility regime</div><div class="pv">MID</div></div>
+  <div class="pill good"><div class="pl">Credit conditions (OAS)</div><div class="pv">EASY · 2.77%</div></div>
+  <div class="pill good"><div class="pl">Volatility regime</div><div class="pv">CALM</div></div>
+  <div class="pill bad"><div class="pl">Valuation (CAPE)</div><div class="pv">47 · 100th pctile</div></div>
   <div class="pill good"><div class="pl">System stance</div><div class="pv">FULLY LONG</div></div>
 </div>
 
-<div class="verdict"><b>Today's read:</b> <a href="glossary.html">SPY</a> 738.18 sits 6% above its <a href="learn.html#lab">10-month average</a> (693); <a href="learn.html#regimes">high-yield spreads</a> are 2.68%, easier than their 12-month median (2.84%); volatility is in the mid <a href="learn.html#regimes">regime</a> at 11.4% <a href="glossary.html">annualized</a>. Zero of three warning lights are on — the tested rules stay fully long. The blind spot: valuations are at dot-com extremes, which none of these three signals can see. That's the next node on the <a href="learn.html#graph">graph</a>.</div>
+<div class="verdict"><b>Today's read:</b> <a href="glossary.html">SPY</a> 738.93 sits 7% above its <a href="learn.html#lab">10-month average</a> (694); <a href="learn.html#regimes">high-yield spreads</a> are 2.77%, easier than their 12-month median (2.84%); volatility is in the calm <a href="learn.html#regimes">regime</a> at 11.4% <a href="glossary.html">annualized</a>. Zero of three warning lights are on — the tested rules stay fully long. The valuation gauge is no longer a blind spot: <a href="glossary.html">CAPE</a> reads ≈47, the 100th percentile of 145 years — but tested on its own, top-decile CAPE predicted almost nothing about the next month (see the <a href="learn.html#graph">graph</a>). Expensive is a fact, not a timing signal; it raises the stakes on the credit tripwire rather than firing one itself.</div>
 
 <h2 id="action">What should I actually do?</h2>
 <div class="learn"><div class="lt">In plain words</div>
 <p><b>1 · Today: do nothing.</b> All three warning lights are green. Keep the index fund, keep the plan. Boredom is the correct feeling.</p>
-<p><b>2 · Know your tripwire in advance.</b> If SPY finishes a month below ~$693 (it's at 738), the first light turns red — the tested response is to cut stock exposure roughly in half. Two lights red: get defensive. This is decided <i>now</i>, calmly, not during the scary week it happens.</p>
+<p><b>2 · Know your tripwire in advance.</b> If SPY finishes a month below ~$694 (it's at 739), the first light turns red — the tested response is to cut stock exposure roughly in half. Two lights red: get defensive. This is decided <i>now</i>, calmly, not during the scary week it happens.</p>
 <p><b>3 · Don't short. Don't chase.</b> Betting on declines has no evidence behind it in our tests (<a href="learn.html#positioning">why</a>), and buying more just because the market is up isn't a signal either. The system's whole job is: stay in, until the specific tripwires say otherwise.</p></div>
 
 <h2 id="stance">What that stance means</h2>
 <ul>
   <li><b>Longs: hold.</b> The base rate is on your side (markets rose in ~64% of all months in the sample) and no tested warning is active. See <a href="learn.html#positioning">chapter 4</a> for why "no warning" is the long signal.</li>
   <li><b>Shorts: no.</b> Even the scariest tested condition (credit stress + broken trend) still averaged <i>positive</i> next-month returns historically. The evidence supports de-risking in storms — it does not yet support betting on declines. The full argument is in <a href="learn.html#positioning">chapter 4</a>.</li>
-  <li><b>New purchases: the rules are indifferent to timing here</b> — they say the environment is normal. What they do say: know in advance that the de-risk line sits near $693 on SPY.</li>
+  <li><b>New purchases: the rules are indifferent to timing here</b> — they say the environment is normal. What they do say: know in advance that the de-risk line sits near $694 on SPY.</li>
 </ul>
 
 <h2 id="portfolio">Your portfolio 🔒</h2>
@@ -180,7 +181,7 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 
 <h2 id="next">Next steps</h2>
 <ul class="next">
-  <li><span class="k">CAPE valuation node</span> — wire the Shiller dataset in, unlocking the "expensive market + tightening credit" edge: the original hypothesis this system was built to test.</li>
+  <li><span class="k">CAPE valuation node — ✅ done (Jul 2026).</span> Shiller data wired in and both CAPE edges tested; verdicts live in <a href="learn.html#graph">the graph</a>.</li>
   <li><span class="k">Yield curve &amp; breadth nodes</span> — two classic recession/fragility indicators to add to the graph (free FRED API key unlocks full history).</li>
   <li><span class="k">Signal-flip alerts in the morning brief</span> — trend break or credit stress lands in the 7 AM email automatically.</li>
   <li><span class="k">Per-position rules</span> — walk-forward tests on the high-beta sleeve (where regime flips bite ~2x).</li>
