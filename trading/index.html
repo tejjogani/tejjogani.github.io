@@ -11,6 +11,9 @@
   --blue:#4a7ba6; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --c0:#4a7ba6; --c1:#b28f2c; --c2:#7a8a5c; --c3:#c0564f; --c4:#8a6fb0;
+  --c5:#3e8e7e; --c6:#c07a3f; --c7:#5b6b9e; --c8:#98596b; --c9:#6b8f3d;
+  --c10:#7d7468; --c11:#4f8fb5;
 }
 * { box-sizing:border-box; }
 html,body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
@@ -82,15 +85,18 @@ figcaption { font-size:13px; color:var(--soft); margin-top:7px; max-width:70ch; 
 .unlockbox button { padding:9px 18px; border:none; border-radius:8px; background:var(--accent);
   color:#fff; font-size:14px; cursor:pointer; }
 .unlockbox .err { color:var(--red); font-size:13px; margin-top:10px; display:none; }
-#graphwrap { background:var(--panel); border:1px solid var(--line); border-radius:12px;
-  padding:10px; margin:16px 0; }
+#graphwrap, #netwrap { background:var(--panel); border:1px solid var(--line);
+  border-radius:12px; padding:10px; margin:16px 0; }
 #graphwrap svg { width:100%; height:auto; display:block; }
-#edge-detail { background:var(--bg); border:1px solid var(--line); border-radius:10px;
-  padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
-#edge-detail .stats { display:flex; flex-wrap:wrap; gap:16px; margin-top:8px;
-  font-variant-numeric:tabular-nums; }
-#edge-detail .stats div { font-size:13px; color:var(--soft); }
-#edge-detail .stats b { display:block; color:var(--ink); font-size:15px; }
+#netwrap canvas { width:100%; display:block; cursor:pointer; }
+.cdot { display:inline-block; width:10px; height:10px; border-radius:50%;
+  margin-right:8px; vertical-align:baseline; }
+#edge-detail, #net-detail { background:var(--bg); border:1px solid var(--line);
+  border-radius:10px; padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
+#edge-detail .stats, #net-detail .stats { display:flex; flex-wrap:wrap; gap:16px;
+  margin-top:8px; font-variant-numeric:tabular-nums; }
+#edge-detail .stats div, #net-detail .stats div { font-size:13px; color:var(--soft); }
+#edge-detail .stats b, #net-detail .stats b { display:block; color:var(--ink); font-size:15px; }
 .next { list-style:none; padding:0; }
 .next li { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:13px 17px; margin:9px 0; max-width:74ch; }
@@ -121,7 +127,8 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
     <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
     <a class="sub" href="learn.html#lab">2 · The strategy lab</a>
     <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
-    <a class="sub" href="learn.html#positioning">4 · Longs, shorts &amp; flat</a>
+    <a class="sub" href="learn.html#comovement">4 · Companies that move together</a>
+    <a class="sub" href="learn.html#positioning">5 · Longs, shorts &amp; flat</a>
     <div class="grp">Reference</div>
     <a class="" href="glossary.html">Glossary</a>
   </nav>
@@ -142,6 +149,12 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 </div>
 
 <div class="verdict"><b>Today's read:</b> SPY 738.18 sits 6% above its 10-month average (693); high-yield spreads are 2.68%, easier than their 12-month median (2.84%); volatility is in the mid regime at 11.4% annualized. Zero of three warning lights are on — the tested rules stay fully long. The blind spot: valuations are at dot-com extremes, which none of these three signals can see. That's the next node on the <a href="learn.html#graph">graph</a>.</div>
+
+<h2 id="action">What should I actually do?</h2>
+<div class="learn"><div class="lt">In plain words</div>
+<p><b>1 · Today: do nothing.</b> All three warning lights are green. Keep the index fund, keep the plan. Boredom is the correct feeling.</p>
+<p><b>2 · Know your tripwire in advance.</b> If SPY finishes a month below ~$693 (it's at 738), the first light turns red — the tested response is to cut stock exposure roughly in half. Two lights red: get defensive. This is decided <i>now</i>, calmly, not during the scary week it happens.</p>
+<p><b>3 · Don't short. Don't chase.</b> Betting on declines has no evidence behind it in our tests (<a href="learn.html#positioning">why</a>), and buying more just because the market is up isn't a signal either. The system's whole job is: stay in, until the specific tripwires say otherwise.</p></div>
 
 <h2 id="stance">What that stance means</h2>
 <ul>
@@ -168,6 +181,16 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
   <li><span class="k">Signal-flip alerts in the morning brief</span> — trend break or credit stress lands in the 7 AM email automatically.</li>
   <li><span class="k">Per-position rules</span> — walk-forward tests on the high-beta sleeve (where regime flips bite ~2x).</li>
   <li><span class="k">Idea ledger</span> — every new hypothesis becomes a graph edge and keeps its verdict, including the rejections. That's the compounding memory.</li>
+</ul>
+
+<h2 id="agent">The path to an investing agent</h2>
+<p class="lede">The end state is an agent that watches, reasons, and proposes — with you approving trades until it has earned more rope. Each stage must prove itself before the next unlocks.</p>
+<ul class="next">
+  <li><span class="k">Stage 0 — Research system (you are here).</span> Signals, backtests, and the evidence graph, rebuilt on demand. The agent's future brain.</li>
+  <li><span class="k">Stage 1 — Watcher.</span> Daily cron: refresh signals, alert on any flip via the morning brief / WhatsApp. No opinions, just tripwires. One command away.</li>
+  <li><span class="k">Stage 2 — Analyst.</span> On each flip or weekly, the agent writes a short memo: what changed, what the tested edges say, what it would do and why — every claim linked to a graph edge. You do the clicking.</li>
+  <li><span class="k">Stage 3 — Trader with training wheels.</span> The agent proposes exact orders (paper-traded first, then the empty Agentic account) under hard guardrails: only rules with validated edges, position caps, no shorts without a validated negative edge, full decision log.</li>
+  <li><span class="k">Stage 4 — Autonomy, earned.</span> Only after the decision log shows the agent following its own rules through at least one full regime change. Trust is a backtest too.</li>
 </ul>
 
 <div class="footnote">Rebuilt by <span class="mono">backtest.py → build_docs.py</span> in <span class="mono">~/trading-research</span>. Data: Yahoo Finance, FRED, Robinhood (read-only). Monthly signals, no transaction costs, cash earns 0% in tests. Research tooling — historical measurement, not investment advice.</div>

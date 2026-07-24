@@ -11,6 +11,9 @@
   --blue:#4a7ba6; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --c0:#4a7ba6; --c1:#b28f2c; --c2:#7a8a5c; --c3:#c0564f; --c4:#8a6fb0;
+  --c5:#3e8e7e; --c6:#c07a3f; --c7:#5b6b9e; --c8:#98596b; --c9:#6b8f3d;
+  --c10:#7d7468; --c11:#4f8fb5;
 }
 * { box-sizing:border-box; }
 html,body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
@@ -82,15 +85,18 @@ figcaption { font-size:13px; color:var(--soft); margin-top:7px; max-width:70ch; 
 .unlockbox button { padding:9px 18px; border:none; border-radius:8px; background:var(--accent);
   color:#fff; font-size:14px; cursor:pointer; }
 .unlockbox .err { color:var(--red); font-size:13px; margin-top:10px; display:none; }
-#graphwrap { background:var(--panel); border:1px solid var(--line); border-radius:12px;
-  padding:10px; margin:16px 0; }
+#graphwrap, #netwrap { background:var(--panel); border:1px solid var(--line);
+  border-radius:12px; padding:10px; margin:16px 0; }
 #graphwrap svg { width:100%; height:auto; display:block; }
-#edge-detail { background:var(--bg); border:1px solid var(--line); border-radius:10px;
-  padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
-#edge-detail .stats { display:flex; flex-wrap:wrap; gap:16px; margin-top:8px;
-  font-variant-numeric:tabular-nums; }
-#edge-detail .stats div { font-size:13px; color:var(--soft); }
-#edge-detail .stats b { display:block; color:var(--ink); font-size:15px; }
+#netwrap canvas { width:100%; display:block; cursor:pointer; }
+.cdot { display:inline-block; width:10px; height:10px; border-radius:50%;
+  margin-right:8px; vertical-align:baseline; }
+#edge-detail, #net-detail { background:var(--bg); border:1px solid var(--line);
+  border-radius:10px; padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
+#edge-detail .stats, #net-detail .stats { display:flex; flex-wrap:wrap; gap:16px;
+  margin-top:8px; font-variant-numeric:tabular-nums; }
+#edge-detail .stats div, #net-detail .stats div { font-size:13px; color:var(--soft); }
+#edge-detail .stats b, #net-detail .stats b { display:block; color:var(--ink); font-size:15px; }
 .next { list-style:none; padding:0; }
 .next li { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:13px 17px; margin:9px 0; max-width:74ch; }
@@ -121,7 +127,8 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
     <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
     <a class="sub" href="learn.html#lab">2 · The strategy lab</a>
     <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
-    <a class="sub" href="learn.html#positioning">4 · Longs, shorts &amp; flat</a>
+    <a class="sub" href="learn.html#comovement">4 · Companies that move together</a>
+    <a class="sub" href="learn.html#positioning">5 · Longs, shorts &amp; flat</a>
     <div class="grp">Reference</div>
     <a class="active" href="glossary.html">Glossary</a>
   </nav>
@@ -133,7 +140,7 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 <div class="eyebrow">Reference</div>
 <h1>Glossary</h1>
 <div class="sub">Every term used in the dashboard and playbook, in plain English.</div>
-<dl><dt>CAGR</dt><dd>Compound annual growth rate — what an investment actually earned per year once compounding is accounted for. The destination number.</dd><dt>Sharpe ratio</dt><dd>Average return divided by volatility (annualized). Return per unit of stress. Roughly: 0.5 mediocre, 0.8 decent, 1.0+ good for simple rules.</dd><dt>Max drawdown</dt><dd>Worst peak-to-trough decline. The journey number — it decides whether you'd actually have held on.</dd><dt>Volatility</dt><dd>How much returns swing, usually annualized standard deviation. ~15% is normal for stocks; 30%+ is storm territory.</dd><dt>Beta</dt><dd>How much a stock moves per 1% market move. Beta 2 ≈ doubles every market swing, both directions.</dd><dt>Correlation</dt><dd>How much two things move together (−1 to +1). Low-correlation assets are diversifiers; in crashes, most correlations lurch toward 1.</dd><dt>Regime</dt><dd>A persistent market 'mood' — calm, choppy, stressed. Regimes cluster, which is why risk is more predictable than return.</dd><dt>Hidden Markov model</dt><dd>A statistical model that assumes an unobservable state generates the data, and infers today's state from recent behavior. Our regime detector.</dd><dt>Walk-forward</dt><dd>Testing discipline where the model only ever uses data available at each historical moment. The difference between a backtest and a fairy tale.</dd><dt>Lookahead bias</dt><dd>Accidentally letting a backtest peek at the future (e.g., using a month's average price to trade that same month). The most common way backtests lie.</dd><dt>Credit spread / OAS</dt><dd>Extra yield lenders demand from risky borrowers over Treasuries. Widening spreads = 'borrowing is getting harder' = the classic pre-storm signal.</dd><dt>10-month moving average</dt><dd>Average of the last ~10 months of prices. Price above it = uptrend intact. Old (1930s), simple, and still the benchmark trend filter.</dd><dt>Base rate</dt><dd>What happens on average, ignoring all signals — here, stocks up ~64% of months, +1%/month. Every trade idea must beat this, not zero.</dd><dt>t-statistic</dt><dd>How many standard errors an effect is from zero. |t| > 2 is the conventional 'probably real' bar. Small samples almost never clear it — respect that.</dd><dt>Hit rate</dt><dd>Percent of months a condition saw positive returns. 64% base rate is why shorting is structurally hard.</dd><dt>Conjunction</dt><dd>Two signals required together (credit stress AND broken trend). Conjunctions are where real edges usually hide — single indicators are too crowded.</dd><dt>Drawdown insurance</dt><dd>Giving up expected return to shrink worst-case losses (what trend/regime filters actually do). Insurance costs premium; the premium here is ~2.4% CAGR.</dd><dt>Equity risk premium</dt><dd>Expected stock return minus safe bond yield — the payment for bearing risk. Near zero today, which is what 'expensive market' means in one number.</dd></dl>
+<dl><dt>CAGR</dt><dd>Compound annual growth rate — what an investment actually earned per year once compounding is accounted for. The destination number.</dd><dt>Sharpe ratio</dt><dd>Average return divided by volatility (annualized). Return per unit of stress. Roughly: 0.5 mediocre, 0.8 decent, 1.0+ good for simple rules.</dd><dt>Max drawdown</dt><dd>Worst peak-to-trough decline. The journey number — it decides whether you'd actually have held on.</dd><dt>Volatility</dt><dd>How much returns swing, usually annualized standard deviation. ~15% is normal for stocks; 30%+ is storm territory.</dd><dt>Beta</dt><dd>How much a stock moves per 1% market move. Beta 2 ≈ doubles every market swing, both directions.</dd><dt>Correlation</dt><dd>How much two things move together (−1 to +1). Low-correlation assets are diversifiers; in crashes, most correlations lurch toward 1.</dd><dt>Regime</dt><dd>A persistent market 'mood' — calm, choppy, stressed. Regimes cluster, which is why risk is more predictable than return.</dd><dt>Hidden Markov model</dt><dd>A statistical model that assumes an unobservable state generates the data, and infers today's state from recent behavior. Our regime detector.</dd><dt>Walk-forward</dt><dd>Testing discipline where the model only ever uses data available at each historical moment. The difference between a backtest and a fairy tale.</dd><dt>Lookahead bias</dt><dd>Accidentally letting a backtest peek at the future (e.g., using a month's average price to trade that same month). The most common way backtests lie.</dd><dt>Credit spread / OAS</dt><dd>Extra yield lenders demand from risky borrowers over Treasuries. Widening spreads = 'borrowing is getting harder' = the classic pre-storm signal.</dd><dt>10-month moving average</dt><dd>Average of the last ~10 months of prices. Price above it = uptrend intact. Old (1930s), simple, and still the benchmark trend filter.</dd><dt>Base rate</dt><dd>What happens on average, ignoring all signals — here, stocks up ~64% of months, +1%/month. Every trade idea must beat this, not zero.</dd><dt>t-statistic</dt><dd>How many standard errors an effect is from zero. |t| > 2 is the conventional 'probably real' bar. Small samples almost never clear it — respect that.</dd><dt>Hit rate</dt><dd>Percent of months a condition saw positive returns. 64% base rate is why shorting is structurally hard.</dd><dt>Conjunction</dt><dd>Two signals required together (credit stress AND broken trend). Conjunctions are where real edges usually hide — single indicators are too crowded.</dd><dt>Drawdown insurance</dt><dd>Giving up expected return to shrink worst-case losses (what trend/regime filters actually do). Insurance costs premium; the premium here is ~2.4% CAGR.</dd><dt>Equity risk premium</dt><dd>Expected stock return minus safe bond yield — the payment for bearing risk. Near zero today, which is what 'expensive market' means in one number.</dd><dt>Transition matrix</dt><dd>The regime model's table of switching odds: given today's mood, the probability of each mood tomorrow. Big diagonal numbers = moods are sticky = risk is forecastable.</dd><dt>Emission</dt><dd>What a hidden state 'shows' you — the daily return and volatility a regime generates. You infer the hidden mood from its visible emissions.</dd><dt>Baum–Welch (EM)</dt><dd>The fitting loop for a hidden Markov model: guess the states, sort days into them, re-measure each state, repeat until stable. No hand labels anywhere.</dd><dt>Forward algorithm</dt><dd>The daily Bayes update that turns yesterday's regime probabilities plus today's market move into today's regime probabilities. Cheap, online, no peeking ahead.</dd><dt>Correlation network</dt><dd>A graph where stocks are dots and strong return correlations are lines. The market's real seating chart — who actually trades together, whatever the sector label says.</dd><dt>Label propagation</dt><dd>Cluster discovery by peer pressure: every stock repeatedly adopts the most common group among its correlated neighbors until the map settles.</dd><dt>Long / flat / short</dt><dd>The three positions: own it, don't own it, bet against it. Long needs no forecast (drift pays you), flat needs a risk signal, short needs a direction edge — the rarest thing in markets.</dd><dt>Cluster migration</dt><dd>A stock changing which group it trades with — often the market repricing its story before the news says why. Worth investigating every time.</dd></dl>
 <div class="footnote">Terms get added as new nodes and edges enter the graph.</div>
 
 </main>

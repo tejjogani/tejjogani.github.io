@@ -11,6 +11,9 @@
   --blue:#4a7ba6; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --c0:#4a7ba6; --c1:#b28f2c; --c2:#7a8a5c; --c3:#c0564f; --c4:#8a6fb0;
+  --c5:#3e8e7e; --c6:#c07a3f; --c7:#5b6b9e; --c8:#98596b; --c9:#6b8f3d;
+  --c10:#7d7468; --c11:#4f8fb5;
 }
 * { box-sizing:border-box; }
 html,body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
@@ -82,15 +85,18 @@ figcaption { font-size:13px; color:var(--soft); margin-top:7px; max-width:70ch; 
 .unlockbox button { padding:9px 18px; border:none; border-radius:8px; background:var(--accent);
   color:#fff; font-size:14px; cursor:pointer; }
 .unlockbox .err { color:var(--red); font-size:13px; margin-top:10px; display:none; }
-#graphwrap { background:var(--panel); border:1px solid var(--line); border-radius:12px;
-  padding:10px; margin:16px 0; }
+#graphwrap, #netwrap { background:var(--panel); border:1px solid var(--line);
+  border-radius:12px; padding:10px; margin:16px 0; }
 #graphwrap svg { width:100%; height:auto; display:block; }
-#edge-detail { background:var(--bg); border:1px solid var(--line); border-radius:10px;
-  padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
-#edge-detail .stats { display:flex; flex-wrap:wrap; gap:16px; margin-top:8px;
-  font-variant-numeric:tabular-nums; }
-#edge-detail .stats div { font-size:13px; color:var(--soft); }
-#edge-detail .stats b { display:block; color:var(--ink); font-size:15px; }
+#netwrap canvas { width:100%; display:block; cursor:pointer; }
+.cdot { display:inline-block; width:10px; height:10px; border-radius:50%;
+  margin-right:8px; vertical-align:baseline; }
+#edge-detail, #net-detail { background:var(--bg); border:1px solid var(--line);
+  border-radius:10px; padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
+#edge-detail .stats, #net-detail .stats { display:flex; flex-wrap:wrap; gap:16px;
+  margin-top:8px; font-variant-numeric:tabular-nums; }
+#edge-detail .stats div, #net-detail .stats div { font-size:13px; color:var(--soft); }
+#edge-detail .stats b, #net-detail .stats b { display:block; color:var(--ink); font-size:15px; }
 .next { list-style:none; padding:0; }
 .next li { background:var(--panel); border:1px solid var(--line); border-radius:12px;
   padding:13px 17px; margin:9px 0; max-width:74ch; }
@@ -121,7 +127,8 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
     <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
     <a class="sub" href="learn.html#lab">2 · The strategy lab</a>
     <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
-    <a class="sub" href="learn.html#positioning">4 · Longs, shorts &amp; flat</a>
+    <a class="sub" href="learn.html#comovement">4 · Companies that move together</a>
+    <a class="sub" href="learn.html#positioning">5 · Longs, shorts &amp; flat</a>
     <div class="grp">Reference</div>
     <a class="" href="glossary.html">Glossary</a>
   </nav>
@@ -138,14 +145,40 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 
 <h2 id="regimes">1 · Market regimes — the weather system</h2>
 <p class="lede">Markets don't have one personality. They alternate between calm grinds and violent storms, and the storms cluster.</p>
+<div class="learn"><div class="lt">In plain words</div>
+<p>The market has moods: calm, jumpy, panicked. You can't predict which way prices go tomorrow — but you <i>can</i> tell what mood the market is in today, and the mood tells you how violent tomorrow is likely to be. Every risk decision in this playbook starts there. In twenty years around institutional money I never met a desk that could reliably call direction; every good one I met sized positions by the weather.</p></div>
 <figure><img src="assets/regimes.png" alt="SPY since 1997, colored by a hidden Markov model's regime estimate made in real time (green calm, gold mid, red stress). It finds 2008, 2011, 2015–16, 2018, 2020 and 2022 without ever being told about them." loading="lazy"><figcaption>SPY since 1997, colored by a hidden Markov model's regime estimate made in real time (green calm, gold mid, red stress). It finds 2008, 2011, 2015–16, 2018, 2020 and 2022 without ever being told about them.</figcaption></figure>
-<p>A <b>hidden Markov model</b> assumes an unobservable state (calm / mid / stress) generates the returns we observe, and infers today's state from recent return and volatility behavior. It's the workhorse of regime detection at real funds — not because it predicts crashes, but because it recognizes when one has begun early enough to matter.</p>
+<h3>What a hidden Markov model actually is</h3>
+<p>Two words, two assumptions. <b>Markov</b>: the market's state tomorrow depends only on its state today — like weather, a stormy day is most likely followed by another stormy day, regardless of how long ago summer was. <b>Hidden</b>: you never observe the state directly. Nobody rings a bell announcing "stress regime" — you see only what the state <i>emits</i>: each day's return and volatility. The model's job is to reason backwards from the visible emissions to the invisible state.</p>
+<p>Concretely, ours has three moving parts:</p>
+<p><b>1 · Three states, each with its own statistical fingerprint.</b> Each state is defined by what returns look like while the market is in it. Here is the actual fitted model as of 2026-07-23:</p>
+<div class="tblwrap"><table>
+  <tr><th>State</th><th>Typical volatility</th><th>Typical return (ann.)</th><th>Persistence (p stay)</th><th>Typical visit</th><th>P(today)</th></tr>
+  <tr><td><b>Calm</b></td><td>9%</td><td>+18%</td><td>98.1%</td><td>~53 days</td><td>36%</td></tr><tr><td><b>Mid</b></td><td>15%</td><td>+7%</td><td>96.1%</td><td>~26 days</td><td>64%</td></tr><tr><td><b>Stress</b></td><td>27%</td><td>+9%</td><td>98.0%</td><td>~51 days</td><td>0%</td></tr>
+</table></div>
+<p><b>2 · A transition matrix</b> — the probability of moving between states on any given day. This is where regime <i>stickiness</i> lives:</p>
+<div class="tblwrap"><table>
+  <tr><th></th><th>→ Calm</th><th>→ Mid</th><th>→ Stress</th></tr>
+  <tr><td><b>From Calm</b></td><td>98.1%</td><td>1.9%</td><td>0.0%</td></tr><tr><td><b>From Mid</b></td><td>2.4%</td><td>96.1%</td><td>1.5%</td></tr><tr><td><b>From Stress</b></td><td>0.0%</td><td>2.0%</td><td>98.0%</td></tr>
+</table></div>
+<p><b>3 · Inference</b> — each day the model runs a Bayes update (the "forward algorithm"): start from yesterday's state probabilities, push them through the transition matrix, then reweight by how well each state explains today's return and volatility. A single −3% day barely moves it (calm markets have bad days too); a <i>string</i> of wild days shifts the probability mass to stress quickly.</p>
+<h3>How it's fitted, and how we keep it honest</h3>
+<p>Fitting uses expectation-maximization (Baum–Welch): guess the states, infer which days belong to which state, re-estimate each state's fingerprint from its days, repeat until stable. Nothing is labeled by hand — the model discovers "calm/mid/stress" on its own, purely because three clusters of behavior genuinely exist in the data. Two disciplines keep it honest: it is refit only once a year on an <b>expanding window</b> (no future data ever), and states are ranked by volatility after each refit so "stress" always means the same thing even if the model reorders its internal labels.</p>
+<h3>Why this matters for money</h3>
+<p>Look at the persistence column: regimes last weeks to months, not days. That's the entire trade. Because volatility clusters, <i>knowing today's state genuinely tells you about tomorrow's risk</i> — the stress state's volatility is several times calm's, and once entered it sticks around. You can't predict returns from this table (note the return column's noisiness), but you can predict the <i>width</i> of what might happen — and position size should scale with width. The limits are just as important: the model recognizes storms slightly late (it needs evidence to accumulate), it says nothing about <i>why</i> a storm started, and it will occasionally flicker at boundaries — which is why the playbook demands a second, independent signal (credit, trend) before acting hard.</p>
 <figure><img src="assets/credit.png" alt="The credit node: high-yield bonds relative to Treasuries. Shaded spans = high-yield underperforming, i.e. lenders demanding more for risk — 'borrowing is getting harder.' Note the shading arriving before and through every major equity drawdown." loading="lazy"><figcaption>The credit node: high-yield bonds relative to Treasuries. Shaded spans = high-yield underperforming, i.e. lenders demanding more for risk — 'borrowing is getting harder.' Note the shading arriving before and through every major equity drawdown.</figcaption></figure>
-<div class="learn"><div class="lt">Why credit matters to stocks</div>
-<p>Companies live on borrowed money. When lenders get scared they demand higher yields from the riskiest borrowers first — so high-yield bonds sag <i>before</i> the trouble reaches earnings reports. That's why "high valuations + credit tightening" is the classic bubble-burst fingerprint: expensive assets meeting expensive money.</p></div>
+<h3>Why credit leads stocks — the transmission chain</h3>
+<p>This is the single most important mechanism in the playbook, so it's worth the full walk-through. Corporate America runs on rolling debt: companies don't pay loans off, they <i>refinance</i> them — old bonds mature, new bonds are issued to repay them. That treadmill only works while lenders are willing.</p>
+<p>Now consider who notices trouble first. A stockholder owns unlimited upside, so hope is part of the position. A bondholder's best case is only getting their money back — <b>bond investors are paid to imagine the downside</b>, and nothing else. When the economy's data starts smelling wrong, they act first, and they act on the riskiest borrowers first: junk-rated companies, the ones with no cushion. Those borrowers' bond prices sag, meaning the yield lenders demand over safe Treasuries — the <b>spread</b> — widens. All of this happens in the bond market's pricing <i>months before</i> weak demand shows up in any earnings report, because it's a change in willingness-to-lend, not a change in reported results.</p>
+<p>Then the mechanical damage arrives in three steps. <b>One:</b> companies refinancing at higher rates see interest expense eat their earnings. <b>Two:</b> the weakest can't refinance at all — defaults begin, layoffs follow, the fear feeds itself. <b>Three (subtlest, biggest):</b> every asset's price is a claim on future cash flows discounted back to today, and when the price of money rises, the discount is harsher — so valuations compress <i>even for companies whose businesses are fine</i>.</p>
+<p>Here is why the conjunction with valuations is the bubble-burst fingerprint. Expensive markets are, mathematically, markets whose price depends mostly on <i>distant</i> future cash flows — which makes them maximally sensitive to that discounting step. Cheap markets can absorb tighter money; expensive ones cannot. High CAPE alone predicts almost nothing about the next year (expensive markets happily got more expensive for years — 1997, 1998, 1999, 2024, 2025…). Tight credit alone is survivable when assets are cheap. But <b>expensive assets meeting expensive money</b> removes the escape routes: 2000 (spreads had been widening since the 1998 LTCM shock while the Nasdaq doubled), 2007–08 (high-yield cracked in June 2007; the S&amp;P peaked that October, months later), 2022 (the Fed repriced money and the longest-duration assets — unprofitable tech — fell hardest). Same fingerprint, three different decades.</p>
+<div class="learn"><div class="lt">The one-line version</div>
+<p>Stocks are priced on hope, bonds on fear — and fear does its homework earlier. Watch what lenders charge the weakest borrowers: it's the market's smoke detector, and it goes off before the flames reach the earnings statements. When it fires <i>while</i> valuations are stretched, history's worst drawdowns follow. That pairing — not either signal alone — is the edge this system was built to test.</p></div>
 
 <h2 id="lab">2 · The strategy lab — judging rules honestly</h2>
 <p class="lede">Four rules, same 18-year window (July 2008 → today), monthly rebalance, signals applied to the following month. Cash earns 0% — a deliberate handicap against the timing rules.</p>
+<div class="learn"><div class="lt">In plain words</div>
+<p>We pretend to trade each rule through 18 years of history, never letting it see the future, and score three things: what it made, how rough the ride was, and how deep the worst hole got. The finding — and this matches every serious study since the 1970s — is that simple timing rules don't beat the market; they make the crashes survivable. That's a product worth owning, as long as you know that's what you bought.</p></div>
 <div class="tblwrap"><table>
   <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Worst drawdown</th><th>Time invested</th></tr>
   <tr><td>Buy & hold</td><td>11.93%</td><td>0.80</td><td class="neg">-46.3%</td><td>100%</td></tr><tr><td>Trend (10-mo MA)</td><td>9.54%</td><td>0.90</td><td class="neg">-23.0%</td><td>78%</td></tr><tr><td>Trend + vol regime</td><td>9.39%</td><td>0.97</td><td class="neg">-16.8%</td><td>74%</td></tr><tr><td>Trend + credit (conjunction)</td><td>9.38%</td><td>0.96</td><td class="neg">-21.1%</td><td>72%</td></tr>
@@ -158,6 +191,8 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 
 <h2 id="graph">3 · The relationship graph — ideas on trial</h2>
 <p class="lede">Indicators are nodes. Hypotheses about how they combine are edges. Every edge must earn its status from walk-forward evidence — and rejected edges are kept, because remembering what <i>doesn't</i> work is half the edge. Click anything.</p>
+<div class="learn"><div class="lt">In plain words</div>
+<p>Every market belief gets written as "IF this, THEN that," tested against history, and stamped with a verdict. Funds pay research teams millions to maintain exactly this: an institutional memory of what's been tried. Ours is a JSON file and a nightly script — but the discipline is identical, and the discipline is the moat.</p></div>
 <div id="graphwrap">
   <svg id="graphsvg" viewBox="0 0 900 560" role="img" aria-label="Relationship graph of market indicators"></svg>
   <div id="edge-detail">Click a node or an edge to see its hypothesis and evidence.</div>
@@ -169,8 +204,33 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 <div class="learn"><div class="lt">The most valuable negative result in finance</div>
 <p>No edge cleared statistical significance (|t| &gt; 2) for predicting <b>average</b> returns — with only 34–75 stress-months in the sample, noisy means can't clear that bar. Yet the strategies built on the same signals clearly cut drawdowns. Both are true because of a cornerstone empirical fact: <b>returns are nearly unpredictable; risk is very predictable.</b> Volatility under stress conditions runs 6–8% a month versus ~5% baseline, and it clusters. The signals don't say "the market will fall" — they say "if it falls, it falls harder." De-risking on them is defense on variance, not a forecast of direction.</p></div>
 
-<h2 id="positioning">4 · Longs, shorts, and staying flat</h2>
+<h2 id="comovement">4 · Companies that move together</h2>
+<p class="lede">Take 64 stocks, one year of daily returns, and ask a single question: who actually trades together? No sector labels, no industry codes — just correlation. Drag your eyes around; click any node.</p>
+<div class="learn"><div class="lt">In plain words</div>
+<p>We let the computer group stocks purely by who rises and falls together. It rediscovers the industry map on its own — chips with chips, banks with banks — which proves the groupings are real money flows, not opinions. Then the question that makes money: which group is the market's cash actually crowding into, and does the news story agree? When flows and story agree you have a trend; when they disagree, one of them is lying.</p></div>
+<div id="netwrap">
+  <canvas id="netcanvas" height="540"></canvas>
+  <div id="net-detail">Click a company to see its cluster, momentum, and strongest partners. Ringed nodes are your holdings.</div>
+</div>
+<div class="tblwrap"><table>
+  <tr><th>Discovered cluster</th><th>Names</th><th>3-mo avg</th><th>1-mo avg</th><th>Internal corr</th></tr>
+  <tr><td><span class="cdot" style="background:var(--c0)"></span>MU · AMD · INTC · QCOM…</td><td>10</td><td class="pos">+24.7%</td><td>-6.9%</td><td>0.35</td></tr><tr><td><span class="cdot" style="background:var(--c2)"></span>AXSM · LLY · ABBV · MRK…</td><td>8</td><td class="pos">+14.9%</td><td>+6.0%</td><td>0.35</td></tr><tr><td><span class="cdot" style="background:var(--c5)"></span>BAC · GS · MS · JPM…</td><td>6</td><td class="pos">+11.2%</td><td>+2.8%</td><td>0.62</td></tr><tr><td><span class="cdot" style="background:var(--c4)"></span>UNH · V · AXP · MA…</td><td>6</td><td class="pos">+6.6%</td><td>+2.6%</td><td>0.33</td></tr><tr><td><span class="cdot" style="background:var(--c9)"></span>GE · HON · BA · CRSP</td><td>4</td><td class="pos">+2.4%</td><td>-4.4%</td><td>0.34</td></tr><tr><td><span class="cdot" style="background:var(--c8)"></span>XOM · CVX · COP · SLB</td><td>4</td><td class="neg">-1.6%</td><td>+10.4%</td><td>0.63</td></tr><tr><td><span class="cdot" style="background:var(--c6)"></span>DUK · LIN · NEE · AMT</td><td>4</td><td class="neg">-2.8%</td><td>-0.7%</td><td>0.29</td></tr><tr><td><span class="cdot" style="background:var(--c1)"></span>UPS · TGT · PLD · HD…</td><td>8</td><td class="neg">-4.6%</td><td>-2.7%</td><td>0.33</td></tr><tr><td><span class="cdot" style="background:var(--c7)"></span>NOW · MSFT · CRM · ADBE</td><td>4</td><td class="neg">-5.0%</td><td>+3.3%</td><td>0.65</td></tr><tr><td><span class="cdot" style="background:var(--c3)"></span>AAPL · GOOGL · META · AMZN…</td><td>6</td><td class="neg">-7.5%</td><td>-1.5%</td><td>0.27</td></tr>
+</table></div>
+<div class="learn"><div class="lt">What just happened</div>
+<p>The clusters above were discovered by <b>label propagation</b>: every stock starts as its own group, then repeatedly adopts the most common group among its correlated neighbors until the network settles. Nobody told it what a semiconductor is — yet it rebuilt the sector map (chips, banks, pharma, energy, payments) from co-movement alone. That's the proof the structure is real, not imposed.</p></div>
+<h3>How to read it against the news</h3>
+<p>The graph tells you <b>what</b> is moving together; the news tells you <b>why</b>. The discipline is to require both:</p>
+<ul>
+  <li><b>Trend + story = trustworthy.</b> The top cluster right now is chips at +24.7% over three months — and the narrative (AI capex) is on every front page. Co-movement confirms the story is actually being expressed in prices, together, across the group.</li>
+  <li><b>Story without co-movement = suspect.</b> If the headlines scream a theme but the supposed beneficiaries aren't actually correlating, the market doesn't believe it. Fade the narrative.</li>
+  <li><b>Co-movement without a story = investigate.</b> A cluster tightening or a stock migrating between clusters before any news is often the market pricing something not yet public. That migration is one of the oldest quiet signals there is.</li>
+  <li><b>Diversification is cluster-level, not ticker-level.</b> Owning three names in one cluster is one bet, three times. Check which clusters your holdings actually live in — the ring markers make it visible.</li>
+</ul>
+
+<h2 id="positioning">5 · Longs, shorts, and staying flat</h2>
 <p class="lede">The point of understanding the market is to act intelligently. Here's how evidence maps to the three possible actions.</p>
+<div class="learn"><div class="lt">In plain words</div>
+<p>Three possible positions: own stocks (long), own fewer or none (flat), bet on a fall (short). Owning is the default because markets drift up over time — you're paid for enduring the swings. Going flat needs only proof that the storm risk rose (we have that proof). Shorting needs proof prices will actually <i>fall</i> — a far higher bar that our evidence doesn't clear, and the graveyard of every smart person who confused "overvalued" with "about to go down."</p></div>
 <h3>Long is the default, not a prediction</h3>
 <p>Across the sample the market rose in about 64% of months, averaging +1.04%/month — that upward drift is the base rate, the payment for bearing risk. So a long position doesn't need a bullish forecast; it needs the <i>absence of tested warnings</i>. That's why the dashboard shows warning lights, not buy signals.</p>
 <h3>Flat (de-risking) needs only a variance edge</h3>
@@ -283,6 +343,113 @@ GRAPH.nodes.forEach((n) => {
   g.appendChild(t);
   g.addEventListener("click", () => showNode(n));
   svg.appendChild(g);
+});
+</script>
+<script>
+const NET = {"as_of": "2026-07-23", "window_days": 250, "edge_threshold": 0.55, "nodes": [{"sym": "AAPL", "cluster": 3, "ret_3m": 17.7, "ret_1m": 9.8, "vol": 25.0, "held": false, "partners": [{"sym": "AMZN", "corr": 0.32}, {"sym": "MS", "corr": 0.31}, {"sym": "BLK", "corr": 0.3}]}, {"sym": "ABBV", "cluster": 2, "ret_3m": 28.8, "ret_1m": 10.2, "vol": 26.0, "held": false, "partners": [{"sym": "AMGN", "corr": 0.48}, {"sym": "JNJ", "corr": 0.47}, {"sym": "MRK", "corr": 0.46}]}, {"sym": "ADBE", "cluster": 7, "ret_3m": -11.2, "ret_1m": 7.9, "vol": 37.0, "held": false, "partners": [{"sym": "CRM", "corr": 0.75}, {"sym": "NOW", "corr": 0.7}, {"sym": "MSFT", "corr": 0.49}]}, {"sym": "ALGN", "cluster": 4, "ret_3m": -11.8, "ret_1m": -1.6, "vol": 54.0, "held": true, "partners": [{"sym": "AXP", "corr": 0.39}, {"sym": "LOW", "corr": 0.37}, {"sym": "HD", "corr": 0.37}]}, {"sym": "AMD", "cluster": 0, "ret_3m": 76.8, "ret_1m": 3.8, "vol": 70.0, "held": false, "partners": [{"sym": "TSM", "corr": 0.59}, {"sym": "MU", "corr": 0.52}, {"sym": "INTC", "corr": 0.49}]}, {"sym": "AMGN", "cluster": 2, "ret_3m": 7.4, "ret_1m": 5.7, "vol": 27.0, "held": false, "partners": [{"sym": "PFE", "corr": 0.54}, {"sym": "MRK", "corr": 0.51}, {"sym": "LLY", "corr": 0.48}]}, {"sym": "AMT", "cluster": 6, "ret_3m": -7.1, "ret_1m": -5.6, "vol": 26.0, "held": false, "partners": [{"sym": "DUK", "corr": 0.33}, {"sym": "T", "corr": 0.32}, {"sym": "MCD", "corr": 0.3}]}, {"sym": "AMZN", "cluster": 3, "ret_3m": -8.4, "ret_1m": -0.3, "vol": 32.0, "held": false, "partners": [{"sym": "META", "corr": 0.47}, {"sym": "GOOGL", "corr": 0.45}, {"sym": "TSLA", "corr": 0.38}]}, {"sym": "AVGO", "cluster": 0, "ret_3m": -6.4, "ret_1m": 2.7, "vol": 47.0, "held": false, "partners": [{"sym": "TSM", "corr": 0.6}, {"sym": "NVDA", "corr": 0.52}, {"sym": "MU", "corr": 0.48}]}, {"sym": "AXP", "cluster": 4, "ret_3m": 7.3, "ret_1m": -0.2, "vol": 26.0, "held": false, "partners": [{"sym": "BAC", "corr": 0.64}, {"sym": "BLK", "corr": 0.54}, {"sym": "JPM", "corr": 0.54}]}, {"sym": "AXSM", "cluster": 2, "ret_3m": 32.2, "ret_1m": 1.5, "vol": 42.0, "held": true, "partners": [{"sym": "GILD", "corr": 0.24}, {"sym": "LLY", "corr": 0.22}, {"sym": "CRSP", "corr": 0.2}]}, {"sym": "BA", "cluster": 9, "ret_3m": -10.6, "ret_1m": -5.0, "vol": 32.0, "held": false, "partners": [{"sym": "GE", "corr": 0.43}, {"sym": "HON", "corr": 0.36}, {"sym": "CRSP", "corr": 0.35}]}, {"sym": "BAC", "cluster": 5, "ret_3m": 17.4, "ret_1m": 6.1, "vol": 22.0, "held": false, "partners": [{"sym": "WFC", "corr": 0.8}, {"sym": "JPM", "corr": 0.75}, {"sym": "MS", "corr": 0.69}]}, {"sym": "BLK", "cluster": 5, "ret_3m": -1.0, "ret_1m": 5.6, "vol": 27.0, "held": false, "partners": [{"sym": "MS", "corr": 0.62}, {"sym": "GS", "corr": 0.57}, {"sym": "AXP", "corr": 0.54}]}, {"sym": "CAT", "cluster": 0, "ret_3m": 7.3, "ret_1m": -9.9, "vol": 38.0, "held": false, "partners": [{"sym": "TSM", "corr": 0.56}, {"sym": "MU", "corr": 0.51}, {"sym": "DE", "corr": 0.47}]}, {"sym": "COP", "cluster": 8, "ret_3m": -2.6, "ret_1m": 12.4, "vol": 30.0, "held": false, "partners": [{"sym": "CVX", "corr": 0.81}, {"sym": "XOM", "corr": 0.81}, {"sym": "SLB", "corr": 0.46}]}, {"sym": "COST", "cluster": 11, "ret_3m": -8.6, "ret_1m": -3.6, "vol": 20.0, "held": false, "partners": [{"sym": "WMT", "corr": 0.61}, {"sym": "MCD", "corr": 0.34}, {"sym": "DUK", "corr": 0.29}]}, {"sym": "CRM", "cluster": 7, "ret_3m": -9.2, "ret_1m": 2.7, "vol": 40.0, "held": false, "partners": [{"sym": "NOW", "corr": 0.79}, {"sym": "ADBE", "corr": 0.75}, {"sym": "MSFT", "corr": 0.56}]}, {"sym": "CRSP", "cluster": 9, "ret_3m": -13.9, "ret_1m": -11.2, "vol": 59.0, "held": true, "partners": [{"sym": "BA", "corr": 0.35}, {"sym": "BLK", "corr": 0.3}, {"sym": "MS", "corr": 0.3}]}, {"sym": "CVX", "cluster": 8, "ret_3m": 4.6, "ret_1m": 13.4, "vol": 23.0, "held": false, "partners": [{"sym": "XOM", "corr": 0.83}, {"sym": "COP", "corr": 0.81}, {"sym": "SLB", "corr": 0.42}]}, {"sym": "DE", "cluster": 0, "ret_3m": 3.3, "ret_1m": 1.8, "vol": 31.0, "held": false, "partners": [{"sym": "CAT", "corr": 0.47}, {"sym": "HON", "corr": 0.32}, {"sym": "LOW", "corr": 0.31}]}, {"sym": "DIS", "cluster": 1, "ret_3m": -9.8, "ret_1m": -7.5, "vol": 25.0, "held": false, "partners": [{"sym": "LOW", "corr": 0.4}, {"sym": "AXP", "corr": 0.38}, {"sym": "BLK", "corr": 0.38}]}, {"sym": "DUK", "cluster": 6, "ret_3m": 1.8, "ret_1m": 2.2, "vol": 16.0, "held": false, "partners": [{"sym": "NEE", "corr": 0.49}, {"sym": "JNJ", "corr": 0.44}, {"sym": "MCD", "corr": 0.37}]}, {"sym": "GE", "cluster": 9, "ret_3m": 23.8, "ret_1m": -4.5, "vol": 32.0, "held": false, "partners": [{"sym": "BA", "corr": 0.43}, {"sym": "CAT", "corr": 0.42}, {"sym": "JPM", "corr": 0.41}]}, {"sym": "GILD", "cluster": 2, "ret_3m": -1.4, "ret_1m": 4.6, "vol": 27.0, "held": false, "partners": [{"sym": "AMGN", "corr": 0.46}, {"sym": "JNJ", "corr": 0.37}, {"sym": "ABBV", "corr": 0.34}]}, {"sym": "GOOGL", "cluster": 3, "ret_3m": -6.2, "ret_1m": -8.0, "vol": 31.0, "held": false, "partners": [{"sym": "AMZN", "corr": 0.45}, {"sym": "TSLA", "corr": 0.43}, {"sym": "TSM", "corr": 0.37}]}, {"sym": "GS", "cluster": 5, "ret_3m": 15.9, "ret_1m": -0.2, "vol": 31.0, "held": false, "partners": [{"sym": "MS", "corr": 0.84}, {"sym": "JPM", "corr": 0.65}, {"sym": "BLK", "corr": 0.57}]}, {"sym": "HD", "cluster": 1, "ret_3m": -3.8, "ret_1m": -5.3, "vol": 25.0, "held": false, "partners": [{"sym": "LOW", "corr": 0.88}, {"sym": "UPS", "corr": 0.4}, {"sym": "MCD", "corr": 0.4}]}, {"sym": "HON", "cluster": 9, "ret_3m": 10.2, "ret_1m": 3.3, "vol": 26.0, "held": false, "partners": [{"sym": "GE", "corr": 0.41}, {"sym": "HD", "corr": 0.37}, {"sym": "LOW", "corr": 0.36}]}, {"sym": "INTC", "cluster": 0, "ret_3m": 50.1, "ret_1m": -23.9, "vol": 78.0, "held": false, "partners": [{"sym": "MU", "corr": 0.51}, {"sym": "AMD", "corr": 0.49}, {"sym": "QCOM", "corr": 0.43}]}, {"sym": "JNJ", "cluster": 2, "ret_3m": 13.1, "ret_1m": 7.6, "vol": 18.0, "held": false, "partners": [{"sym": "MRK", "corr": 0.51}, {"sym": "ABBV", "corr": 0.47}, {"sym": "DUK", "corr": 0.44}]}, {"sym": "JPM", "cluster": 5, "ret_3m": 12.8, "ret_1m": 5.4, "vol": 22.0, "held": false, "partners": [{"sym": "BAC", "corr": 0.75}, {"sym": "WFC", "corr": 0.67}, {"sym": "MS", "corr": 0.65}]}, {"sym": "LIN", "cluster": 6, "ret_3m": -0.0, "ret_1m": -1.8, "vol": 18.0, "held": false, "partners": [{"sym": "DUK", "corr": 0.3}, {"sym": "HON", "corr": 0.29}, {"sym": "HD", "corr": 0.28}]}, {"sym": "LLY", "cluster": 2, "ret_3m": 29.5, "ret_1m": 6.1, "vol": 39.0, "held": false, "partners": [{"sym": "AMGN", "corr": 0.48}, {"sym": "MRK", "corr": 0.4}, {"sym": "PFE", "corr": 0.35}]}, {"sym": "LOW", "cluster": 1, "ret_3m": -17.6, "ret_1m": -8.3, "vol": 27.0, "held": false, "partners": [{"sym": "HD", "corr": 0.88}, {"sym": "PLD", "corr": 0.4}, {"sym": "DIS", "corr": 0.4}]}, {"sym": "MA", "cluster": 4, "ret_3m": 5.7, "ret_1m": 7.4, "vol": 22.0, "held": false, "partners": [{"sym": "V", "corr": 0.85}, {"sym": "AXP", "corr": 0.48}, {"sym": "ADBE", "corr": 0.4}]}, {"sym": "MCD", "cluster": 1, "ret_3m": -12.5, "ret_1m": -4.0, "vol": 18.0, "held": false, "partners": [{"sym": "HD", "corr": 0.4}, {"sym": "LOW", "corr": 0.39}, {"sym": "JNJ", "corr": 0.37}]}, {"sym": "META", "cluster": 3, "ret_3m": -8.0, "ret_1m": 8.7, "vol": 39.0, "held": true, "partners": [{"sym": "AMZN", "corr": 0.47}, {"sym": "TSLA", "corr": 0.34}, {"sym": "NVDA", "corr": 0.34}]}, {"sym": "MRK", "cluster": 2, "ret_3m": 14.7, "ret_1m": 8.2, "vol": 28.0, "held": false, "partners": [{"sym": "PFE", "corr": 0.54}, {"sym": "AMGN", "corr": 0.51}, {"sym": "JNJ", "corr": 0.51}]}, {"sym": "MS", "cluster": 5, "ret_3m": 14.7, "ret_1m": -2.1, "vol": 27.0, "held": false, "partners": [{"sym": "GS", "corr": 0.84}, {"sym": "BAC", "corr": 0.69}, {"sym": "JPM", "corr": 0.65}]}, {"sym": "MSFT", "cluster": 7, "ret_3m": -8.0, "ret_1m": 4.4, "vol": 28.0, "held": false, "partners": [{"sym": "NOW", "corr": 0.63}, {"sym": "CRM", "corr": 0.56}, {"sym": "ADBE", "corr": 0.49}]}, {"sym": "MU", "cluster": 0, "ret_3m": 105.6, "ret_1m": -5.5, "vol": 77.0, "held": false, "partners": [{"sym": "TSM", "corr": 0.59}, {"sym": "AMD", "corr": 0.52}, {"sym": "INTC", "corr": 0.51}]}, {"sym": "NEE", "cluster": 6, "ret_3m": -6.0, "ret_1m": 2.5, "vol": 22.0, "held": false, "partners": [{"sym": "DUK", "corr": 0.49}, {"sym": "JNJ", "corr": 0.32}, {"sym": "PLD", "corr": 0.28}]}, {"sym": "NFLX", "cluster": 3, "ret_3m": -25.8, "ret_1m": -4.1, "vol": 35.0, "held": false, "partners": [{"sym": "AMZN", "corr": 0.25}, {"sym": "MSFT", "corr": 0.23}, {"sym": "V", "corr": 0.21}]}, {"sym": "NKE", "cluster": 1, "ret_3m": -7.6, "ret_1m": -2.0, "vol": 36.0, "held": false, "partners": [{"sym": "HD", "corr": 0.39}, {"sym": "LOW", "corr": 0.38}, {"sym": "DIS", "corr": 0.34}]}, {"sym": "NOW", "cluster": 7, "ret_3m": 8.4, "ret_1m": -2.0, "vol": 53.0, "held": false, "partners": [{"sym": "CRM", "corr": 0.79}, {"sym": "ADBE", "corr": 0.7}, {"sym": "MSFT", "corr": 0.63}]}, {"sym": "NVDA", "cluster": 0, "ret_3m": 4.7, "ret_1m": 4.9, "vol": 36.0, "held": true, "partners": [{"sym": "TSM", "corr": 0.63}, {"sym": "AVGO", "corr": 0.52}, {"sym": "AMD", "corr": 0.48}]}, {"sym": "ORCL", "cluster": 0, "ret_3m": -31.7, "ret_1m": -23.5, "vol": 66.0, "held": false, "partners": [{"sym": "AVGO", "corr": 0.47}, {"sym": "NVDA", "corr": 0.41}, {"sym": "TSM", "corr": 0.37}]}, {"sym": "PFE", "cluster": 2, "ret_3m": -4.7, "ret_1m": 4.0, "vol": 24.0, "held": false, "partners": [{"sym": "AMGN", "corr": 0.54}, {"sym": "MRK", "corr": 0.54}, {"sym": "ABBV", "corr": 0.39}]}, {"sym": "PLD", "cluster": 1, "ret_3m": 2.7, "ret_1m": 3.0, "vol": 23.0, "held": false, "partners": [{"sym": "LOW", "corr": 0.4}, {"sym": "HD", "corr": 0.39}, {"sym": "BAC", "corr": 0.37}]}, {"sym": "QCOM", "cluster": 0, "ret_3m": 28.2, "ret_1m": -13.3, "vol": 52.0, "held": false, "partners": [{"sym": "AMD", "corr": 0.45}, {"sym": "INTC", "corr": 0.43}, {"sym": "TSLA", "corr": 0.41}]}, {"sym": "SBUX", "cluster": 4, "ret_3m": 4.3, "ret_1m": -0.3, "vol": 28.0, "held": false, "partners": [{"sym": "V", "corr": 0.38}, {"sym": "TGT", "corr": 0.37}, {"sym": "LOW", "corr": 0.34}]}, {"sym": "SLB", "cluster": 8, "ret_3m": -13.3, "ret_1m": 1.3, "vol": 33.0, "held": false, "partners": [{"sym": "COP", "corr": 0.46}, {"sym": "XOM", "corr": 0.44}, {"sym": "CVX", "corr": 0.42}]}, {"sym": "T", "cluster": 10, "ret_3m": -12.6, "ret_1m": 4.0, "vol": 24.0, "held": false, "partners": [{"sym": "VZ", "corr": 0.73}, {"sym": "DUK", "corr": 0.34}, {"sym": "AMT", "corr": 0.32}]}, {"sym": "TGT", "cluster": 1, "ret_3m": 4.3, "ret_1m": -4.8, "vol": 31.0, "held": false, "partners": [{"sym": "HD", "corr": 0.38}, {"sym": "SBUX", "corr": 0.37}, {"sym": "LOW", "corr": 0.34}]}, {"sym": "TSLA", "cluster": 3, "ret_3m": -14.5, "ret_1m": -14.9, "vol": 46.0, "held": true, "partners": [{"sym": "TSM", "corr": 0.46}, {"sym": "GOOGL", "corr": 0.43}, {"sym": "QCOM", "corr": 0.41}]}, {"sym": "TSM", "cluster": 0, "ret_3m": 8.9, "ret_1m": -5.7, "vol": 40.0, "held": false, "partners": [{"sym": "NVDA", "corr": 0.63}, {"sym": "AVGO", "corr": 0.6}, {"sym": "MU", "corr": 0.59}]}, {"sym": "UNH", "cluster": 4, "ret_3m": 20.1, "ret_1m": 4.4, "vol": 39.0, "held": false, "partners": [{"sym": "V", "corr": 0.23}, {"sym": "ALGN", "corr": 0.23}, {"sym": "UPS", "corr": 0.22}]}, {"sym": "UPS", "cluster": 1, "ret_3m": 7.7, "ret_1m": 7.5, "vol": 31.0, "held": false, "partners": [{"sym": "HD", "corr": 0.4}, {"sym": "LOW", "corr": 0.37}, {"sym": "PLD", "corr": 0.34}]}, {"sym": "V", "cluster": 4, "ret_3m": 14.1, "ret_1m": 5.8, "vol": 22.0, "held": false, "partners": [{"sym": "MA", "corr": 0.85}, {"sym": "AXP", "corr": 0.46}, {"sym": "SBUX", "corr": 0.38}]}, {"sym": "VZ", "cluster": 10, "ret_3m": -5.6, "ret_1m": -2.4, "vol": 24.0, "held": false, "partners": [{"sym": "T", "corr": 0.73}, {"sym": "DUK", "corr": 0.32}, {"sym": "CVX", "corr": 0.28}]}, {"sym": "WFC", "cluster": 5, "ret_3m": 7.7, "ret_1m": 2.2, "vol": 27.0, "held": false, "partners": [{"sym": "BAC", "corr": 0.8}, {"sym": "JPM", "corr": 0.67}, {"sym": "MS", "corr": 0.56}]}, {"sym": "WMT", "cluster": 11, "ret_3m": -17.7, "ret_1m": -8.9, "vol": 25.0, "held": false, "partners": [{"sym": "COST", "corr": 0.61}, {"sym": "MCD", "corr": 0.35}, {"sym": "LOW", "corr": 0.29}]}, {"sym": "XOM", "cluster": 8, "ret_3m": 4.9, "ret_1m": 14.6, "vol": 25.0, "held": false, "partners": [{"sym": "CVX", "corr": 0.83}, {"sym": "COP", "corr": 0.81}, {"sym": "SLB", "corr": 0.44}]}], "edges": [{"a": "AAPL", "b": "AMZN", "corr": 0.325}, {"a": "AAPL", "b": "MS", "corr": 0.305}, {"a": "ABBV", "b": "AMGN", "corr": 0.484}, {"a": "ABBV", "b": "JNJ", "corr": 0.472}, {"a": "ADBE", "b": "CRM", "corr": 0.753}, {"a": "ADBE", "b": "NOW", "corr": 0.704}, {"a": "ALGN", "b": "AXP", "corr": 0.392}, {"a": "ALGN", "b": "LOW", "corr": 0.374}, {"a": "ALGN", "b": "UNH", "corr": 0.227}, {"a": "AMD", "b": "INTC", "corr": 0.495}, {"a": "AMD", "b": "MU", "corr": 0.525}, {"a": "AMD", "b": "QCOM", "corr": 0.446}, {"a": "AMD", "b": "TSM", "corr": 0.591}, {"a": "AMGN", "b": "GILD", "corr": 0.463}, {"a": "AMGN", "b": "LLY", "corr": 0.485}, {"a": "AMGN", "b": "MRK", "corr": 0.514}, {"a": "AMGN", "b": "PFE", "corr": 0.538}, {"a": "AMT", "b": "DUK", "corr": 0.328}, {"a": "AMT", "b": "T", "corr": 0.317}, {"a": "AMZN", "b": "GOOGL", "corr": 0.45}, {"a": "AMZN", "b": "META", "corr": 0.467}, {"a": "AMZN", "b": "NFLX", "corr": 0.253}, {"a": "AVGO", "b": "NVDA", "corr": 0.52}, {"a": "AVGO", "b": "ORCL", "corr": 0.474}, {"a": "AVGO", "b": "TSM", "corr": 0.595}, {"a": "AXP", "b": "BAC", "corr": 0.641}, {"a": "AXP", "b": "BLK", "corr": 0.543}, {"a": "AXP", "b": "DIS", "corr": 0.383}, {"a": "AXP", "b": "MA", "corr": 0.485}, {"a": "AXP", "b": "V", "corr": 0.464}, {"a": "AXSM", "b": "GILD", "corr": 0.236}, {"a": "AXSM", "b": "LLY", "corr": 0.223}, {"a": "BA", "b": "CRSP", "corr": 0.352}, {"a": "BA", "b": "GE", "corr": 0.434}, {"a": "BA", "b": "HON", "corr": 0.355}, {"a": "BAC", "b": "GS", "corr": 0.565}, {"a": "BAC", "b": "JPM", "corr": 0.747}, {"a": "BAC", "b": "MS", "corr": 0.69}, {"a": "BAC", "b": "WFC", "corr": 0.802}, {"a": "BLK", "b": "CRSP", "corr": 0.299}, {"a": "BLK", "b": "GS", "corr": 0.569}, {"a": "BLK", "b": "MS", "corr": 0.621}, {"a": "CAT", "b": "DE", "corr": 0.465}, {"a": "CAT", "b": "GE", "corr": 0.422}, {"a": "CAT", "b": "MU", "corr": 0.508}, {"a": "CAT", "b": "TSM", "corr": 0.556}, {"a": "COP", "b": "CVX", "corr": 0.811}, {"a": "COP", "b": "SLB", "corr": 0.465}, {"a": "COP", "b": "XOM", "corr": 0.805}, {"a": "COST", "b": "MCD", "corr": 0.342}, {"a": "COST", "b": "WMT", "corr": 0.607}, {"a": "CRM", "b": "MSFT", "corr": 0.565}, {"a": "CRM", "b": "NOW", "corr": 0.787}, {"a": "CVX", "b": "XOM", "corr": 0.834}, {"a": "DE", "b": "HON", "corr": 0.317}, {"a": "DIS", "b": "LOW", "corr": 0.398}, {"a": "DUK", "b": "JNJ", "corr": 0.441}, {"a": "DUK", "b": "LIN", "corr": 0.297}, {"a": "DUK", "b": "NEE", "corr": 0.493}, {"a": "DUK", "b": "T", "corr": 0.34}, {"a": "DUK", "b": "VZ", "corr": 0.321}, {"a": "GE", "b": "HON", "corr": 0.405}, {"a": "GILD", "b": "JNJ", "corr": 0.374}, {"a": "GOOGL", "b": "TSLA", "corr": 0.427}, {"a": "GS", "b": "JPM", "corr": 0.647}, {"a": "GS", "b": "MS", "corr": 0.838}, {"a": "HD", "b": "HON", "corr": 0.373}, {"a": "HD", "b": "LOW", "corr": 0.88}, {"a": "HD", "b": "MCD", "corr": 0.396}, {"a": "HD", "b": "NKE", "corr": 0.386}, {"a": "HD", "b": "PLD", "corr": 0.392}, {"a": "HD", "b": "TGT", "corr": 0.379}, {"a": "HD", "b": "UPS", "corr": 0.403}, {"a": "HON", "b": "LIN", "corr": 0.287}, {"a": "INTC", "b": "MU", "corr": 0.511}, {"a": "INTC", "b": "QCOM", "corr": 0.429}, {"a": "JNJ", "b": "MRK", "corr": 0.508}, {"a": "JNJ", "b": "NEE", "corr": 0.321}, {"a": "JPM", "b": "MS", "corr": 0.648}, {"a": "JPM", "b": "WFC", "corr": 0.667}, {"a": "LLY", "b": "MRK", "corr": 0.396}, {"a": "LOW", "b": "MCD", "corr": 0.388}, {"a": "LOW", "b": "NKE", "corr": 0.384}, {"a": "LOW", "b": "PLD", "corr": 0.404}, {"a": "LOW", "b": "UPS", "corr": 0.37}, {"a": "MA", "b": "V", "corr": 0.851}, {"a": "MCD", "b": "WMT", "corr": 0.354}, {"a": "META", "b": "TSLA", "corr": 0.339}, {"a": "MRK", "b": "PFE", "corr": 0.536}, {"a": "MS", "b": "WFC", "corr": 0.556}, {"a": "MSFT", "b": "NFLX", "corr": 0.231}, {"a": "MSFT", "b": "NOW", "corr": 0.628}, {"a": "MU", "b": "TSM", "corr": 0.593}, {"a": "NVDA", "b": "ORCL", "corr": 0.414}, {"a": "NVDA", "b": "TSM", "corr": 0.63}, {"a": "SBUX", "b": "TGT", "corr": 0.367}, {"a": "SBUX", "b": "V", "corr": 0.38}, {"a": "SLB", "b": "XOM", "corr": 0.44}, {"a": "T", "b": "VZ", "corr": 0.732}, {"a": "TSLA", "b": "TSM", "corr": 0.462}, {"a": "UNH", "b": "V", "corr": 0.228}], "clusters": [{"id": 0, "members": ["MU", "AMD", "INTC", "QCOM", "TSM", "CAT", "NVDA", "DE", "AVGO", "ORCL"], "avg_ret_3m": 24.7, "avg_ret_1m": -6.9, "avg_inner_corr": 0.35}, {"id": 2, "members": ["AXSM", "LLY", "ABBV", "MRK", "JNJ", "AMGN", "GILD", "PFE"], "avg_ret_3m": 14.9, "avg_ret_1m": 6.0, "avg_inner_corr": 0.35}, {"id": 5, "members": ["BAC", "GS", "MS", "JPM", "WFC", "BLK"], "avg_ret_3m": 11.2, "avg_ret_1m": 2.8, "avg_inner_corr": 0.62}, {"id": 4, "members": ["UNH", "V", "AXP", "MA", "SBUX", "ALGN"], "avg_ret_3m": 6.6, "avg_ret_1m": 2.6, "avg_inner_corr": 0.33}, {"id": 9, "members": ["GE", "HON", "BA", "CRSP"], "avg_ret_3m": 2.4, "avg_ret_1m": -4.4, "avg_inner_corr": 0.34}, {"id": 8, "members": ["XOM", "CVX", "COP", "SLB"], "avg_ret_3m": -1.6, "avg_ret_1m": 10.4, "avg_inner_corr": 0.63}, {"id": 6, "members": ["DUK", "LIN", "NEE", "AMT"], "avg_ret_3m": -2.8, "avg_ret_1m": -0.7, "avg_inner_corr": 0.29}, {"id": 1, "members": ["UPS", "TGT", "PLD", "HD", "NKE", "DIS", "MCD", "LOW"], "avg_ret_3m": -4.6, "avg_ret_1m": -2.7, "avg_inner_corr": 0.33}, {"id": 7, "members": ["NOW", "MSFT", "CRM", "ADBE"], "avg_ret_3m": -5.0, "avg_ret_1m": 3.3, "avg_inner_corr": 0.65}, {"id": 3, "members": ["AAPL", "GOOGL", "META", "AMZN", "TSLA", "NFLX"], "avg_ret_3m": -7.5, "avg_ret_1m": -1.5, "avg_inner_corr": 0.27}, {"id": 10, "members": ["VZ", "T"], "avg_ret_3m": -9.1, "avg_ret_1m": 0.8, "avg_inner_corr": 0.73}, {"id": 11, "members": ["COST", "WMT"], "avg_ret_3m": -13.2, "avg_ret_1m": -6.3, "avg_inner_corr": 0.61}]};
+const CC = ["#4a7ba6","#b28f2c","#7a8a5c","#c0564f","#8a6fb0","#3e8e7e",
+            "#c07a3f","#5b6b9e","#98596b","#6b8f3d","#7d7468","#4f8fb5"];
+const cv = document.getElementById("netcanvas");
+const ctx = cv.getContext("2d");
+const nd = document.getElementById("net-detail");
+const H = 540, DPR = window.devicePixelRatio || 1;
+let W;
+const nodes = NET.nodes;
+const idx = {}; nodes.forEach((n) => (idx[n.sym] = n));
+nodes.forEach((n, i) => {
+  const a = (n.cluster / 12) * Math.PI * 2 + (i % 7) * 0.13;
+  const r = 130 + (i % 5) * 24;
+  n.x = Math.cos(a) * r; n.y = Math.sin(a) * r * 0.72;
+  n.vx = 0; n.vy = 0;
+});
+const springs = NET.edges.map((e) => ({ a: idx[e.a], b: idx[e.b], w: e.corr }));
+function resize() {
+  W = cv.parentElement.clientWidth - 20;
+  cv.width = W * DPR; cv.height = H * DPR;
+  cv.style.height = H + "px";
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+function stepSim() {
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i];
+    for (let j = i + 1; j < nodes.length; j++) {
+      const b = nodes[j];
+      let dx = a.x - b.x, dy = a.y - b.y;
+      const d2 = dx * dx + dy * dy + 0.01, d = Math.sqrt(d2);
+      const f = 1400 / d2;
+      dx /= d; dy /= d;
+      a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f; b.vy -= dy * f;
+    }
+  }
+  springs.forEach((s) => {
+    let dx = s.b.x - s.a.x, dy = s.b.y - s.a.y;
+    const d = Math.sqrt(dx * dx + dy * dy) + 0.01;
+    const f = (d - 55) * 0.03 * Math.max(s.w, 0.3);
+    dx /= d; dy /= d;
+    s.a.vx += dx * f; s.a.vy += dy * f; s.b.vx -= dx * f; s.b.vy -= dy * f;
+  });
+  nodes.forEach((n) => {
+    n.vx -= n.x * 0.006; n.vy -= n.y * 0.009;
+    n.x += n.vx * 0.5; n.y += n.vy * 0.5;
+    n.vx *= 0.55; n.vy *= 0.55;
+    const mx = W / 2 - 30, my = H / 2 - 26;
+    n.x = Math.max(-mx, Math.min(mx, n.x));
+    n.y = Math.max(-my, Math.min(my, n.y));
+  });
+}
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2;
+  ctx.lineWidth = 1;
+  springs.forEach((s) => {
+    ctx.strokeStyle = `rgba(107,102,94,${0.07 + Math.max(0, s.w - 0.5) * 0.55})`;
+    ctx.beginPath();
+    ctx.moveTo(cx + s.a.x, cy + s.a.y);
+    ctx.lineTo(cx + s.b.x, cy + s.b.y);
+    ctx.stroke();
+  });
+  ctx.font = "9.5px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  nodes.forEach((n) => {
+    const x = cx + n.x, y = cy + n.y;
+    ctx.fillStyle = CC[n.cluster % 12];
+    ctx.beginPath(); ctx.arc(x, y, n.held ? 8 : 5.5, 0, 7); ctx.fill();
+    if (n.held) { ctx.strokeStyle = "#1c1a17"; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 1; }
+    ctx.fillStyle = "#6b665e";
+    ctx.fillText(n.sym, x, y - 10);
+  });
+}
+resize();
+let ticks = 0;
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+(function loop() {
+  for (let k = 0; k < 5; k++) stepSim();
+  draw();
+  if (++ticks < (reduced ? 1 : 70)) requestAnimationFrame(loop);
+  else if (reduced && ticks === 1) { for (let k = 0; k < 350; k++) stepSim(); draw(); }
+})();
+window.addEventListener("resize", () => { resize(); draw(); });
+cv.addEventListener("click", (ev) => {
+  const rect = cv.getBoundingClientRect();
+  const mx = ev.clientX - rect.left - W / 2, my = ev.clientY - rect.top - H / 2;
+  let best = null, bd = 500;
+  nodes.forEach((n) => {
+    const d = (n.x - mx) ** 2 + (n.y - my) ** 2;
+    if (d < bd) { bd = d; best = n; }
+  });
+  if (!best) return;
+  const cl = NET.clusters.find((c) => c.id === best.cluster);
+  const members = cl ? cl.members.filter((s) => s !== best.sym).slice(0, 8).join(", ") : "";
+  const partners = best.partners.map((p) => `${p.sym} ${p.corr}`).join(" · ");
+  nd.innerHTML = `<b>${best.sym}</b>${best.held ? ' <span class="tag good">you hold this</span>' : ""}
+    <span class="cdot" style="background:${CC[best.cluster % 12]};margin-left:10px"></span>
+    <span style="color:var(--soft);font-size:13px">trades with ${members || "no tight cluster"}</span>
+    <div class="stats">
+      <div><b>${best.ret_3m > 0 ? "+" : ""}${best.ret_3m}%</b>3 months</div>
+      <div><b>${best.ret_1m > 0 ? "+" : ""}${best.ret_1m}%</b>1 month</div>
+      <div><b>${best.vol}%</b>volatility (1y)</div>
+      <div><b>${partners}</b>strongest correlations</div>
+    </div>`;
 });
 </script>
 
