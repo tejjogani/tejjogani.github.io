@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trading Research — Backtest Replay</title>
+<style>
+:root {
+  --bg:#faf8f4; --panel:#ffffff; --ink:#1c1a17; --soft:#6b665e; --line:#e7e2d8;
+  --accent:#7a8a5c; --accent-soft:#eef1e6; --gold:#b28f2c; --red:#c0564f;
+  --blue:#4a7ba6; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --c0:#4a7ba6; --c1:#b28f2c; --c2:#7a8a5c; --c3:#c0564f; --c4:#8a6fb0;
+  --c5:#3e8e7e; --c6:#c07a3f; --c7:#5b6b9e; --c8:#98596b; --c9:#6b8f3d;
+  --c10:#7d7468; --c11:#4f8fb5;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; }
+body { display:grid; grid-template-columns:264px 1fr; min-height:100vh; }
+aside { border-right:1px solid var(--line); padding:32px 24px; position:sticky; top:0;
+  height:100vh; overflow-y:auto; }
+.brand { font-family:var(--serif); font-size:22px; margin:0 0 2px; }
+.brand a { color:var(--ink); text-decoration:none; }
+.tagline { font-size:12.5px; color:var(--soft); margin-bottom:26px; }
+nav .grp { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft);
+  margin:18px 0 6px; font-weight:600; }
+nav a { display:block; padding:5px 10px; margin:1px 0; border-radius:8px; color:var(--ink);
+  text-decoration:none; font-size:14px; }
+nav a:hover { background:var(--accent-soft); }
+nav a.active { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+nav a.sub { padding-left:22px; font-size:13px; color:var(--soft); }
+.backlink { margin-top:28px; font-size:13px; }
+.backlink a { color:var(--soft); }
+main { padding:44px 48px 90px; max-width:840px; }
+.eyebrow { font-size:11.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+  font-weight:650; }
+h1 { font-family:var(--serif); font-weight:400; font-size:34px; margin:6px 0 4px;
+  letter-spacing:-.01em; text-wrap:balance; }
+.sub { color:var(--soft); margin-bottom:26px; }
+h2 { font-family:var(--serif); font-weight:400; font-size:24px; margin:46px 0 8px;
+  padding-top:8px; }
+h3 { font-size:16px; margin:26px 0 6px; }
+p, li { line-height:1.65; font-size:15px; }
+p.lede { color:var(--soft); max-width:66ch; margin-top:0; }
+p, ul { max-width:70ch; }
+.board { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 8px; }
+.pill { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:10px 16px; min-width:148px; }
+.pill .pl { font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--soft); }
+.pill .pv { font-size:16px; font-weight:650; font-variant-numeric:tabular-nums; margin-top:2px; }
+.good .pv { color:var(--accent); } .warn .pv { color:var(--gold); } .bad .pv { color:var(--red); }
+.info .pv { color:var(--blue); }
+.verdict { border-left:3px solid var(--accent); background:var(--panel); padding:14px 18px;
+  border-radius:0 12px 12px 0; margin:16px 0; max-width:72ch; border-top:1px solid var(--line);
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+table { border-collapse:collapse; width:100%; margin:14px 0; font-variant-numeric:tabular-nums;
+  background:var(--panel); border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+th { text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--soft); padding:10px 14px; border-bottom:1px solid var(--line);
+  background:var(--bg); font-weight:600; }
+td { padding:10px 14px; border-bottom:1px solid var(--line); font-size:14px; }
+tr:last-child td { border-bottom:none; }
+.tblwrap { overflow-x:auto; }
+.pos { color:var(--accent); } .neg { color:var(--red); }
+.mono { font-family:var(--mono); font-size:13px; }
+.tag { font-size:11.5px; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.tag.good { background:var(--accent-soft); color:var(--accent); }
+.tag.warn { background:#f5edda; color:var(--gold); }
+.tag.bad { background:#f7e5e3; color:var(--red); }
+.tag.grey { background:#efece6; color:var(--soft); }
+figure { margin:20px 0; }
+figure img { max-width:100%; border:1px solid var(--line); border-radius:12px; background:#fff; }
+figcaption { font-size:13px; color:var(--soft); margin-top:7px; max-width:70ch; }
+.learn { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+  border-radius:0 12px 12px 0; padding:16px 20px; margin:20px 0; max-width:74ch; }
+.learn .lt { font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--gold);
+  font-weight:650; margin-bottom:6px; }
+.learn p { font-size:14px; margin:6px 0; }
+.unlockbox { background:var(--panel); border:1px dashed var(--line); border-radius:12px;
+  padding:26px; text-align:center; margin:16px 0; }
+.unlockbox input { padding:9px 12px; border:1px solid var(--line); border-radius:8px;
+  font-size:14px; margin-right:8px; background:var(--bg); }
+.unlockbox button { padding:9px 18px; border:none; border-radius:8px; background:var(--accent);
+  color:#fff; font-size:14px; cursor:pointer; }
+.unlockbox .err { color:var(--red); font-size:13px; margin-top:10px; display:none; }
+#graphwrap, #netwrap { background:var(--panel); border:1px solid var(--line);
+  border-radius:12px; padding:10px; margin:16px 0; }
+#graphwrap svg { width:100%; height:auto; display:block; }
+#netwrap canvas { width:100%; display:block; cursor:pointer; }
+.cdot { display:inline-block; width:10px; height:10px; border-radius:50%;
+  margin-right:8px; vertical-align:baseline; }
+#edge-detail, #net-detail { background:var(--bg); border:1px solid var(--line);
+  border-radius:10px; padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
+#edge-detail .stats, #net-detail .stats { display:flex; flex-wrap:wrap; gap:16px;
+  margin-top:8px; font-variant-numeric:tabular-nums; }
+#edge-detail .stats div, #net-detail .stats div { font-size:13px; color:var(--soft); }
+#edge-detail .stats b, #net-detail .stats b { display:block; color:var(--ink); font-size:15px; }
+.next { list-style:none; padding:0; }
+.next li { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:13px 17px; margin:9px 0; max-width:74ch; }
+.next .k { font-weight:650; }
+dl dt { font-weight:650; margin-top:16px; }
+dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
+.footnote { margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
+  color:var(--soft); font-size:13px; max-width:76ch; }
+@media (max-width: 900px) {
+  body { grid-template-columns:1fr; }
+  aside { position:static; height:auto; border-right:none; border-bottom:1px solid var(--line); }
+  main { padding:28px 20px 70px; }
+}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand"><a href="index.html">Trading Research</a></div>
+  <div class="tagline">regime-aware, walk-forward, honest</div>
+  <nav>
+    <div class="grp">Dashboard</div>
+    <a class="" href="index.html">Today's dashboard</a>
+    <a class="active" href="replay.html">Backtest replay ▶</a>
+    <a class="" href="index.html#portfolio">Your portfolio 🔒</a>
+    <a class="" href="index.html#next">Next steps</a>
+    <div class="grp">Learn</div>
+    <a class="" href="learn.html">The playbook</a>
+    <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
+    <a class="sub" href="learn.html#lab">2 · The strategy lab</a>
+    <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
+    <a class="sub" href="learn.html#comovement">4 · Companies that move together</a>
+    <a class="sub" href="learn.html#positioning">5 · Longs, shorts &amp; flat</a>
+    <a class="sub" href="learn.html#newera">6 · Sentiment &amp; the new era</a>
+    <div class="grp">Reference</div>
+    <a class="" href="glossary.html">Glossary</a>
+  </nav>
+  <div class="backlink"><a href="../recipes/">← family dashboard</a></div>
+</aside>
+
+<main>
+
+<div class="eyebrow">Backtest replay · 2008-03 → 2026-06</div>
+<h1>Watch the factors fire — or fail to</h1>
+<div class="sub">Every month since 2008, replayed: the three signals, what the regime-filtered strategy did about them, and a running honest tally of storms dodged vs false alarms. Press play.</div>
+
+<div id="netwrap" style="padding:16px">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+    <button id="play" style="padding:9px 22px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:15px;cursor:pointer">▶ Play</button>
+    <select id="speed" style="padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg)">
+      <option value="6">6 months/sec</option>
+      <option value="12" selected>12 months/sec</option>
+      <option value="24">24 months/sec</option>
+    </select>
+    <input id="scrub" type="range" min="0" value="0" style="flex:1;min-width:160px">
+    <span id="mon" class="mono" style="font-size:15px;font-weight:650;min-width:74px"></span>
+  </div>
+  <div class="board" style="margin:10px 0">
+    <div class="pill" id="p-trend"><div class="pl">Trend</div><div class="pv">—</div></div>
+    <div class="pill" id="p-credit"><div class="pl">Credit</div><div class="pv">—</div></div>
+    <div class="pill" id="p-regime"><div class="pl">Vol regime</div><div class="pv">—</div></div>
+    <div class="pill info" id="p-w"><div class="pl">Strategy exposure</div><div class="pv">—</div></div>
+  </div>
+  <canvas id="rc" height="400"></canvas>
+  <div class="board" style="margin-top:10px">
+    <div class="pill good" id="t-saved"><div class="pl">Storms dodged</div><div class="pv">0</div></div>
+    <div class="pill bad" id="t-false"><div class="pl">False alarms</div><div class="pv">0</div></div>
+    <div class="pill info" id="t-net"><div class="pl">Net de-risking P&amp;L</div><div class="pv">0%</div></div>
+    <div class="pill info" id="t-dd"><div class="pl">Drawdown now (strat vs B&amp;H)</div><div class="pv">—</div></div>
+  </div>
+  <div id="net-detail" style="max-height:180px;overflow-y:auto"><b>Event log</b> — signal flips appear here as they happen.</div>
+</div>
+
+<div class="learn"><div class="lt">How to watch this</div>
+<p>Blue is buy &amp; hold; olive is the trend+regime strategy; the strip under the chart shows the three signals each month (top row trend, middle credit, bottom vol regime — red means warning). Watch 2008: the signals stack, the strategy steps aside, and the blue line falls twice as far as the olive one. Then watch 2010–2019: repeated false alarms where de-risking cost a little upside each time. That's the honest shape of the trade — insurance premiums are paid in good years, the payout comes in the terrible ones. The tally cards keep the running score so you can judge whether the insurance was worth it at any point in history.</p></div>
+
+</main>
+
+<script>
+const TL = [{"d": "2008-03", "spy": 94.46, "fwd": 4.77, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-04", "spy": 98.97, "fwd": 1.51, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-05", "spy": 100.46, "fwd": -8.36, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-06", "spy": 92.07, "fwd": -0.9, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-07", "spy": 91.24, "fwd": 1.55, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-08", "spy": 92.65, "fwd": -9.42, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-09", "spy": 83.92, "fwd": -16.52, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-10", "spy": 70.06, "fwd": -6.96, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-11", "spy": 65.18, "fwd": 0.98, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2008-12", "spy": 65.82, "fwd": -8.21, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2009-01", "spy": 60.42, "fwd": -10.74, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2009-02", "spy": 53.93, "fwd": 8.33, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2009-03", "spy": 58.42, "fwd": 9.93, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2009-04", "spy": 64.22, "fwd": 5.85, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2009-05", "spy": 67.98, "fwd": -0.07, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2009-06", "spy": 67.93, "fwd": 7.46, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2009-07", "spy": 73.0, "fwd": 3.69, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2009-08", "spy": 75.7, "fwd": 3.55, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2009-09", "spy": 78.38, "fwd": -1.92, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2009-10", "spy": 76.87, "fwd": 6.16, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2009-11", "spy": 81.61, "fwd": 1.91, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2009-12", "spy": 83.17, "fwd": -3.63, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2010-01", "spy": 80.15, "fwd": 3.12, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2010-02", "spy": 82.65, "fwd": 6.09, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2010-03", "spy": 87.68, "fwd": 1.55, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2010-04", "spy": 89.03, "fwd": -7.95, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2010-05", "spy": 81.96, "fwd": -5.17, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2010-06", "spy": 77.72, "fwd": 6.83, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2010-07", "spy": 83.03, "fwd": -4.5, "trend": false, "credit": false, "regime": 1, "w": 0.5, "wc": 0.5}, {"d": "2010-08", "spy": 79.29, "fwd": 8.96, "trend": false, "credit": true, "regime": 1, "w": 0.5, "wc": 0.0}, {"d": "2010-09", "spy": 86.39, "fwd": 3.82, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2010-10", "spy": 89.69, "fwd": 0.0, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2010-11", "spy": 89.69, "fwd": 6.69, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2010-12", "spy": 95.69, "fwd": 2.33, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2011-01", "spy": 97.92, "fwd": 3.47, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2011-02", "spy": 101.32, "fwd": 0.01, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2011-03", "spy": 101.33, "fwd": 2.9, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2011-04", "spy": 104.27, "fwd": -1.12, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2011-05", "spy": 103.1, "fwd": -1.69, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2011-06", "spy": 101.36, "fwd": -2.0, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2011-07", "spy": 99.33, "fwd": -5.5, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2011-08", "spy": 93.87, "fwd": -6.94, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2011-09", "spy": 87.35, "fwd": 10.91, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2011-10", "spy": 96.89, "fwd": -0.41, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2011-11", "spy": 96.49, "fwd": 1.04, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2011-12", "spy": 97.5, "fwd": 4.64, "trend": true, "credit": true, "regime": 2, "w": 0.5, "wc": 0.5}, {"d": "2012-01", "spy": 102.02, "fwd": 4.34, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2012-02", "spy": 106.45, "fwd": 3.22, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2012-03", "spy": 109.88, "fwd": -0.67, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2012-04", "spy": 109.14, "fwd": -6.01, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2012-05", "spy": 102.59, "fwd": 4.06, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2012-06", "spy": 106.75, "fwd": 1.18, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2012-07", "spy": 108.02, "fwd": 2.51, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2012-08", "spy": 110.72, "fwd": 2.54, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2012-09", "spy": 113.53, "fwd": -1.82, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2012-10", "spy": 111.46, "fwd": 0.57, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2012-11", "spy": 112.09, "fwd": 0.89, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2012-12", "spy": 113.09, "fwd": 5.12, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2013-01", "spy": 118.88, "fwd": 1.28, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2013-02", "spy": 120.4, "fwd": 3.8, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2013-03", "spy": 124.97, "fwd": 1.92, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2013-04", "spy": 127.37, "fwd": 2.36, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2013-05", "spy": 130.38, "fwd": -1.33, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2013-06", "spy": 128.64, "fwd": 5.17, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2013-07", "spy": 135.29, "fwd": -3.0, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2013-08", "spy": 131.23, "fwd": 3.16, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2013-09", "spy": 135.38, "fwd": 4.63, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2013-10", "spy": 141.65, "fwd": 2.96, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2013-11", "spy": 145.85, "fwd": 2.59, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2013-12", "spy": 149.63, "fwd": -3.52, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2014-01", "spy": 144.36, "fwd": 4.55, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2014-02", "spy": 150.93, "fwd": 0.83, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2014-03", "spy": 152.18, "fwd": 0.7, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2014-04", "spy": 153.24, "fwd": 2.32, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2014-05", "spy": 156.79, "fwd": 2.06, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2014-06", "spy": 160.03, "fwd": -1.34, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2014-07", "spy": 157.88, "fwd": 3.95, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2014-08", "spy": 164.11, "fwd": -1.38, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2014-09", "spy": 161.85, "fwd": 2.36, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2014-10", "spy": 165.66, "fwd": 2.75, "trend": true, "credit": true, "regime": 2, "w": 0.5, "wc": 0.5}, {"d": "2014-11", "spy": 170.21, "fwd": -0.25, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2014-12", "spy": 169.78, "fwd": -2.96, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2015-01", "spy": 164.75, "fwd": 5.62, "trend": true, "credit": true, "regime": 2, "w": 0.5, "wc": 0.5}, {"d": "2015-02", "spy": 174.01, "fwd": -1.57, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2015-03", "spy": 171.28, "fwd": 0.98, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2015-04", "spy": 172.96, "fwd": 1.29, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2015-05", "spy": 175.18, "fwd": -2.03, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2015-06", "spy": 171.62, "fwd": 2.26, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2015-07", "spy": 175.5, "fwd": -6.1, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2015-08", "spy": 164.8, "fwd": -2.55, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2015-09", "spy": 160.6, "fwd": 8.51, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2015-10", "spy": 174.26, "fwd": 0.37, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2015-11", "spy": 174.9, "fwd": -1.73, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2015-12", "spy": 171.87, "fwd": -4.98, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2016-01", "spy": 163.32, "fwd": -0.08, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2016-02", "spy": 163.18, "fwd": 6.73, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2016-03", "spy": 174.16, "fwd": 0.39, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2016-04", "spy": 174.85, "fwd": 1.7, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2016-05", "spy": 177.82, "fwd": 0.35, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2016-06", "spy": 178.44, "fwd": 3.65, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2016-07", "spy": 184.95, "fwd": 0.12, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2016-08", "spy": 185.17, "fwd": 0.01, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2016-09", "spy": 185.18, "fwd": -1.73, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2016-10", "spy": 181.97, "fwd": 3.68, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2016-11", "spy": 188.67, "fwd": 2.03, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2016-12", "spy": 192.5, "fwd": 1.79, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-01", "spy": 195.94, "fwd": 3.93, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-02", "spy": 203.64, "fwd": 0.12, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-03", "spy": 203.89, "fwd": 0.99, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-04", "spy": 205.92, "fwd": 1.41, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-05", "spy": 208.82, "fwd": 0.64, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-06", "spy": 210.15, "fwd": 2.06, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-07", "spy": 214.47, "fwd": 0.29, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-08", "spy": 215.1, "fwd": 2.01, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-09", "spy": 219.43, "fwd": 2.36, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-10", "spy": 224.61, "fwd": 3.06, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-11", "spy": 231.47, "fwd": 1.21, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2017-12", "spy": 234.28, "fwd": 5.64, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2018-01", "spy": 247.48, "fwd": -3.64, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2018-02", "spy": 238.48, "fwd": -2.74, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2018-03", "spy": 231.95, "fwd": 0.52, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2018-04", "spy": 233.14, "fwd": 2.43, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2018-05", "spy": 238.81, "fwd": 0.58, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2018-06", "spy": 240.19, "fwd": 3.7, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2018-07", "spy": 249.08, "fwd": 3.19, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2018-08", "spy": 257.03, "fwd": 0.59, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2018-09", "spy": 258.56, "fwd": -6.91, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2018-10", "spy": 240.69, "fwd": 1.85, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2018-11", "spy": 245.16, "fwd": -8.8, "trend": true, "credit": true, "regime": 2, "w": 0.5, "wc": 0.5}, {"d": "2018-12", "spy": 223.57, "fwd": 8.01, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2019-01", "spy": 241.47, "fwd": 3.24, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2019-02", "spy": 249.3, "fwd": 1.81, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2019-03", "spy": 253.81, "fwd": 4.09, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2019-04", "spy": 264.18, "fwd": -6.38, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2019-05", "spy": 247.34, "fwd": 6.96, "trend": false, "credit": true, "regime": 0, "w": 0.5, "wc": 0.0}, {"d": "2019-06", "spy": 264.55, "fwd": 1.51, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2019-07", "spy": 268.55, "fwd": -1.67, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2019-08", "spy": 264.05, "fwd": 1.95, "trend": true, "credit": true, "regime": 2, "w": 0.5, "wc": 0.5}, {"d": "2019-09", "spy": 269.19, "fwd": 2.21, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2019-10", "spy": 275.14, "fwd": 3.62, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2019-11", "spy": 285.1, "fwd": 2.91, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2019-12", "spy": 293.38, "fwd": -0.04, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2020-01", "spy": 293.26, "fwd": -7.92, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2020-02", "spy": 270.05, "fwd": -12.49, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2020-03", "spy": 236.33, "fwd": 12.7, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2020-04", "spy": 266.34, "fwd": 4.76, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2020-05", "spy": 279.02, "fwd": 1.77, "trend": true, "credit": true, "regime": 2, "w": 0.5, "wc": 0.5}, {"d": "2020-06", "spy": 283.97, "fwd": 5.89, "trend": true, "credit": true, "regime": 2, "w": 0.5, "wc": 0.5}, {"d": "2020-07", "spy": 300.7, "fwd": 6.98, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2020-08", "spy": 321.68, "fwd": -3.74, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2020-09", "spy": 309.64, "fwd": -2.49, "trend": true, "credit": true, "regime": 2, "w": 0.5, "wc": 0.5}, {"d": "2020-10", "spy": 301.92, "fwd": 10.88, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2020-11", "spy": 334.76, "fwd": 3.7, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2020-12", "spy": 347.16, "fwd": -1.02, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2021-01", "spy": 343.63, "fwd": 2.78, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2021-02", "spy": 353.18, "fwd": 4.54, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2021-03", "spy": 369.21, "fwd": 5.29, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2021-04", "spy": 388.75, "fwd": 0.66, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2021-05", "spy": 391.3, "fwd": 2.24, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2021-06", "spy": 400.08, "fwd": 2.44, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2021-07", "spy": 409.84, "fwd": 2.98, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2021-08", "spy": 422.04, "fwd": -4.66, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2021-09", "spy": 402.37, "fwd": 7.02, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2021-10", "spy": 430.6, "fwd": -0.8, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2021-11", "spy": 427.14, "fwd": 4.62, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2021-12", "spy": 446.9, "fwd": -5.27, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2022-01", "spy": 423.33, "fwd": -2.95, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2022-02", "spy": 410.83, "fwd": 3.76, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2022-03", "spy": 426.28, "fwd": -8.78, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2022-04", "spy": 388.86, "fwd": 0.23, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2022-05", "spy": 389.74, "fwd": -8.25, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2022-06", "spy": 357.6, "fwd": 9.21, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2022-07", "spy": 390.53, "fwd": -4.08, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2022-08", "spy": 374.6, "fwd": -9.24, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2022-09", "spy": 339.97, "fwd": 8.13, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2022-10", "spy": 367.6, "fwd": 5.56, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2022-11", "spy": 388.04, "fwd": -5.76, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2022-12", "spy": 365.67, "fwd": 6.29, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2023-01", "spy": 388.67, "fwd": -2.51, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2023-02", "spy": 378.9, "fwd": 3.71, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2023-03", "spy": 392.95, "fwd": 1.6, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2023-04", "spy": 399.22, "fwd": 0.46, "trend": true, "credit": true, "regime": 0, "w": 1.0, "wc": 0.5}, {"d": "2023-05", "spy": 401.07, "fwd": 6.48, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2023-06", "spy": 427.06, "fwd": 3.27, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2023-07", "spy": 441.03, "fwd": -1.63, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2023-08", "spy": 433.87, "fwd": -4.74, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2023-09", "spy": 413.29, "fwd": -2.17, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2023-10", "spy": 404.31, "fwd": 9.13, "trend": false, "credit": false, "regime": 1, "w": 0.5, "wc": 0.5}, {"d": "2023-11", "spy": 441.25, "fwd": 4.57, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2023-12", "spy": 461.39, "fwd": 1.59, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2024-01", "spy": 468.74, "fwd": 5.22, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2024-02", "spy": 493.2, "fwd": 3.27, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2024-03", "spy": 509.33, "fwd": -4.03, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2024-04", "spy": 488.79, "fwd": 5.06, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2024-05", "spy": 513.52, "fwd": 3.53, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2024-06", "spy": 531.63, "fwd": 1.21, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2024-07", "spy": 538.07, "fwd": 2.34, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2024-08", "spy": 550.64, "fwd": 2.1, "trend": true, "credit": false, "regime": 2, "w": 0.5, "wc": 1.0}, {"d": "2024-09", "spy": 562.21, "fwd": -0.89, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2024-10", "spy": 557.19, "fwd": 5.96, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2024-11", "spy": 590.42, "fwd": -2.41, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2024-12", "spy": 576.22, "fwd": 2.69, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2025-01", "spy": 591.69, "fwd": -1.27, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2025-02", "spy": 584.18, "fwd": -5.57, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2025-03", "spy": 551.63, "fwd": -0.87, "trend": false, "credit": false, "regime": 2, "w": 0.0, "wc": 0.5}, {"d": "2025-04", "spy": 546.85, "fwd": 6.28, "trend": false, "credit": true, "regime": 2, "w": 0.0, "wc": 0.0}, {"d": "2025-05", "spy": 581.21, "fwd": 5.14, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2025-06", "spy": 611.08, "fwd": 2.3, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2025-07", "spy": 625.15, "fwd": 2.05, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2025-08", "spy": 637.98, "fwd": 3.56, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2025-09", "spy": 660.71, "fwd": 2.38, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2025-10", "spy": 676.46, "fwd": 0.2, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2025-11", "spy": 677.77, "fwd": 0.08, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2025-12", "spy": 678.32, "fwd": 1.47, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2026-01", "spy": 688.31, "fwd": -0.86, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2026-02", "spy": 682.36, "fwd": -4.94, "trend": true, "credit": true, "regime": 1, "w": 1.0, "wc": 0.5}, {"d": "2026-03", "spy": 648.67, "fwd": 10.51, "trend": false, "credit": false, "regime": 1, "w": 0.5, "wc": 0.5}, {"d": "2026-04", "spy": 716.81, "fwd": 5.26, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}, {"d": "2026-05", "spy": 754.54, "fwd": -1.03, "trend": true, "credit": false, "regime": 0, "w": 1.0, "wc": 1.0}, {"d": "2026-06", "spy": 746.77, "fwd": -1.15, "trend": true, "credit": false, "regime": 1, "w": 1.0, "wc": 1.0}];
+const N = TL.length;
+// cumulative curves
+let bh = 1, st = 1;
+TL.forEach((t) => {
+  t.bh = bh = bh * (1 + t.fwd / 100);
+  t.st = st = st * (1 + t.w * t.fwd / 100);
+});
+let bhPk = 0, stPk = 0;
+TL.forEach((t) => {
+  bhPk = Math.max(bhPk, t.bh); stPk = Math.max(stPk, t.st);
+  t.bhDD = t.bh / bhPk - 1; t.stDD = t.st / stPk - 1;
+  t.bhPk = bhPk; t.stPk = stPk;
+});
+const yMax = Math.max(...TL.map((t) => Math.max(t.bh, t.st))) * 1.05;
+const yMin = 0.55;
+const cv = document.getElementById("rc"), ctx = cv.getContext("2d");
+const DPR = window.devicePixelRatio || 1;
+let W, CH = 310, LANE = 66;
+function resize() {
+  W = cv.parentElement.clientWidth - 32;
+  cv.width = W * DPR; cv.height = 400 * DPR;
+  cv.style.height = "400px";
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+const X = (i) => 46 + (i / (N - 1)) * (W - 56);
+const Y = (v) => 10 + (1 - (Math.log(v) - Math.log(yMin)) / (Math.log(yMax) - Math.log(yMin))) * (CH - 20);
+const REG = ["#6f8a4f", "#b28f2c", "#c0564f"];
+function draw(k) {
+  ctx.clearRect(0, 0, W, 400);
+  ctx.strokeStyle = "#e7e2d8"; ctx.fillStyle = "#6b665e";
+  ctx.font = "10.5px -apple-system,sans-serif"; ctx.textAlign = "right";
+  [1, 2, 4, 8].forEach((v) => {
+    ctx.beginPath(); ctx.moveTo(46, Y(v)); ctx.lineTo(W - 10, Y(v)); ctx.stroke();
+    ctx.fillText("$" + v, 40, Y(v) + 3);
+  });
+  ctx.textAlign = "center";
+  for (let i = 0; i < N; i += 24) if (TL[i]) ctx.fillText(TL[i].d.slice(0, 4), X(i), CH + LANE + 18);
+  // signal lanes up to playhead
+  const lw = (W - 56) / (N - 1);
+  for (let i = 0; i <= k; i++) {
+    const t = TL[i], x = X(i) - lw / 2;
+    ctx.fillStyle = t.trend ? "#dfe5d2" : "#c0564f";
+    ctx.fillRect(x, CH + 6, lw + 0.5, 16);
+    ctx.fillStyle = t.credit ? "#c0564f" : "#dfe5d2";
+    ctx.fillRect(x, CH + 26, lw + 0.5, 16);
+    ctx.fillStyle = REG[t.regime] + (t.regime === 0 ? "55" : "");
+    ctx.fillRect(x, CH + 46, lw + 0.5, 16);
+  }
+  ctx.fillStyle = "#6b665e"; ctx.textAlign = "left";
+  ctx.fillText("trend", W - 8 - 30, CH + 18);
+  ctx.fillText("credit", W - 8 - 30, CH + 38);
+  ctx.fillText("regime", W - 8 - 34, CH + 58);
+  // curves up to playhead
+  [["bh", "#4a7ba6"], ["st", "#7a8a5c"]].forEach(([key, col]) => {
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= k; i++) {
+      const y = Y(TL[i][key]);
+      i === 0 ? ctx.moveTo(X(i), y) : ctx.lineTo(X(i), y);
+    }
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(X(k), Y(TL[k][key]), 4, 0, 7);
+    ctx.fillStyle = col; ctx.fill();
+  });
+  ctx.lineWidth = 1;
+}
+// UI refs
+const pills = {
+  trend: document.getElementById("p-trend"), credit: document.getElementById("p-credit"),
+  regime: document.getElementById("p-regime"), w: document.getElementById("p-w"),
+};
+const tally = {
+  saved: document.getElementById("t-saved"), fal: document.getElementById("t-false"),
+  net: document.getElementById("t-net"), dd: document.getElementById("t-dd"),
+};
+const logEl = document.getElementById("net-detail");
+const scrub = document.getElementById("scrub");
+scrub.max = N - 1;
+const RNAMES = ["CALM", "MID", "STRESS"];
+function setPill(el, txt, tone) {
+  el.className = "pill " + tone;
+  el.querySelector(".pv").textContent = txt;
+}
+let savedN = 0, falN = 0, savedAmt = 0, falAmt = 0, logK = -1;
+function update(k, scrubbed) {
+  const t = TL[k];
+  document.getElementById("mon").textContent = t.d;
+  setPill(pills.trend, t.trend ? "ON" : "BROKEN", t.trend ? "good" : "bad");
+  setPill(pills.credit, t.credit ? "STRESS" : "EASY", t.credit ? "bad" : "good");
+  setPill(pills.regime, RNAMES[t.regime], ["good", "warn", "bad"][t.regime]);
+  setPill(pills.w, Math.round(t.w * 100) + "%", "info");
+  if (scrubbed) { // recompute tallies from scratch
+    savedN = falN = 0; savedAmt = falAmt = 0; logK = -1;
+    logEl.innerHTML = "<b>Event log</b>";
+    for (let i = 0; i <= k; i++) tick(i);
+  } else tick(k);
+  tally.saved.querySelector(".pv").textContent = savedN + " mo · +" + savedAmt.toFixed(1) + "%";
+  tally.fal.querySelector(".pv").textContent = falN + " mo · −" + falAmt.toFixed(1) + "%";
+  const net = savedAmt - falAmt;
+  tally.net.querySelector(".pv").textContent = (net >= 0 ? "+" : "") + net.toFixed(1) + "%";
+  tally.net.className = "pill " + (net >= 0 ? "good" : "bad");
+  tally.dd.querySelector(".pv").textContent =
+    (TL[k].stDD * 100).toFixed(0) + "% vs " + (TL[k].bhDD * 100).toFixed(0) + "%";
+  draw(k);
+}
+function tick(i) {
+  const t = TL[i];
+  if (t.w < 1) {
+    const eff = (1 - t.w) * t.fwd;
+    if (t.fwd < 0) { savedN++; savedAmt += -eff; } else { falN++; falAmt += eff; }
+  }
+  if (i > logK) {
+    logK = i;
+    const p = TL[i - 1];
+    const msgs = [];
+    if (!p) return;
+    if (p.trend !== t.trend) msgs.push(t.trend ? "trend restored" : "TREND BROKEN");
+    if (p.credit !== t.credit) msgs.push(t.credit ? "CREDIT STRESS on" : "credit eased");
+    if (p.regime !== t.regime) msgs.push("vol regime → " + RNAMES[t.regime]);
+    if (p.w !== t.w) msgs.push("exposure → " + Math.round(t.w * 100) + "%");
+    if (msgs.length) {
+      const div = document.createElement("div");
+      div.style.cssText = "font-size:13px;color:#6b665e;margin-top:4px";
+      div.innerHTML = "<span class='mono'>" + t.d + "</span> · " + msgs.join(" · ");
+      logEl.insertBefore(div, logEl.children[1] || null);
+    }
+  }
+}
+let k = 0, playing = false, timer = null;
+const playBtn = document.getElementById("play");
+function step() {
+  if (k >= N - 1) { stop(); return; }
+  k++; scrub.value = k; update(k, false);
+}
+function start() {
+  playing = true; playBtn.textContent = "⏸ Pause";
+  if (k >= N - 1) { k = 0; savedN = falN = 0; savedAmt = falAmt = 0; logK = -1;
+    logEl.innerHTML = "<b>Event log</b>"; }
+  timer = setInterval(step, 1000 / +document.getElementById("speed").value);
+}
+function stop() { playing = false; playBtn.textContent = "▶ Play"; clearInterval(timer); }
+playBtn.addEventListener("click", () => (playing ? stop() : start()));
+document.getElementById("speed").addEventListener("change", () => { if (playing) { stop(); start(); } });
+scrub.addEventListener("input", () => { k = +scrub.value; update(k, true); });
+window.addEventListener("resize", () => { resize(); draw(k); });
+resize(); update(0, true);
+</script>
+
+</body>
+</html>
