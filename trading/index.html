@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trading Research — Dashboard</title>
+<style>
+:root {
+  --bg:#faf8f4; --panel:#ffffff; --ink:#1c1a17; --soft:#6b665e; --line:#e7e2d8;
+  --accent:#7a8a5c; --accent-soft:#eef1e6; --gold:#b28f2c; --red:#c0564f;
+  --blue:#4a7ba6; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; }
+body { display:grid; grid-template-columns:264px 1fr; min-height:100vh; }
+aside { border-right:1px solid var(--line); padding:32px 24px; position:sticky; top:0;
+  height:100vh; overflow-y:auto; }
+.brand { font-family:var(--serif); font-size:22px; margin:0 0 2px; }
+.brand a { color:var(--ink); text-decoration:none; }
+.tagline { font-size:12.5px; color:var(--soft); margin-bottom:26px; }
+nav .grp { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft);
+  margin:18px 0 6px; font-weight:600; }
+nav a { display:block; padding:5px 10px; margin:1px 0; border-radius:8px; color:var(--ink);
+  text-decoration:none; font-size:14px; }
+nav a:hover { background:var(--accent-soft); }
+nav a.active { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+nav a.sub { padding-left:22px; font-size:13px; color:var(--soft); }
+.backlink { margin-top:28px; font-size:13px; }
+.backlink a { color:var(--soft); }
+main { padding:44px 48px 90px; max-width:840px; }
+.eyebrow { font-size:11.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+  font-weight:650; }
+h1 { font-family:var(--serif); font-weight:400; font-size:34px; margin:6px 0 4px;
+  letter-spacing:-.01em; text-wrap:balance; }
+.sub { color:var(--soft); margin-bottom:26px; }
+h2 { font-family:var(--serif); font-weight:400; font-size:24px; margin:46px 0 8px;
+  padding-top:8px; }
+h3 { font-size:16px; margin:26px 0 6px; }
+p, li { line-height:1.65; font-size:15px; }
+p.lede { color:var(--soft); max-width:66ch; margin-top:0; }
+p, ul { max-width:70ch; }
+.board { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 8px; }
+.pill { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:10px 16px; min-width:148px; }
+.pill .pl { font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--soft); }
+.pill .pv { font-size:16px; font-weight:650; font-variant-numeric:tabular-nums; margin-top:2px; }
+.good .pv { color:var(--accent); } .warn .pv { color:var(--gold); } .bad .pv { color:var(--red); }
+.info .pv { color:var(--blue); }
+.verdict { border-left:3px solid var(--accent); background:var(--panel); padding:14px 18px;
+  border-radius:0 12px 12px 0; margin:16px 0; max-width:72ch; border-top:1px solid var(--line);
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+table { border-collapse:collapse; width:100%; margin:14px 0; font-variant-numeric:tabular-nums;
+  background:var(--panel); border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+th { text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--soft); padding:10px 14px; border-bottom:1px solid var(--line);
+  background:var(--bg); font-weight:600; }
+td { padding:10px 14px; border-bottom:1px solid var(--line); font-size:14px; }
+tr:last-child td { border-bottom:none; }
+.tblwrap { overflow-x:auto; }
+.pos { color:var(--accent); } .neg { color:var(--red); }
+.mono { font-family:var(--mono); font-size:13px; }
+.tag { font-size:11.5px; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.tag.good { background:var(--accent-soft); color:var(--accent); }
+.tag.warn { background:#f5edda; color:var(--gold); }
+.tag.bad { background:#f7e5e3; color:var(--red); }
+.tag.grey { background:#efece6; color:var(--soft); }
+figure { margin:20px 0; }
+figure img { max-width:100%; border:1px solid var(--line); border-radius:12px; background:#fff; }
+figcaption { font-size:13px; color:var(--soft); margin-top:7px; max-width:70ch; }
+.learn { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+  border-radius:0 12px 12px 0; padding:16px 20px; margin:20px 0; max-width:74ch; }
+.learn .lt { font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--gold);
+  font-weight:650; margin-bottom:6px; }
+.learn p { font-size:14px; margin:6px 0; }
+.unlockbox { background:var(--panel); border:1px dashed var(--line); border-radius:12px;
+  padding:26px; text-align:center; margin:16px 0; }
+.unlockbox input { padding:9px 12px; border:1px solid var(--line); border-radius:8px;
+  font-size:14px; margin-right:8px; background:var(--bg); }
+.unlockbox button { padding:9px 18px; border:none; border-radius:8px; background:var(--accent);
+  color:#fff; font-size:14px; cursor:pointer; }
+.unlockbox .err { color:var(--red); font-size:13px; margin-top:10px; display:none; }
+#graphwrap { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:10px; margin:16px 0; }
+#graphwrap svg { width:100%; height:auto; display:block; }
+#edge-detail { background:var(--bg); border:1px solid var(--line); border-radius:10px;
+  padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
+#edge-detail .stats { display:flex; flex-wrap:wrap; gap:16px; margin-top:8px;
+  font-variant-numeric:tabular-nums; }
+#edge-detail .stats div { font-size:13px; color:var(--soft); }
+#edge-detail .stats b { display:block; color:var(--ink); font-size:15px; }
+.next { list-style:none; padding:0; }
+.next li { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:13px 17px; margin:9px 0; max-width:74ch; }
+.next .k { font-weight:650; }
+dl dt { font-weight:650; margin-top:16px; }
+dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
+.footnote { margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
+  color:var(--soft); font-size:13px; max-width:76ch; }
+@media (max-width: 900px) {
+  body { grid-template-columns:1fr; }
+  aside { position:static; height:auto; border-right:none; border-bottom:1px solid var(--line); }
+  main { padding:28px 20px 70px; }
+}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand"><a href="index.html">Trading Research</a></div>
+  <div class="tagline">regime-aware, walk-forward, honest</div>
+  <nav>
+    <div class="grp">Dashboard</div>
+    <a class="active" href="index.html">Today's dashboard</a>
+    <a class="" href="index.html#portfolio">Your portfolio 🔒</a>
+    <a class="" href="index.html#next">Next steps</a>
+    <div class="grp">Learn</div>
+    <a class="" href="learn.html">The playbook</a>
+    <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
+    <a class="sub" href="learn.html#lab">2 · The strategy lab</a>
+    <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
+    <a class="sub" href="learn.html#positioning">4 · Longs, shorts &amp; flat</a>
+    <div class="grp">Reference</div>
+    <a class="" href="glossary.html">Glossary</a>
+  </nav>
+  <div class="backlink"><a href="../recipes/">← family dashboard</a></div>
+</aside>
+
+<main>
+
+<div class="eyebrow">Dashboard · data through 2026-07-23</div>
+<h1>Where the market is, and what the playbook says</h1>
+<div class="sub">Three tested signals → one stance. Everything here is explained in <a href="learn.html">the playbook</a>.</div>
+
+<div class="board">
+  <div class="pill good"><div class="pl">Trend (10-mo MA)</div><div class="pv">ON · risk-on</div></div>
+  <div class="pill good"><div class="pl">Credit conditions</div><div class="pv">EASY · OAS 2.68%</div></div>
+  <div class="pill warn"><div class="pl">Volatility regime</div><div class="pv">MID</div></div>
+  <div class="pill good"><div class="pl">System stance</div><div class="pv">FULLY LONG</div></div>
+</div>
+
+<div class="verdict"><b>Today's read:</b> SPY 738.18 sits 6% above its 10-month average (693); high-yield spreads are 2.68%, easier than their 12-month median (2.84%); volatility is in the mid regime at 11.4% annualized. Zero of three warning lights are on — the tested rules stay fully long. The blind spot: valuations are at dot-com extremes, which none of these three signals can see. That's the next node on the <a href="learn.html#graph">graph</a>.</div>
+
+<h2 id="stance">What that stance means</h2>
+<ul>
+  <li><b>Longs: hold.</b> The base rate is on your side (markets rose in ~64% of all months in the sample) and no tested warning is active. See <a href="learn.html#positioning">chapter 4</a> for why "no warning" is the long signal.</li>
+  <li><b>Shorts: no.</b> Even the scariest tested condition (credit stress + broken trend) still averaged <i>positive</i> next-month returns historically. The evidence supports de-risking in storms — it does not yet support betting on declines. The full argument is in <a href="learn.html#positioning">chapter 4</a>.</li>
+  <li><b>New purchases: the rules are indifferent to timing here</b> — they say the environment is normal. What they do say: know in advance that the de-risk line sits near $693 on SPY.</li>
+</ul>
+
+<h2 id="portfolio">Your portfolio 🔒</h2>
+<p class="lede">Positions, values, and per-position guidance — encrypted like the budget tab. Same passphrase.</p>
+<div id="port-slot">
+  <div class="unlockbox" id="unlock">
+    <p style="margin-top:0">Enter the dashboard passphrase to view your positions.</p>
+    <input id="pass" type="password" placeholder="passphrase" autocomplete="current-password" />
+    <button id="unlock-btn">Unlock</button>
+    <div class="err" id="unlock-err">Wrong passphrase — try again.</div>
+  </div>
+</div>
+
+<h2 id="next">Next steps</h2>
+<ul class="next">
+  <li><span class="k">CAPE valuation node</span> — wire the Shiller dataset in, unlocking the "expensive market + tightening credit" edge: the original hypothesis this system was built to test.</li>
+  <li><span class="k">Yield curve &amp; breadth nodes</span> — two classic recession/fragility indicators to add to the graph (free FRED API key unlocks full history).</li>
+  <li><span class="k">Signal-flip alerts in the morning brief</span> — trend break or credit stress lands in the 7 AM email automatically.</li>
+  <li><span class="k">Per-position rules</span> — walk-forward tests on the high-beta sleeve (where regime flips bite ~2x).</li>
+  <li><span class="k">Idea ledger</span> — every new hypothesis becomes a graph edge and keeps its verdict, including the rejections. That's the compounding memory.</li>
+</ul>
+
+<div class="footnote">Rebuilt by <span class="mono">backtest.py → build_docs.py</span> in <span class="mono">~/trading-research</span>. Data: Yahoo Finance, FRED, Robinhood (read-only). Monthly signals, no transaction costs, cash earns 0% in tests. Research tooling — historical measurement, not investment advice.</div>
+
+</main>
+
+<script src="portfolio.js"></script>
+<script>
+async function decryptBlob(enc, passphrase) {
+  const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(passphrase),
+    "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: b64(enc.salt), iterations: enc.iter, hash: "SHA-256" },
+    km, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(enc.iv) }, key, b64(enc.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function renderPortfolio(d) {
+  const rows = d.rows.map(p => `<tr>
+    <td><b>${p.symbol}</b></td>
+    <td>$${p.value.toLocaleString(undefined,{maximumFractionDigits:0})}</td>
+    <td>${p.weight.toFixed(1)}%</td>
+    <td class="${p.pnl < 0 ? 'neg' : 'pos'}">${p.pnl > 0 ? '+' : ''}${p.pnl.toFixed(1)}%</td>
+    <td>${p.beta == null ? '—' : p.beta.toFixed(2)}</td>
+    <td style="color:var(--soft);font-size:13px">${p.note}</td></tr>`).join("");
+  const bullets = d.bullets.map(b => `<li>${b}</li>`).join("");
+  document.getElementById("port-slot").innerHTML = `
+    <div class="board">
+      <div class="pill info"><div class="pl">Equity value</div><div class="pv">$${d.total.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+      <div class="pill info"><div class="pl">Portfolio beta</div><div class="pv">${d.beta.toFixed(2)}</div></div>
+      <div class="pill info"><div class="pl">As of</div><div class="pv">${d.as_of}</div></div>
+    </div>
+    <div class="tblwrap"><table>
+      <tr><th>Position</th><th>Value</th><th>Weight</th><th>P&amp;L</th><th>Beta</th><th>Playbook note</th></tr>
+      ${rows}</table></div>
+    <h3>What this means for you</h3><ul>${bullets}</ul>`;
+}
+async function tryUnlock(pass) {
+  try {
+    const d = await decryptBlob(PORTFOLIO_ENC, pass);
+    sessionStorage.setItem("dashKey", pass);
+    renderPortfolio(d);
+    return true;
+  } catch (e) { return false; }
+}
+document.getElementById("unlock-btn").addEventListener("click", async () => {
+  const ok = await tryUnlock(document.getElementById("pass").value);
+  if (!ok) document.getElementById("unlock-err").style.display = "block";
+});
+document.getElementById("pass").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("unlock-btn").click();
+});
+const saved = sessionStorage.getItem("dashKey");
+if (saved) tryUnlock(saved);
+</script>
+
+</body>
+</html>

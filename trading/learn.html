@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trading Research — The Playbook</title>
+<style>
+:root {
+  --bg:#faf8f4; --panel:#ffffff; --ink:#1c1a17; --soft:#6b665e; --line:#e7e2d8;
+  --accent:#7a8a5c; --accent-soft:#eef1e6; --gold:#b28f2c; --red:#c0564f;
+  --blue:#4a7ba6; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; }
+body { display:grid; grid-template-columns:264px 1fr; min-height:100vh; }
+aside { border-right:1px solid var(--line); padding:32px 24px; position:sticky; top:0;
+  height:100vh; overflow-y:auto; }
+.brand { font-family:var(--serif); font-size:22px; margin:0 0 2px; }
+.brand a { color:var(--ink); text-decoration:none; }
+.tagline { font-size:12.5px; color:var(--soft); margin-bottom:26px; }
+nav .grp { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft);
+  margin:18px 0 6px; font-weight:600; }
+nav a { display:block; padding:5px 10px; margin:1px 0; border-radius:8px; color:var(--ink);
+  text-decoration:none; font-size:14px; }
+nav a:hover { background:var(--accent-soft); }
+nav a.active { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+nav a.sub { padding-left:22px; font-size:13px; color:var(--soft); }
+.backlink { margin-top:28px; font-size:13px; }
+.backlink a { color:var(--soft); }
+main { padding:44px 48px 90px; max-width:840px; }
+.eyebrow { font-size:11.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+  font-weight:650; }
+h1 { font-family:var(--serif); font-weight:400; font-size:34px; margin:6px 0 4px;
+  letter-spacing:-.01em; text-wrap:balance; }
+.sub { color:var(--soft); margin-bottom:26px; }
+h2 { font-family:var(--serif); font-weight:400; font-size:24px; margin:46px 0 8px;
+  padding-top:8px; }
+h3 { font-size:16px; margin:26px 0 6px; }
+p, li { line-height:1.65; font-size:15px; }
+p.lede { color:var(--soft); max-width:66ch; margin-top:0; }
+p, ul { max-width:70ch; }
+.board { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 8px; }
+.pill { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:10px 16px; min-width:148px; }
+.pill .pl { font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--soft); }
+.pill .pv { font-size:16px; font-weight:650; font-variant-numeric:tabular-nums; margin-top:2px; }
+.good .pv { color:var(--accent); } .warn .pv { color:var(--gold); } .bad .pv { color:var(--red); }
+.info .pv { color:var(--blue); }
+.verdict { border-left:3px solid var(--accent); background:var(--panel); padding:14px 18px;
+  border-radius:0 12px 12px 0; margin:16px 0; max-width:72ch; border-top:1px solid var(--line);
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+table { border-collapse:collapse; width:100%; margin:14px 0; font-variant-numeric:tabular-nums;
+  background:var(--panel); border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+th { text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--soft); padding:10px 14px; border-bottom:1px solid var(--line);
+  background:var(--bg); font-weight:600; }
+td { padding:10px 14px; border-bottom:1px solid var(--line); font-size:14px; }
+tr:last-child td { border-bottom:none; }
+.tblwrap { overflow-x:auto; }
+.pos { color:var(--accent); } .neg { color:var(--red); }
+.mono { font-family:var(--mono); font-size:13px; }
+.tag { font-size:11.5px; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.tag.good { background:var(--accent-soft); color:var(--accent); }
+.tag.warn { background:#f5edda; color:var(--gold); }
+.tag.bad { background:#f7e5e3; color:var(--red); }
+.tag.grey { background:#efece6; color:var(--soft); }
+figure { margin:20px 0; }
+figure img { max-width:100%; border:1px solid var(--line); border-radius:12px; background:#fff; }
+figcaption { font-size:13px; color:var(--soft); margin-top:7px; max-width:70ch; }
+.learn { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+  border-radius:0 12px 12px 0; padding:16px 20px; margin:20px 0; max-width:74ch; }
+.learn .lt { font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--gold);
+  font-weight:650; margin-bottom:6px; }
+.learn p { font-size:14px; margin:6px 0; }
+.unlockbox { background:var(--panel); border:1px dashed var(--line); border-radius:12px;
+  padding:26px; text-align:center; margin:16px 0; }
+.unlockbox input { padding:9px 12px; border:1px solid var(--line); border-radius:8px;
+  font-size:14px; margin-right:8px; background:var(--bg); }
+.unlockbox button { padding:9px 18px; border:none; border-radius:8px; background:var(--accent);
+  color:#fff; font-size:14px; cursor:pointer; }
+.unlockbox .err { color:var(--red); font-size:13px; margin-top:10px; display:none; }
+#graphwrap { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:10px; margin:16px 0; }
+#graphwrap svg { width:100%; height:auto; display:block; }
+#edge-detail { background:var(--bg); border:1px solid var(--line); border-radius:10px;
+  padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
+#edge-detail .stats { display:flex; flex-wrap:wrap; gap:16px; margin-top:8px;
+  font-variant-numeric:tabular-nums; }
+#edge-detail .stats div { font-size:13px; color:var(--soft); }
+#edge-detail .stats b { display:block; color:var(--ink); font-size:15px; }
+.next { list-style:none; padding:0; }
+.next li { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:13px 17px; margin:9px 0; max-width:74ch; }
+.next .k { font-weight:650; }
+dl dt { font-weight:650; margin-top:16px; }
+dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
+.footnote { margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
+  color:var(--soft); font-size:13px; max-width:76ch; }
+@media (max-width: 900px) {
+  body { grid-template-columns:1fr; }
+  aside { position:static; height:auto; border-right:none; border-bottom:1px solid var(--line); }
+  main { padding:28px 20px 70px; }
+}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand"><a href="index.html">Trading Research</a></div>
+  <div class="tagline">regime-aware, walk-forward, honest</div>
+  <nav>
+    <div class="grp">Dashboard</div>
+    <a class="" href="index.html">Today's dashboard</a>
+    <a class="" href="index.html#portfolio">Your portfolio 🔒</a>
+    <a class="" href="index.html#next">Next steps</a>
+    <div class="grp">Learn</div>
+    <a class="active" href="learn.html">The playbook</a>
+    <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
+    <a class="sub" href="learn.html#lab">2 · The strategy lab</a>
+    <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
+    <a class="sub" href="learn.html#positioning">4 · Longs, shorts &amp; flat</a>
+    <div class="grp">Reference</div>
+    <a class="" href="glossary.html">Glossary</a>
+  </nav>
+  <div class="backlink"><a href="../recipes/">← family dashboard</a></div>
+</aside>
+
+<main>
+
+<div class="eyebrow">The playbook</div>
+<h1>How this system thinks</h1>
+<div class="sub">Four chapters: what regimes are, how strategies are judged, how ideas become evidence, and how evidence becomes positions.</div>
+
+<p>One rule governs everything here: <b>the model never sees the future.</b> Every signal below is computed "walk-forward" — at each month-end, using only information available on that date, exactly as you would have experienced it. Backtests that skip this rule (most of them) produce beautiful curves and real losses.</p>
+
+<h2 id="regimes">1 · Market regimes — the weather system</h2>
+<p class="lede">Markets don't have one personality. They alternate between calm grinds and violent storms, and the storms cluster.</p>
+<figure><img src="assets/regimes.png" alt="SPY since 1997, colored by a hidden Markov model's regime estimate made in real time (green calm, gold mid, red stress). It finds 2008, 2011, 2015–16, 2018, 2020 and 2022 without ever being told about them." loading="lazy"><figcaption>SPY since 1997, colored by a hidden Markov model's regime estimate made in real time (green calm, gold mid, red stress). It finds 2008, 2011, 2015–16, 2018, 2020 and 2022 without ever being told about them.</figcaption></figure>
+<p>A <b>hidden Markov model</b> assumes an unobservable state (calm / mid / stress) generates the returns we observe, and infers today's state from recent return and volatility behavior. It's the workhorse of regime detection at real funds — not because it predicts crashes, but because it recognizes when one has begun early enough to matter.</p>
+<figure><img src="assets/credit.png" alt="The credit node: high-yield bonds relative to Treasuries. Shaded spans = high-yield underperforming, i.e. lenders demanding more for risk — 'borrowing is getting harder.' Note the shading arriving before and through every major equity drawdown." loading="lazy"><figcaption>The credit node: high-yield bonds relative to Treasuries. Shaded spans = high-yield underperforming, i.e. lenders demanding more for risk — 'borrowing is getting harder.' Note the shading arriving before and through every major equity drawdown.</figcaption></figure>
+<div class="learn"><div class="lt">Why credit matters to stocks</div>
+<p>Companies live on borrowed money. When lenders get scared they demand higher yields from the riskiest borrowers first — so high-yield bonds sag <i>before</i> the trouble reaches earnings reports. That's why "high valuations + credit tightening" is the classic bubble-burst fingerprint: expensive assets meeting expensive money.</p></div>
+
+<h2 id="lab">2 · The strategy lab — judging rules honestly</h2>
+<p class="lede">Four rules, same 18-year window (July 2008 → today), monthly rebalance, signals applied to the following month. Cash earns 0% — a deliberate handicap against the timing rules.</p>
+<div class="tblwrap"><table>
+  <tr><th>Strategy</th><th>CAGR</th><th>Sharpe</th><th>Worst drawdown</th><th>Time invested</th></tr>
+  <tr><td>Buy & hold</td><td>11.93%</td><td>0.80</td><td class="neg">-46.3%</td><td>100%</td></tr><tr><td>Trend (10-mo MA)</td><td>9.54%</td><td>0.90</td><td class="neg">-23.0%</td><td>78%</td></tr><tr><td>Trend + vol regime</td><td>9.39%</td><td>0.97</td><td class="neg">-16.8%</td><td>74%</td></tr><tr><td>Trend + credit (conjunction)</td><td>9.38%</td><td>0.96</td><td class="neg">-21.1%</td><td>72%</td></tr>
+</table></div>
+<figure><img src="assets/equity_curves.png" alt="Growth of $1. Buy & hold wins the destination; the filtered rules improve the journey." loading="lazy"><figcaption>Growth of $1. Buy & hold wins the destination; the filtered rules improve the journey.</figcaption></figure>
+<figure><img src="assets/drawdowns.png" alt="The chart that matters most: how far below your own peak you are. Buy & hold spent 2008–09 down 46%. The regime-filtered rules bottomed at −17%." loading="lazy"><figcaption>The chart that matters most: how far below your own peak you are. Buy & hold spent 2008–09 down 46%. The regime-filtered rules bottomed at −17%.</figcaption></figure>
+<div class="learn"><div class="lt">The three numbers that matter</div>
+<p><b>CAGR</b> — compound annual growth, "what you actually made per year." <b>Sharpe</b> — return per unit of volatility; how much sleep each percent cost (0.8 decent, 1.0 good for a simple rule). <b>Max drawdown</b> — the worst peak-to-trough fall; the number that decides whether you'd really have stayed in the seat.</p>
+<p>The honest result: the filters <b>gave up ~2.4% CAGR and halved the worst loss.</b> That's not a defect — it's the actual product. You are buying insurance with expected return. Whether that trade is worth it depends on account size, temperament, and when you'll need the money — which is why it's a decision to make in calm markets, in advance.</p></div>
+
+<h2 id="graph">3 · The relationship graph — ideas on trial</h2>
+<p class="lede">Indicators are nodes. Hypotheses about how they combine are edges. Every edge must earn its status from walk-forward evidence — and rejected edges are kept, because remembering what <i>doesn't</i> work is half the edge. Click anything.</p>
+<div id="graphwrap">
+  <svg id="graphsvg" viewBox="0 0 900 560" role="img" aria-label="Relationship graph of market indicators"></svg>
+  <div id="edge-detail">Click a node or an edge to see its hypothesis and evidence.</div>
+</div>
+<div class="tblwrap"><table>
+  <tr><th>Edge</th><th>Status</th><th>Evidence — next-month SPY return under condition</th></tr>
+  <tr><td>Credit stress → weak returns</td><td><span class="tag warn">tested — weak/insignificant</span></td><td class="mono">+0.81% vs +1.04% base · vol 5.9% · n=75 · t=-0.34</td></tr><tr><td>Broken trend → weak returns</td><td><span class="tag warn">tested — weak/insignificant</span></td><td class="mono">+1.08% vs +1.04% base · vol 7.2% · n=48 · t=+0.04</td></tr><tr><td>High-vol regime → weak returns</td><td><span class="tag warn">tested — weak/insignificant</span></td><td class="mono">+0.90% vs +1.04% base · vol 6.4% · n=67 · t=-0.18</td></tr><tr><td>Credit stress × broken trend</td><td><span class="tag warn">tested — weak/insignificant</span></td><td class="mono">+0.80% vs +1.04% base · vol 7.7% · n=34 · t=-0.18</td></tr><tr><td>High CAPE × tightening credit</td><td><span class="tag grey">untested — blocked on CAPE data feed</span></td><td class="mono">awaiting data feed</td></tr>
+</table></div>
+<div class="learn"><div class="lt">The most valuable negative result in finance</div>
+<p>No edge cleared statistical significance (|t| &gt; 2) for predicting <b>average</b> returns — with only 34–75 stress-months in the sample, noisy means can't clear that bar. Yet the strategies built on the same signals clearly cut drawdowns. Both are true because of a cornerstone empirical fact: <b>returns are nearly unpredictable; risk is very predictable.</b> Volatility under stress conditions runs 6–8% a month versus ~5% baseline, and it clusters. The signals don't say "the market will fall" — they say "if it falls, it falls harder." De-risking on them is defense on variance, not a forecast of direction.</p></div>
+
+<h2 id="positioning">4 · Longs, shorts, and staying flat</h2>
+<p class="lede">The point of understanding the market is to act intelligently. Here's how evidence maps to the three possible actions.</p>
+<h3>Long is the default, not a prediction</h3>
+<p>Across the sample the market rose in about 64% of months, averaging +1.04%/month — that upward drift is the base rate, the payment for bearing risk. So a long position doesn't need a bullish forecast; it needs the <i>absence of tested warnings</i>. That's why the dashboard shows warning lights, not buy signals.</p>
+<h3>Flat (de-risking) needs only a variance edge</h3>
+<p>To justify cutting exposure you don't need to predict a fall — you only need evidence that the <i>distribution</i> got wider, and that's exactly what the regime and credit nodes deliver. This is the cheapest edge in markets because it's the most reliable one.</p>
+<h3>Shorting needs a direction edge — and we don't have one yet</h3>
+<p>A short fights the drift: the market's +1%/month base rate is a headwind you pay every month you're early, on top of borrow costs, and your maximum loss is unbounded. Look at the graph's evidence: even our scariest tested condition — credit stress <i>and</i> broken trend together — still averaged <b>+0.8%/month</b>. Historically, being short in those months lost money on average. The bar for an outright short is an edge with a genuinely <i>negative</i> conditional mean and |t| &gt; 2. Nothing in the graph clears it. What professionals do instead of naked shorts: reduce exposure, buy puts (defined risk, known cost), or go long/short <i>pairs</i> where the market drift cancels out. If the CAPE × credit edge validates with a negative mean once the valuation node is wired in, that becomes this playbook's first legitimate short signal — and that test is precisely why it's next on the roadmap.</p>
+<div class="learn"><div class="lt">The asymmetry to remember</div>
+<p>De-risking needs an edge in <b>variance</b> (easy to find, we have it). Shorting needs an edge in <b>direction</b> (rare, we don't — yet). Confusing the two is how people turn a good storm detector into a losing short book.</p></div>
+
+<div class="footnote">Chapter data regenerates on every backtest run. Sample: July 2008 → 2026-07-23, monthly. All statistics are historical measurement, not prediction.</div>
+
+</main>
+
+<script>
+const GRAPH = {"nodes": [{"id": "trend", "name": "SPY price vs 10-month moving average", "source": "yfinance SPY", "status": "live"}, {"id": "credit_spreads", "name": "High-yield credit spread (ICE BofA OAS)", "source": "FRED BAMLH0A0HYM2", "status": "live"}, {"id": "vol_regime", "name": "Volatility regime (3-state HMM)", "source": "derived from SPY", "status": "live"}, {"id": "valuation_cape", "name": "Valuation (Shiller CAPE)", "source": "Shiller dataset", "status": "pending \u2014 needs data feed"}, {"id": "yield_curve", "name": "10y-3m Treasury curve", "source": "FRED T10Y3M", "status": "pending"}, {"id": "breadth", "name": "% of stocks above 200-day MA", "source": "needs universe data", "status": "pending"}, {"id": "fwd_return_1m", "name": "SPY forward 1-month return", "source": "target variable", "status": "live"}], "edges": [{"id": "credit_alone", "from": ["credit_spreads"], "to": "fwd_return_1m", "hypothesis": "When HY spreads are above their 12-month median (credit getting harder), forward equity returns are weaker.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 75, "mean_fwd_1m_pct": 0.81, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 64.0, "vol_of_fwd_pct": 5.89, "t_stat_vs_base": -0.34}}, {"id": "trend_alone", "from": ["trend"], "to": "fwd_return_1m", "hypothesis": "When price is below its 10-month MA, forward returns are weaker and more volatile.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 48, "mean_fwd_1m_pct": 1.08, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 58.3, "vol_of_fwd_pct": 7.2, "t_stat_vs_base": 0.04}}, {"id": "highvol_alone", "from": ["vol_regime"], "to": "fwd_return_1m", "hypothesis": "The high-volatility HMM regime carries weaker risk-adjusted forward returns.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 67, "mean_fwd_1m_pct": 0.9, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 62.7, "vol_of_fwd_pct": 6.38, "t_stat_vs_base": -0.18}}, {"id": "credit_x_trend", "from": ["credit_spreads", "trend"], "to": "fwd_return_1m", "hypothesis": "CONJUNCTION (the bubble-burst fingerprint): credit stress AND broken trend together are far worse than either alone \u2014 this is the tradeable version of 'high valuations + borrowing gets hard = bubbles burst'.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 34, "mean_fwd_1m_pct": 0.8, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 58.8, "vol_of_fwd_pct": 7.73, "t_stat_vs_base": -0.18}}, {"id": "cape_x_credit", "from": ["valuation_cape", "credit_spreads"], "to": "fwd_return_1m", "hypothesis": "High CAPE alone is a poor timing signal (markets stay expensive for years), but high CAPE + tightening credit identifies when expensive markets actually crack.", "status": "untested \u2014 blocked on CAPE data feed", "stats": null}]};
+const POS = {
+  trend: [140, 70], credit_spreads: [140, 170], vol_regime: [140, 270],
+  valuation_cape: [140, 370], yield_curve: [140, 450], breadth: [140, 520],
+  fwd_return_1m: [760, 280],
+};
+const svg = document.getElementById("graphsvg");
+const NS = "http://www.w3.org/2000/svg";
+const detail = document.getElementById("edge-detail");
+const COLORS = { validated: "#6f8a4f", weak: "#b28f2c", pending: "#9b958a" };
+function edgeColor(e) {
+  if (e.status === "validated") return COLORS.validated;
+  if (e.status && e.status.startsWith("tested")) return COLORS.weak;
+  return COLORS.pending;
+}
+function el(tag, attrs) {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  return n;
+}
+function curve(x1, y1, x2, y2) {
+  const mx = (x1 + x2) / 2;
+  return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+}
+function showEdge(e) {
+  const s = e.stats;
+  let statsHtml = "";
+  if (s) statsHtml = `<div class="stats">
+    <div><b>${s.mean_fwd_1m_pct > 0 ? "+" : ""}${s.mean_fwd_1m_pct}%</b>avg next month</div>
+    <div><b>${s.base_mean_fwd_1m_pct > 0 ? "+" : ""}${s.base_mean_fwd_1m_pct}%</b>all months</div>
+    <div><b>${s.vol_of_fwd_pct}%</b>volatility</div>
+    <div><b>${s.hit_rate_positive_pct}%</b>months positive</div>
+    <div><b>${s.n_months}</b>sample</div>
+    <div><b>${s.t_stat_vs_base > 0 ? "+" : ""}${s.t_stat_vs_base}</b>t-stat</div></div>`;
+  detail.innerHTML = `<b>${e.id.replaceAll("_", " ")}</b>
+    <span class="tag ${e.status === "validated" ? "good" : (e.status.startsWith("tested") ? "warn" : "grey")}"
+      style="margin-left:8px">${e.status}</span>
+    <p style="margin:8px 0 0">${e.hypothesis}</p>${statsHtml}`;
+}
+function showNode(n) {
+  detail.innerHTML = `<b>${n.name}</b>
+    <span class="tag ${n.status === "live" ? "good" : "grey"}" style="margin-left:8px">${n.status}</span>
+    <p style="margin:8px 0 0">Source: ${n.source}. ${n.status === "live"
+      ? "Feeding the backtest today." : "On the roadmap — becomes testable once its data feed is wired in."}</p>`;
+}
+// edges first (under nodes)
+GRAPH.edges.forEach((e) => {
+  const [tx, ty] = POS[e.to];
+  const color = edgeColor(e);
+  const dash = (e.status === "validated" || (e.status || "").startsWith("tested")) ? "" : "6 5";
+  const paths = [];
+  if (e.from.length === 1) {
+    paths.push(curve(POS[e.from[0]][0] + 62, POS[e.from[0]][1], tx - 66, ty));
+  } else {
+    const jy = e.from.reduce((a, f) => a + POS[f][1], 0) / e.from.length;
+    const jx = 470;
+    e.from.forEach((f) => paths.push(curve(POS[f][0] + 62, POS[f][1], jx - 16, jy)));
+    paths.push(curve(jx + 16, jy, tx - 66, ty));
+    const j = el("g", { cursor: "pointer" });
+    j.appendChild(el("rect", { x: jx - 20, y: jy - 11, width: 40, height: 22, rx: 5,
+      fill: "#faf8f4", stroke: color, "stroke-width": 1.4,
+      "stroke-dasharray": dash }));
+    const t = el("text", { x: jx, y: jy + 4, "text-anchor": "middle",
+      "font-size": 10.5, "font-weight": 650, fill: color });
+    t.textContent = "AND";
+    j.appendChild(t);
+    j.addEventListener("click", () => showEdge(e));
+    svg.appendChild(j);
+  }
+  paths.forEach((d) => {
+    svg.appendChild(el("path", { d, fill: "none", stroke: color,
+      "stroke-width": 2, "stroke-dasharray": dash, opacity: 0.85 }));
+    const hit = el("path", { d, fill: "none", stroke: "transparent",
+      "stroke-width": 16, cursor: "pointer" });
+    hit.addEventListener("click", () => showEdge(e));
+    svg.appendChild(hit);
+  });
+});
+// nodes on top
+GRAPH.nodes.forEach((n) => {
+  if (!POS[n.id]) return;
+  const [x, y] = POS[n.id];
+  const live = n.status === "live";
+  const target = n.id === "fwd_return_1m";
+  const g = el("g", { cursor: "pointer" });
+  g.appendChild(el("rect", { x: x - 62, y: y - 22, width: 124, height: 44, rx: 10,
+    fill: target ? "#eef1e6" : "#ffffff",
+    stroke: live ? "#7a8a5c" : "#c9c3b8", "stroke-width": live ? 1.8 : 1.2,
+    "stroke-dasharray": live ? "" : "5 4" }));
+  const label = { trend: "Trend", credit_spreads: "Credit spreads", vol_regime: "Vol regime",
+    valuation_cape: "Valuation (CAPE)", yield_curve: "Yield curve", breadth: "Breadth",
+    fwd_return_1m: "Next-month return" }[n.id] || n.id;
+  const t = el("text", { x, y: y + 4, "text-anchor": "middle", "font-size": 12.5,
+    "font-weight": 600, fill: live ? "#1c1a17" : "#8b857a" });
+  t.textContent = label;
+  g.appendChild(t);
+  g.addEventListener("click", () => showNode(n));
+  svg.appendChild(g);
+});
+</script>
+
+</body>
+</html>
