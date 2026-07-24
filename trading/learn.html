@@ -129,6 +129,7 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
     <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
     <a class="sub" href="learn.html#comovement">4 · Companies that move together</a>
     <a class="sub" href="learn.html#positioning">5 · Longs, shorts &amp; flat</a>
+    <a class="sub" href="learn.html#newera">6 · Sentiment &amp; the new era</a>
     <div class="grp">Reference</div>
     <a class="" href="glossary.html">Glossary</a>
   </nav>
@@ -161,7 +162,20 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
   <tr><th></th><th>→ Calm</th><th>→ Mid</th><th>→ Stress</th></tr>
   <tr><td><b>From Calm</b></td><td>98.1%</td><td>1.9%</td><td>0.0%</td></tr><tr><td><b>From Mid</b></td><td>2.4%</td><td>96.1%</td><td>1.5%</td></tr><tr><td><b>From Stress</b></td><td>0.0%</td><td>2.0%</td><td>98.0%</td></tr>
 </table></div>
-<p><b>3 · Inference</b> — each day the model runs a Bayes update (the "forward algorithm"): start from yesterday's state probabilities, push them through the transition matrix, then reweight by how well each state explains today's return and volatility. A single −3% day barely moves it (calm markets have bad days too); a <i>string</i> of wild days shifts the probability mass to stress quickly.</p>
+<p><b>3 · Inference</b> — each day the model runs a Bayes update (the "forward algorithm"): start from yesterday's state probabilities, push them through the transition matrix, then reweight by how well each state explains today's return and volatility.</p>
+<h3>Reading the matrix, cell by cell</h3>
+<p>Each <b>row</b> is "given today's mood…", each <b>column</b> is "…the chance of tomorrow's mood." Rows sum to 100% because tomorrow has to be <i>something</i>. Three cells deserve your attention:</p>
+<ul>
+<li><b>The diagonal</b> (calm→calm 98.1%, mid→mid 96.1%, stress→stress 98.0%): moods overwhelmingly continue. This is the entire economic value of the model. A handy formula: if a state's stay-probability is <span class="mono">p</span>, its typical visit lasts <span class="mono">1/(1−p)</span> days — that's how the "~53 days" column is computed (1/(1−0.981) ≈ 53).</li>
+<li><b>Calm→stress = 0.000.</b> In 33 years of data, the market has essentially never jumped from sunshine straight to hurricane in one day. It walks down a staircase: calm → mid → stress. That means the mid state is your early-warning zone — by the time stress arrives, you were already watching.</li>
+<li><b>Stress→calm = 0.000</b> too: storms don't end abruptly either. Recovery also goes through mid. Symmetric staircase.</li>
+</ul>
+<h3>One day of the actual math</h3>
+<p>Here's a full Bayes update by hand, using today's real numbers. Write yesterday's belief as a probability vector across (calm, mid, stress) — currently roughly <span class="mono">(36%, 64%, 0%)</span>.</p>
+<p><b>Step 1 — push through the matrix</b> (what do we expect before seeing today?). Each new entry is "sum over yesterday's states × their transition chance." For stress: <span class="mono">36%×0.000 + 64%×0.015 + 0%×0.980 ≈ 1%</span>. Doing all three gives the <i>prior</i>: <span class="mono">(37%, 62%, 1%)</span>.</p>
+<p><b>Step 2 — score the evidence.</b> Each state is a bell curve over daily returns with its own width: calm's daily σ is ≈0.56% (that's 8.9% annual ÷ √252 — volatility scales with the square root of time), mid's ≈0.96%, stress's ≈1.7%. Now suppose today drops <b>−2.5%</b>. How surprising is that to each state? Measure in σ-units: <span class="mono">z = −2.5/0.56 ≈ −4.5σ</span> for calm (a once-per-decades event — calm is shocked), −2.6σ for mid (rare but real), −1.5σ for stress (a Tuesday). The bell-curve heights at those points are the <i>likelihoods</i>, roughly in ratio <span class="mono">0.01 : 3.6 : 20</span>.</p>
+<p><b>Step 3 — multiply and renormalize.</b> Posterior ∝ prior × likelihood: calm <span class="mono">37%×0.01</span>, mid <span class="mono">62%×3.6</span>, stress <span class="mono">1%×20</span> → rescale to sum to 100% → <b>(0.1%, 92%, 8%)</b>.</p>
+<p>Read what just happened: one violent day took stress from 1% to only 8% — the model stays skeptical, because the prior said stress was unlikely and calm markets do have bad days. But run the same arithmetic tomorrow: the prior for stress now starts near 9%, so a <i>second</i> wild day lifts it to ~40%, and a third makes it the leading hypothesis. That's the machine in one sentence: <b>priors keep it from panicking at noise; accumulating likelihoods force it to accept a storm within a few days.</b> Exactly the temperament you want in a risk manager.</p>
 <h3>How it's fitted, and how we keep it honest</h3>
 <p>Fitting uses expectation-maximization (Baum–Welch): guess the states, infer which days belong to which state, re-estimate each state's fingerprint from its days, repeat until stable. Nothing is labeled by hand — the model discovers "calm/mid/stress" on its own, purely because three clusters of behavior genuinely exist in the data. Two disciplines keep it honest: it is refit only once a year on an <b>expanding window</b> (no future data ever), and states are ranked by volatility after each refit so "stress" always means the same thing even if the model reorders its internal labels.</p>
 <h3>Why this matters for money</h3>
@@ -239,6 +253,31 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 <p>A short fights the drift: the market's +1%/month base rate is a headwind you pay every month you're early, on top of borrow costs, and your maximum loss is unbounded. Look at the graph's evidence: even our scariest tested condition — credit stress <i>and</i> broken trend together — still averaged <b>+0.8%/month</b>. Historically, being short in those months lost money on average. The bar for an outright short is an edge with a genuinely <i>negative</i> conditional mean and |t| &gt; 2. Nothing in the graph clears it. What professionals do instead of naked shorts: reduce exposure, buy puts (defined risk, known cost), or go long/short <i>pairs</i> where the market drift cancels out. If the CAPE × credit edge validates with a negative mean once the valuation node is wired in, that becomes this playbook's first legitimate short signal — and that test is precisely why it's next on the roadmap.</p>
 <div class="learn"><div class="lt">The asymmetry to remember</div>
 <p>De-risking needs an edge in <b>variance</b> (easy to find, we have it). Shorting needs an edge in <b>direction</b> (rare, we don't — yet). Confusing the two is how people turn a good storm detector into a losing short book.</p></div>
+
+<h2 id="newera">6 · Sentiment, Reddit, and the new era of data</h2>
+<p class="lede">What billion-dollar funds actually do with alternative data, what internet noise is and isn't worth, and exactly how sentiment will plug into our graph and regime model.</p>
+<div class="learn"><div class="lt">In plain words</div>
+<p>Big funds stopped waiting for earnings reports years ago — they buy credit-card data, satellite photos of parking lots, app-download counts, and run language models over every earnings call, all to estimate the numbers <i>before</i> they're announced. Reddit and Twitter are the noisiest end of that spectrum: nearly useless for "which way will the stock go," genuinely useful for "how crowded and fragile is this trade." We'll treat internet sentiment the way we treat everything: a node in the graph that has to earn a verdict.</p></div>
+<h3>The hierarchy of information</h3>
+<p>Keep the order straight, because it's the order the money respects. <b>First: cash flows</b> — earnings, margins, guidance. That's what a stock <i>is</i>. <b>Second: market dynamics</b> — the regime, credit conditions, who's crowded into what (chapters 1–4). <b>Third: sentiment and attention</b> — which never changes what a company is worth, but changes <i>who is holding it and how firmly</i>. Sentiment is a conditioning variable: it tells you how violently the first two will get repriced when they change.</p>
+<h3>What the research actually says about internet noise</h3>
+<ul>
+<li><b>Attention predicts buying, and that buying predicts poor returns.</b> The classic Barber–Odean result: retail investors buy what grabbed their attention, that surge pushes prices past fair value, and forward returns after attention spikes are below average. An attention spike is closer to a <i>sell</i> signal than a buy signal.</li>
+<li><b>Sentiment works best as a contrarian signal at extremes.</b> Euphoria in a crowded name means the marginal buyer is already in — nobody's left to buy. Panic means the marginal seller is done. Mid-range sentiment tells you nothing.</li>
+<li><b>The half-life is days, not months.</b> Viral sentiment decays fast, which fights our monthly cadence. What survives at longer horizons is <i>crowding</i>: how one-sided the positioning got.</li>
+<li><b>Survivorship bias is the trap.</b> You remember the GameStop that 100×'d, not the hundred tickers that got the same treatment and bled out. Any test we run must include the ones that didn't work.</li>
+</ul>
+<h3>How it wires into our architecture</h3>
+<p><b>Into the graph first, not the HMM.</b> The regime model's inputs need decades of history and stable meaning — clean Reddit data barely covers one full cycle, and grafting it in would change what the states mean. So sentiment enters the same way credit did: as <b>new nodes</b> with testable edges. Concretely, using Google Trends (2004→) as the long-history attention proxy plus Reddit/Stocktwits mention counts:</p>
+<ul>
+<li><i>Node:</i> attention z-score per ticker (how abnormal is this week's search/mention volume vs its own history).</li>
+<li><i>Edge to test:</i> "attention spike → next-quarter underperformance" (the Barber–Odean effect, on our universe, walk-forward).</li>
+<li><i>Edge to test:</i> "cluster-level euphoria + stretched valuation → weak forward returns" — the sentiment version of the credit conjunction, and a direct read on today's AI-chips crowding.</li>
+<li><i>Edge to test:</i> "attention spike on a name migrating between co-movement clusters → volatility event ahead" — connecting chapter 4's network to the sentiment node.</li>
+</ul>
+<p><b>Graduation rule:</b> only if a sentiment feature earns a validated verdict does it get promoted into the regime model as a third emission dimension (return, volatility, <i>sentiment</i>) — at which point the states would sharpen from "calm/mid/stress" into moods like <i>euphoric-calm</i> (quiet tape, greedy crowd — the dangerous one) versus <i>fearful-calm</i> (quiet tape, scarred crowd — historically the best buying weather). Same walk-forward test decides if that richer model earns its keep.</p>
+<div class="learn"><div class="lt">The new-era summary</div>
+<p>Data didn't change what investing is — it changed <i>when you can know things</i>. Funds pay millions to know earnings direction weeks early. Our version of that edge is humbler but real: know the regime, know the crowding, know which trends are confirmed by actual co-movement — and let every new data source, however trendy, stand trial in the graph like everything else.</p></div>
 
 <div class="footnote">Chapter data regenerates on every backtest run. Sample: July 2008 → 2026-07-23, monthly. All statistics are historical measurement, not prediction.</div>
 
