@@ -317,5 +317,118 @@ const RECIPES = [
       }
     ],
     "source": "Mom"
+  },
+  {
+    "id": "palak-paneer",
+    "title": "Palak Paneer (Restaurant-Style)",
+    "category": "Curry",
+    "dateAdded": "2026-07-25",
+    "tags": [
+      "paneer",
+      "curry",
+      "vegetarian",
+      "indian",
+      "spinach"
+    ],
+    "note": "Classic creamy spinach-and-paneer curry — deeply spiced onion-tomato base, spinach blended to a rough purée, finished with cream, milk, and kasoori methi.",
+    "sourceUrl": "https://www.teaforturmeric.com/palak-paneer/",
+    "nutrition": {
+      "servings": 4,
+      "perServing": {
+        "calories": 510,
+        "protein_g": 15,
+        "carbs_g": 14,
+        "fat_g": 42,
+        "fiber_g": 5
+      },
+      "estimated": true,
+      "note": "LLM estimate from ingredient quantities"
+    },
+    "ingredientGroups": [
+      {
+        "heading": "Aromatics & base",
+        "items": [
+          "¼ cup neutral oil",
+          "1 tsp cumin seeds",
+          "1 medium onion, finely chopped",
+          "5 garlic cloves, finely chopped",
+          "1-inch ginger, finely chopped",
+          "1–2 small green chilies (Serrano or Thai), finely chopped",
+          "2 ripe tomatoes, puréed"
+        ]
+      },
+      {
+        "heading": "Spices",
+        "items": [
+          "1½ tsp coriander powder",
+          "1 tsp cumin powder",
+          "½ tsp turmeric powder",
+          "½–¾ tsp red chili powder or cayenne",
+          "1½ tsp salt"
+        ]
+      },
+      {
+        "heading": "Spinach",
+        "items": [
+          "1 lb fresh spinach, stems removed (or 10–12 oz frozen)",
+          "2 tbsp ghee or butter",
+          "½ cup water"
+        ]
+      },
+      {
+        "heading": "Paneer & creamy finish",
+        "items": [
+          "8 oz paneer, cut into ½-inch cubes",
+          "¼ cup + 2 tbsp heavy whipping cream",
+          "¼ cup + 2 tbsp whole milk",
+          "½ tbsp kasoori methi (dried fenugreek leaves)",
+          "1 tsp lemon juice",
+          "¼ tsp garam masala (optional)"
+        ]
+      }
+    ],
+    "methodGroups": [
+      {
+        "heading": "Build the base",
+        "steps": [
+          "Heat the oil in a wide pan over medium-high heat. Add the cumin seeds, then the onion, and cook about 10 minutes until deep golden, splashing in a little water if it starts to stick.",
+          "Stir in the garlic, ginger, and chili and cook 2 minutes until fragrant."
+        ]
+      },
+      {
+        "heading": "Simmer the masala",
+        "steps": [
+          "Add the puréed tomatoes, ground spices, and salt. Cook 3–4 minutes until the oil starts to separate."
+        ]
+      },
+      {
+        "heading": "Cook the spinach",
+        "steps": [
+          "Add the spinach a handful at a time and cook until wilted, about 5 minutes.",
+          "Cover and cook another 10 minutes over medium heat, adding a splash of water only if it sticks."
+        ]
+      },
+      {
+        "heading": "Blend",
+        "steps": [
+          "Let the spinach mixture cool a couple minutes, then pulse it in a food processor into a rough purée — not fully smooth."
+        ]
+      },
+      {
+        "heading": "Finish the curry",
+        "steps": [
+          "Melt the ghee or butter in the same pan, add the puréed spinach, and fry it for a minute.",
+          "Stir in the measured water, then the paneer, cream, and milk. Cover and cook on low-medium 7–10 minutes until the paneer has softened and the oil separates at the edges."
+        ]
+      },
+      {
+        "heading": "Season and serve",
+        "steps": [
+          "Crush in the kasoori methi, taste and adjust salt, then squeeze in the lemon juice and stir. Finish with garam masala if using.",
+          "Serve with rice, roti, naan, or paratha."
+        ]
+      }
+    ],
+    "source": "TeaForTurmeric"
   }
 ];
