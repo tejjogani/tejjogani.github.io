@@ -2,6 +2,118 @@
 // Edit/add recipes under recipes/sources/<Person>/<recipe-id>.json, then run: node build.js
 const RECIPES = [
   {
+    "id": "healthy-butter-chicken",
+    "title": "Healthy Butter Chicken (High-Protein)",
+    "category": "Curry",
+    "dateAdded": "2026-07-25",
+    "tags": [
+      "chicken",
+      "curry",
+      "high-protein",
+      "indian",
+      "meal-prep"
+    ],
+    "note": "A lighter, macro-friendly spin on classic butter chicken — Greek yogurt stands in for heavy cream, keeping the same rich, comforting flavor for a fraction of the calories.",
+    "sourceUrl": "https://amateurprochef.com/2026/05/10/healthy-butter-chicken-2/",
+    "nutrition": {
+      "servings": 4,
+      "perServing": {
+        "calories": 420,
+        "protein_g": 52,
+        "carbs_g": 10,
+        "fat_g": 15
+      },
+      "estimated": false,
+      "note": "As stated by the recipe creator"
+    },
+    "ingredientGroups": [
+      {
+        "heading": "Chicken marinade",
+        "items": [
+          "800g chicken breast",
+          "¾ cup 0% Greek yogurt",
+          "1 tbsp lemon juice",
+          "1 tbsp ginger garlic paste"
+        ]
+      },
+      {
+        "heading": "Marinade spices",
+        "items": [
+          "2 tsp Kashmiri chili powder",
+          "½ tsp turmeric",
+          "1 tsp garam masala",
+          "1 tsp cumin powder",
+          "1 tsp coriander powder",
+          "1 tsp salt"
+        ]
+      },
+      {
+        "heading": "Curry sauce",
+        "items": [
+          "1 can (398 mL) fine diced tomatoes",
+          "1 medium onion, finely diced",
+          "1 tbsp ginger garlic paste",
+          "1 tbsp butter",
+          "2 tsp oil",
+          "½ cup water, to thin the sauce"
+        ]
+      },
+      {
+        "heading": "Sauce spices",
+        "items": [
+          "1½ tsp Kashmiri chili powder",
+          "1 tsp coriander powder",
+          "1 tsp garam masala",
+          "1 tbsp kasoori methi (dried fenugreek leaves)",
+          "Salt, to taste"
+        ]
+      },
+      {
+        "heading": "Creamy finish",
+        "items": [
+          "1 cup 0% Greek yogurt",
+          "½ tsp honey or sugar (optional)"
+        ]
+      }
+    ],
+    "methodGroups": [
+      {
+        "heading": "Marinate the chicken",
+        "steps": [
+          "Combine the chicken, yogurt, lemon juice, ginger garlic paste, and all marinade spices in a bowl. Mix well and let sit at least 30 minutes."
+        ]
+      },
+      {
+        "heading": "Cook the chicken",
+        "steps": [
+          "Cook the marinated chicken in a pan or air fryer at 380°F (193°C) for 12–14 minutes, until lightly charred and cooked through. Set aside."
+        ]
+      },
+      {
+        "heading": "Build the curry base",
+        "steps": [
+          "Melt the butter with the oil in a large pan over medium heat. Add the onion and cook until soft and golden, splashing in a little water if it starts to stick.",
+          "Stir in the ginger garlic paste for about a minute, then add the tomatoes. Simmer 8–10 minutes until slightly thickened.",
+          "Stir in the sauce spices and cook 1–2 minutes more."
+        ]
+      },
+      {
+        "heading": "Blend and thin",
+        "steps": [
+          "Blend the sauce until completely smooth, return it to the pan, and stir in the ½ cup of water to loosen the gravy."
+        ]
+      },
+      {
+        "heading": "Finish creamy and serve",
+        "steps": [
+          "Take the pan off high heat, then stir in the Greek yogurt gradually so the sauce stays smooth rather than splitting.",
+          "Add the chicken back in, stir in the garam masala and crushed kasoori methi, and simmer 3–5 minutes before serving."
+        ]
+      }
+    ],
+    "source": "AmateurProChef"
+  },
+  {
     "id": "light-vegetable-stock-soup-soya-croutons",
     "title": "Light Vegetable Stock Soup with Crispy Soya Croutons",
     "category": "Soup",
