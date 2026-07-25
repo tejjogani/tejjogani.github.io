@@ -175,6 +175,16 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
   <li><b>The field improves every year.</b> Standing still is falling behind — which is why the research loop, not any strategy, is the asset.</li>
 </ul>
 
+<h2>Your stack (researched July 2026)</h2>
+<p>The sobering anchor: a 2025 study found <b>58% of retail algo strategies collapse within three months of going live</b> — almost always overfitting plus the execution gap, both preventable. The stack below is chosen to prevent them:</p>
+<ul>
+  <li><b>Broker/API: Alpaca (adopt).</b> Commission-free US stocks/ETFs via API with unlimited, high-fidelity paper trading and no minimum — the standard individual algo on-ramp in 2026. Interactive Brokers later, only if you outgrow ETFs into futures/FX. The Robinhood agentic cash account stays for tiny live validation, not the pipeline.</li>
+  <li><b>Books, in order: Ernest Chan, <i>Quantitative Trading</i></b> (the mechanics and honesty of running a one-person quant shop) → <b>Stefan Jansen, <i>Machine Learning for Algorithmic Trading</i> 2nd ed.</b> (the full modern idea→backtest workflow; skip the deep-learning chapters for now) → QuantStart's free backtesting-pitfalls series as connective tissue.</li>
+  <li><b>Cost discipline:</b> model commissions + spread + slippage in every backtest and require the edge to survive at <i>double</i> your cost assumption. Real fills run ~1.5 ticks worse than the signal — enough to erase a fifth of a thin edge.</li>
+  <li><b>Tax discipline:</b> short-term gains are taxed as income (up to ~37%) vs 15–20% long-term — the single strongest argument for the monthly, low-turnover cadence this whole system already uses.</li>
+</ul>
+<p><b>The 5-step path from here to live:</b> (1) add the cost model to the harness and re-verify every edge survives 2× costs; (2) paper-trade the automated loop on Alpaca for a full quarter, zero manual touches; (3) compare paper vs backtest — material divergence means overfit or mis-costed, fix before funding; (4) fund a $1–5k sleeve with hard-coded position caps and a drawdown kill-switch; (5) scale only after months of live matching expectations, keeping turnover monthly for the tax man.</p>
+
 <div class="learn"><div class="lt">The five-line summary</div>
 <p>Explainable edge → deploy small and mediocre → diversify across uncorrelated edges → size to survive → research forever. Every stage has a kill-criterion written in advance. That's the entire profession; everything else is decoration.</p></div>
 
