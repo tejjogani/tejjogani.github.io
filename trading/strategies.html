@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trading Research — Strategy Families</title>
+<style>
+:root {
+  --bg:#faf8f4; --panel:#ffffff; --ink:#1c1a17; --soft:#6b665e; --line:#e7e2d8;
+  --accent:#7a8a5c; --accent-soft:#eef1e6; --gold:#b28f2c; --red:#c0564f;
+  --blue:#4a7ba6; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --c0:#4a7ba6; --c1:#b28f2c; --c2:#7a8a5c; --c3:#c0564f; --c4:#8a6fb0;
+  --c5:#3e8e7e; --c6:#c07a3f; --c7:#5b6b9e; --c8:#98596b; --c9:#6b8f3d;
+  --c10:#7d7468; --c11:#4f8fb5;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; }
+body { display:grid; grid-template-columns:264px 1fr; min-height:100vh; }
+aside { border-right:1px solid var(--line); padding:32px 24px; position:sticky; top:0;
+  height:100vh; overflow-y:auto; }
+.brand { font-family:var(--serif); font-size:22px; margin:0 0 2px; }
+.brand a { color:var(--ink); text-decoration:none; }
+.tagline { font-size:12.5px; color:var(--soft); margin-bottom:26px; }
+nav .grp { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft);
+  margin:18px 0 6px; font-weight:600; }
+nav a { display:block; padding:5px 10px; margin:1px 0; border-radius:8px; color:var(--ink);
+  text-decoration:none; font-size:14px; }
+nav a:hover { background:var(--accent-soft); }
+nav a.active { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+nav a.sub { padding-left:22px; font-size:13px; color:var(--soft); }
+.backlink { margin-top:28px; font-size:13px; }
+.backlink a { color:var(--soft); }
+main { padding:44px 48px 90px; max-width:840px; }
+.eyebrow { font-size:11.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+  font-weight:650; }
+h1 { font-family:var(--serif); font-weight:400; font-size:34px; margin:6px 0 4px;
+  letter-spacing:-.01em; text-wrap:balance; }
+.sub { color:var(--soft); margin-bottom:26px; }
+h2 { font-family:var(--serif); font-weight:400; font-size:24px; margin:46px 0 8px;
+  padding-top:8px; }
+h3 { font-size:16px; margin:26px 0 6px; }
+p, li { line-height:1.65; font-size:15px; }
+p.lede { color:var(--soft); max-width:66ch; margin-top:0; }
+p, ul { max-width:70ch; }
+.board { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 8px; }
+.pill { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:10px 16px; min-width:148px; }
+.pill .pl { font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--soft); }
+.pill .pv { font-size:16px; font-weight:650; font-variant-numeric:tabular-nums; margin-top:2px; }
+.good .pv { color:var(--accent); } .warn .pv { color:var(--gold); } .bad .pv { color:var(--red); }
+.info .pv { color:var(--blue); }
+.verdict { border-left:3px solid var(--accent); background:var(--panel); padding:14px 18px;
+  border-radius:0 12px 12px 0; margin:16px 0; max-width:72ch; border-top:1px solid var(--line);
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+table { border-collapse:collapse; width:100%; margin:14px 0; font-variant-numeric:tabular-nums;
+  background:var(--panel); border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+th { text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--soft); padding:10px 14px; border-bottom:1px solid var(--line);
+  background:var(--bg); font-weight:600; }
+td { padding:10px 14px; border-bottom:1px solid var(--line); font-size:14px; }
+tr:last-child td { border-bottom:none; }
+.tblwrap { overflow-x:auto; }
+.pos { color:var(--accent); } .neg { color:var(--red); }
+.mono { font-family:var(--mono); font-size:13px; }
+.tag { font-size:11.5px; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.tag.good { background:var(--accent-soft); color:var(--accent); }
+.tag.warn { background:#f5edda; color:var(--gold); }
+.tag.bad { background:#f7e5e3; color:var(--red); }
+.tag.grey { background:#efece6; color:var(--soft); }
+figure { margin:20px 0; }
+figure img { max-width:100%; border:1px solid var(--line); border-radius:12px; background:#fff; }
+figcaption { font-size:13px; color:var(--soft); margin-top:7px; max-width:70ch; }
+.learn { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+  border-radius:0 12px 12px 0; padding:16px 20px; margin:20px 0; max-width:74ch; }
+.learn .lt { font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--gold);
+  font-weight:650; margin-bottom:6px; }
+.learn p { font-size:14px; margin:6px 0; }
+.unlockbox { background:var(--panel); border:1px dashed var(--line); border-radius:12px;
+  padding:26px; text-align:center; margin:16px 0; }
+.unlockbox input { padding:9px 12px; border:1px solid var(--line); border-radius:8px;
+  font-size:14px; margin-right:8px; background:var(--bg); }
+.unlockbox button { padding:9px 18px; border:none; border-radius:8px; background:var(--accent);
+  color:#fff; font-size:14px; cursor:pointer; }
+.unlockbox .err { color:var(--red); font-size:13px; margin-top:10px; display:none; }
+#graphwrap, #netwrap { background:var(--panel); border:1px solid var(--line);
+  border-radius:12px; padding:10px; margin:16px 0; }
+#graphwrap svg { width:100%; height:auto; display:block; }
+#netwrap canvas { width:100%; display:block; cursor:pointer; }
+.cdot { display:inline-block; width:10px; height:10px; border-radius:50%;
+  margin-right:8px; vertical-align:baseline; }
+#edge-detail, #net-detail { background:var(--bg); border:1px solid var(--line);
+  border-radius:10px; padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
+#edge-detail .stats, #net-detail .stats { display:flex; flex-wrap:wrap; gap:16px;
+  margin-top:8px; font-variant-numeric:tabular-nums; }
+#edge-detail .stats div, #net-detail .stats div { font-size:13px; color:var(--soft); }
+#edge-detail .stats b, #net-detail .stats b { display:block; color:var(--ink); font-size:15px; }
+.next { list-style:none; padding:0; }
+.next li { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:13px 17px; margin:9px 0; max-width:74ch; }
+.next .k { font-weight:650; }
+dl dt { font-weight:650; margin-top:16px; }
+dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
+.footnote { margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
+  color:var(--soft); font-size:13px; max-width:76ch; }
+@media (max-width: 900px) {
+  body { grid-template-columns:1fr; }
+  aside { position:static; height:auto; border-right:none; border-bottom:1px solid var(--line); }
+  main { padding:28px 20px 70px; }
+}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand"><a href="index.html">Trading Research</a></div>
+  <div class="tagline">regime-aware, walk-forward, honest</div>
+  <nav>
+    <div class="grp">Dashboard</div>
+    <a class="" href="index.html">Today's dashboard</a>
+    <a class="" href="replay.html">Backtest replay ▶</a>
+    <a class="" href="index.html#portfolio">Your portfolio 🔒</a>
+    <a class="" href="index.html#next">Next steps</a>
+    <div class="grp">Learn</div>
+    <a class="" href="learn.html">The playbook</a>
+    <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
+    <a class="sub" href="learn.html#lab">2 · The strategy lab</a>
+    <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
+    <a class="sub" href="learn.html#comovement">4 · Companies that move together</a>
+    <a class="sub" href="learn.html#positioning">5 · Longs, shorts &amp; flat</a>
+    <a class="sub" href="learn.html#newera">6 · Sentiment &amp; the new era</a>
+    <a class="active" href="strategies.html">Strategy families</a>
+    <a class="" href="index.html#assets">Across assets</a>
+    <div class="grp">Build</div>
+    <a class="" href="algo.html">The algo trader's path</a>
+    <div class="grp">Reference</div>
+    <a class="" href="glossary.html">Glossary</a>
+  </nav>
+  <div class="backlink"><a href="../recipes/">← family dashboard</a></div>
+</aside>
+
+<main>
+
+<div class="eyebrow">Learn · the strategy families</div>
+<h1>Every trading strategy, and why it gets paid</h1>
+<div class="sub">There are only about six basic ways to make money in markets. Each one below is taught with a live demo computed from real data today — including the one that fails, because that lesson matters most.</div>
+
+<div class="learn"><div class="lt">The one question that defines a strategy</div>
+<p>Every legitimate strategy answers: <b>who is paying you, and why are they okay with it?</b> Either you're collecting a <i>risk premium</i> (being paid to hold something uncomfortable) or you're exploiting a <i>mispricing</i> (someone systematically trades at bad prices — often because they must, not because they're dumb). If you can't name the payer, you don't have a strategy; you have a coincidence with good marketing.</p></div>
+
+<h2 id="meanrev">1 · Mean reversion — buying panic, selling calm</h2>
+<p><b>In plain words:</b> prices overshoot. When something falls hard and fast, it usually bounces — like a stretched rubber band. The mean reversion trader buys the panic and sells the recovery.</p>
+<p><b>Who pays you:</b> forced sellers. Margin calls, fund redemptions, stop-losses — people who must sell <i>now</i> at whatever price. You provide the liquidity they're begging for, and the bounce is your fee. This is a risk premium: you get paid for catching falling knives.</p>
+<p><b>The demo</b> — every time SPY fell more than 3% in a week since 1993 (620 times):</p>
+<div class="tblwrap"><table>
+<tr><th>Condition</th><th>Events</th><th>Avg next 5 days</th><th>Positive</th><th>Worst case</th></tr>
+<tr><td>Any normal day (base rate)</td><td>—</td><td>+0.23%</td><td>—</td><td>—</td></tr>
+<tr><td>After a &gt;3% weekly drop</td><td>620</td><td class="pos">+0.83%</td><td>63%</td><td class="neg">-19.8%</td></tr>
+<tr><td>…drop during CALM vol</td><td>59</td><td class="pos">+1.08%</td><td>73%</td><td class="neg">-5.1%</td></tr>
+<tr><td>…drop during HIGH vol</td><td>561</td><td class="pos">+0.80%</td><td>62%</td><td class="neg">-19.8%</td></tr>
+</table></div>
+<figure><img src="assets/demo_meanrev.png" alt="Average path after a panic week vs a normal day" loading="lazy"><figcaption>The rubber band, drawn from 33 years of data: the average path after a panic week (red) climbs ~3.6× faster than a normal day (blue).</figcaption></figure>
+<p><b>Read the table like a professional.</b> The bounce is real — +0.83% in a week vs +0.23% base, 3.6× the normal rate. But look at the regime split: dips in <i>calm</i> markets bounced 73% of the time with a worst case of −5%; dips in <i>high-vol</i> markets bounced only 62% of the time with a worst case of <b>−19.8%</b> (that's October 2008 — the knife kept falling). Mean reversion's dirty secret: it wins small, often, and loses huge, rarely — the exact mirror of trend following. <b>The regime filter isn't optional for this family; it's the strategy.</b></p>
+
+<h2 id="trend">2 · Trend following — the one you already run</h2>
+<p><b>In plain words:</b> what's been going up keeps going up longer than seems reasonable, and crashes take months, not days. Ride the trend, step aside when it breaks. Fully covered in <a href="learn.html#lab">chapter 2</a> — the demo is your own system.</p>
+<p><b>Who pays you:</b> everyone who reacts slowly — institutions that rebalance quarterly, committees that need meetings before selling. And in crashes, everyone who <i>hoped</i>. Trend followers lose small repeatedly (false alarms) and win huge occasionally — mean reversion's mirror twin, which is exactly why the two diversify each other in a portfolio.</p>
+
+<h2 id="momentum">3 · Relative momentum — own whatever is winning</h2>
+<p><b>In plain words:</b> don't predict which asset will do well; just own whichever ones already are, and re-check monthly.</p>
+<p><b>The demo</b> — each month since 2003, hold the top 3 of 9 asset-class ETFs by trailing 12-month return:</p>
+<div class="tblwrap"><table>
+<tr><th>Portfolio</th><th>CAGR</th><th>Sharpe</th><th>Max drawdown</th></tr>
+<tr><td>Top-3 by momentum, rotated monthly</td><td class="pos">11.9%</td><td>0.95</td><td class="neg">-23.2%</td></tr>
+<tr><td>Hold all 9 equally</td><td>8.8%</td><td>0.83</td><td class="neg">-35.6%</td></tr>
+</table></div>
+<figure><img src="assets/demo_momentum.png" alt="Momentum rotation vs equal weight" loading="lazy"><figcaption>+3%/year over the diversified benchmark with a smaller worst drawdown — the momentum premium, one of the most replicated findings in finance.</figcaption></figure>
+<p><b>Who pays you:</b> underreaction. Big news gets priced in over months (committees again), so winners keep winning for a while. <b>Failure mode:</b> turning points — momentum crashes hardest right after a bottom (2009: it was still short/absent from the things that rocketed). This demo is the queued <span class="mono">asset_trend</span> edge's cousin and the natural second strategy for your portfolio.</p>
+
+<h2 id="breakout">4 · Breakout — and why this demo fails on purpose</h2>
+<p><b>In plain words:</b> buy when price exceeds its recent range high (someone knows something), exit when it breaks the range low. The classic is Donchian 55/20 — the 1980s "Turtle" system.</p>
+<p><b>The demo, honestly:</b> on SPY it <b>loses badly</b> — 3.7% CAGR vs 10.8% for buy &amp; hold, with a Sharpe of 0.45 vs 0.64. Why show a failure? Because the lesson is worth more than a win: <b>strategies are instrument-specific.</b> Breakouts made the Turtles rich on commodities and currencies — markets that trend hard when they move. A stock index chops and mean-reverts around a drift, so breakouts buy every local top. Running the right family on the wrong instrument is one of the quietest ways to lose money with a "proven" system.</p>
+
+<h2 id="pairs">5 · Pairs &amp; statistical arbitrage — trading the gap, not the direction</h2>
+<p><b>In plain words:</b> find two things that move together (Coke and Pepsi). When the gap between them stretches unusually wide, bet it closes — long the laggard, short the leader. You don't care where the market goes; you're trading the <i>relationship</i>.</p>
+<p><b>The demo:</b> over 10 years, the KO/PEP spread stretched beyond 2 standard deviations 41 times — and reverted to normal within 60 days <b>93%</b> of the time, median 24 days. The mechanism is very real. Now the cold shower: the "perfect" pair, GLD vs IAU (two funds holding literally the same gold), has a daily spread wobble of just 6 basis points — <b>less than round-trip trading costs.</b> The purest mispricings are exactly the ones already arbitraged to dust. <b>An effect is not an edge until it survives costs</b> — the single most important sentence on this page.</p>
+
+<h2 id="carry">6 · Carry — being paid to hold (no demo needed)</h2>
+<p><b>In plain words:</b> collect a payment simply for holding a position: bond coupons, dividends, selling options premium (being the insurance company). The steadiest income in markets — and the most dangerous psychology, because carry pays you daily right up until the event it insured against arrives. The pros call it "picking up nickels in front of a steamroller." It's a legitimate family (much of finance IS carry), but it's the last one a beginner should automate, precisely because its risk hides longest.</p>
+
+<h2>The map — six families, one table</h2>
+<div class="tblwrap"><table>
+<tr><th>Family</th><th>Who pays you</th><th>Win pattern</th><th>Dies when</th><th>Your status</th></tr>
+<tr><td>Mean reversion</td><td>Forced sellers</td><td>Small, often</td><td>Real crashes (knife keeps falling)</td><td>Candidate #3 — needs regime filter</td></tr>
+<tr><td>Trend following</td><td>Slow reactors, hopers</td><td>Huge, rarely</td><td>Choppy sideways markets</td><td><b>Live</b> — your exposure dial</td></tr>
+<tr><td>Relative momentum</td><td>Underreaction</td><td>Steady drift capture</td><td>Sharp turning points</td><td>Queued — asset_trend edge</td></tr>
+<tr><td>Breakout</td><td>Range traders</td><td>Occasional big trends</td><td>Mean-reverting instruments (SPY!)</td><td>Rejected for indexes — demo above</td></tr>
+<tr><td>Pairs / stat-arb</td><td>Temporary dislocations</td><td>Small, very often</td><td>Costs; relationships breaking</td><td>Educational — capacity too small</td></tr>
+<tr><td>Carry</td><td>Insurance buyers</td><td>Daily drips</td><td>The insured event happening</td><td>Not yet — last to automate</td></tr>
+</table></div>
+<div class="learn"><div class="lt">Why the portfolio idea works</div>
+<p>Look at the win patterns: mean reversion wins small-and-often and loses in crashes; trend loses small-and-often and wins in crashes. Their P&amp;L curves are near-mirror images — run both and the combined curve smooths dramatically. That complementarity, repeated across families, is the entire argument for a portfolio of strategies (<a href="algo.html">stage 3</a>), and it's why the trader in that video runs nine bots, not one.</p></div>
+
+</main>
+
+</body>
+</html>
