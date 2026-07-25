@@ -110,19 +110,114 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
   aside { position:static; height:auto; border-right:none; border-bottom:1px solid var(--line); }
   main { padding:28px 20px 70px; }
 }
+
+/* ---- skip link (a11y) ---- */
+.skip { position:absolute; left:-999px; top:8px; z-index:60; background:var(--panel);
+  border:1px solid var(--accent); color:var(--accent); padding:8px 14px; border-radius:8px;
+  font-size:13px; font-weight:600; text-decoration:none; }
+.skip:focus { left:8px; }
+
+/* ---- visible focus everywhere ---- */
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible,
+.term:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+
+/* ---- reading progress bar (long pages) ---- */
+.progress { position:fixed; top:0; left:0; right:0; height:3px; background:transparent;
+  z-index:50; pointer-events:none; }
+.progress > i { display:block; height:100%; width:0; background:var(--accent);
+  transition:width .08s linear; }
+
+/* ---- glossary term (marginalia study-note treatment) ---- */
+.term { border-bottom:1.5px dotted var(--gold); cursor:help; color:inherit;
+  text-decoration:none; background:none; }
+.term:hover { border-bottom-style:solid; }
+#tooltip { position:fixed; z-index:70; max-width:320px; background:var(--panel);
+  border:1px solid var(--line); border-left:3px solid var(--gold);
+  border-radius:0 10px 10px 0; padding:11px 15px; box-shadow:0 8px 26px rgba(28,26,23,.14);
+  font-family:var(--sans); font-size:13.5px; line-height:1.55; color:var(--ink);
+  opacity:0; transform:translateY(3px); transition:opacity .13s ease, transform .13s ease;
+  pointer-events:none; }
+#tooltip.on { opacity:1; transform:translateY(0); }
+#tooltip .tt-term { font-weight:650; color:var(--gold); font-size:12px;
+  letter-spacing:.03em; display:block; margin-bottom:3px; }
+
+/* ---- on-this-page mini-TOC ---- */
+.toc { position:sticky; top:44px; align-self:start; width:210px; margin:44px 0 0 32px;
+  font-size:13px; }
+.toc .toc-h { font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--soft); font-weight:600; margin-bottom:10px; }
+.toc a { display:block; color:var(--soft); text-decoration:none; padding:3px 0 3px 12px;
+  border-left:2px solid var(--line); line-height:1.4; margin:1px 0; }
+.toc a:hover { color:var(--ink); }
+.toc a.active { color:var(--accent); border-left-color:var(--accent); font-weight:600; }
+.has-toc { display:grid; grid-template-columns:minmax(0,840px) auto; align-items:start; }
+.has-toc main { max-width:none; }
+.toc-toggle { display:none; }
+@media (max-width: 1200px) {
+  .toc { display:none; }
+  .has-toc { display:block; }
+}
+
+/* ---- chapter eyebrow (n of 6) ---- */
+.ch-eyebrow { font-size:11.5px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--gold); font-weight:650; margin-bottom:2px; }
+
+/* ---- self-quiz (check your understanding) ---- */
+.quiz { background:var(--accent-soft); border:1px solid #dfe5d2; border-radius:12px;
+  padding:4px 20px; margin:22px 0; max-width:74ch; }
+.quiz summary { cursor:pointer; padding:14px 0; font-weight:600; font-size:14.5px;
+  list-style:none; display:flex; align-items:baseline; gap:10px; color:var(--ink); }
+.quiz summary::-webkit-details-marker { display:none; }
+.quiz summary::before { content:"?"; flex:none; width:22px; height:22px; border-radius:50%;
+  background:var(--accent); color:#fff; font-size:13px; font-weight:700; text-align:center;
+  line-height:22px; font-family:var(--serif); }
+.quiz summary .qlabel { font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--accent); font-weight:650; align-self:center; }
+.quiz[open] summary { border-bottom:1px solid #dfe5d2; }
+.quiz .qbody { padding:6px 0 16px 32px; }
+.quiz .qbody p { font-size:14px; margin:8px 0; }
+.quiz .qbody p:first-child { margin-top:12px; }
+
+/* ---- next-up learning-path card ---- */
+.nextup { display:flex; align-items:center; gap:16px; text-decoration:none;
+  background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px 20px; margin:30px 0 8px; max-width:74ch; color:var(--ink);
+  transition:border-color .14s ease, transform .14s ease; }
+.nextup:hover { border-color:var(--accent); transform:translateX(2px); }
+.nextup .nu-body { flex:1; min-width:0; }
+.nextup .nu-k { font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--accent); font-weight:650; }
+.nextup .nu-t { font-family:var(--serif); font-size:18px; margin:2px 0 3px; }
+.nextup .nu-d { font-size:13px; color:var(--soft); line-height:1.5; }
+.nextup .nu-arrow { flex:none; font-size:22px; color:var(--accent); }
+.chapter-end { margin:26px 0 8px; }
+.chapter-end .nextup { margin-top:6px; }
+
+@media print {
+  aside, .toc, .progress, #tooltip, .toc-toggle, .nextup { display:none !important; }
+  body, .has-toc { display:block; }
+  main { max-width:none; padding:0; }
+  .term { border-bottom:none; }
+  .quiz { border:1px solid #ccc; }
+  .quiz[open] .qbody, .quiz .qbody { padding-left:0; }
+  a { color:inherit; text-decoration:none; }
+  h2 { page-break-after:avoid; }
+  figure, table, .quiz, .learn, .verdict { page-break-inside:avoid; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation:none !important; }
+  .progress > i, #tooltip, .nextup { transition:none !important; }
+}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"><i></i></div>
 
 <aside>
   <div class="brand"><a href="index.html">Trading Research</a></div>
   <div class="tagline">regime-aware, walk-forward, honest</div>
   <nav>
-    <div class="grp">Dashboard</div>
-    <a class="" href="index.html">Today's dashboard</a>
-    <a class="" href="replay.html">Backtest replay ▶</a>
-    <a class="" href="index.html#portfolio">Your portfolio 🔒</a>
-    <a class="" href="index.html#next">Next steps</a>
     <div class="grp">Learn</div>
     <a class="active" href="learn.html">The playbook</a>
     <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
@@ -132,16 +227,19 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
     <a class="sub" href="learn.html#positioning">5 · Longs, shorts &amp; flat</a>
     <a class="sub" href="learn.html#newera">6 · Sentiment &amp; the new era</a>
     <a class="" href="strategies.html">Strategy families</a>
-    <a class="" href="index.html#assets">Across assets</a>
-    <div class="grp">Build</div>
     <a class="" href="algo.html">The algo trader's path</a>
-    <div class="grp">Reference</div>
     <a class="" href="glossary.html">Glossary</a>
+    <div class="grp">Research desk</div>
+    <a class="" href="index.html">Today's dashboard</a>
+    <a class="" href="replay.html">Backtest replay ▶</a>
+    <a class="" href="index.html#assets">Across assets</a>
+    <a class="" href="index.html#portfolio">Your portfolio 🔒</a>
+    <a class="" href="index.html#next">Next steps</a>
   </nav>
   <div class="backlink"><a href="../recipes/">← family dashboard</a></div>
 </aside>
 
-<main>
+<div class="has-toc"><main id="main">
 
 <div class="eyebrow">The playbook</div>
 <h1>How this system thinks</h1>
@@ -149,6 +247,7 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 
 <p>One rule governs everything here: <b>the model never sees the future.</b> Every signal below is computed "walk-forward" — at each month-end, using only information available on that date, exactly as you would have experienced it. Backtests that skip this rule (most of them) produce beautiful curves and real losses.</p>
 
+<div class="ch-eyebrow" id="ch1">Chapter 1 of 6</div>
 <h2 id="regimes">1 · Market regimes — the weather system</h2>
 <p class="lede">Markets don't have one personality. They alternate between calm grinds and violent storms, and the storms cluster.</p>
 <div class="learn"><div class="lt">In plain words</div>
@@ -194,7 +293,10 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 <p>Here is why the conjunction with valuations is the bubble-burst fingerprint. Expensive markets are, mathematically, markets whose price depends mostly on <i>distant</i> future cash flows — which makes them maximally sensitive to that discounting step. Cheap markets can absorb tighter money; expensive ones cannot. High CAPE alone predicts almost nothing about the next year (expensive markets happily got more expensive for years — 1997, 1998, 1999, 2024, 2025…). Tight credit alone is survivable when assets are cheap. But <b>expensive assets meeting expensive money</b> removes the escape routes: 2000 (spreads had been widening since the 1998 LTCM shock while the Nasdaq doubled), 2007–08 (high-yield cracked in June 2007; the S&amp;P peaked that October, months later), 2022 (the Fed repriced money and the longest-duration assets — unprofitable tech — fell hardest). Same fingerprint, three different decades.</p>
 <div class="learn"><div class="lt">The one-line version</div>
 <p>Stocks are priced on hope, bonds on fear — and fear does its homework earlier. Watch what lenders charge the weakest borrowers: it's the market's smoke detector, and it goes off before the flames reach the earnings statements. When it fires <i>while</i> valuations are stretched, history's worst drawdowns follow. That pairing — not either signal alone — is the edge this system was built to test.</p></div>
+<details class="quiz"><summary><span class="qlabel">Check yourself</span><span>Why does the model need TWO wild days before it starts believing a storm has arrived?</span></summary><div class="qbody"><p>Because a single bad day is scored against a <b>prior</b> that says stress is unlikely, and calm markets genuinely do have the occasional violent day. One −2.5% day only lifts the stress probability from ~1% to ~8% — the model stays skeptical.</p><p>But that update <i>raises tomorrow's starting point</i>. A second wild day now compounds on a ~9% prior and pushes stress toward ~40%; a third makes it the leading hypothesis. Priors stop it panicking at noise; accumulating evidence forces it to accept a real storm within days. That's exactly the temperament you want in a risk manager.</p></div></details>
+<a class="nextup" href="learn.html#lab"><div class="nu-body"><div class="nu-k">Next in the playbook</div><div class="nu-t">2 · The strategy lab</div><div class="nu-d">Now that you can read the weather, see how trading rules built on it are judged — honestly, across 18 years, without ever peeking at the future.</div></div><div class="nu-arrow" aria-hidden="true">→</div></a>
 
+<div class="ch-eyebrow">Chapter 2 of 6</div>
 <h2 id="lab">2 · The strategy lab — judging rules honestly</h2>
 <p class="lede">Four rules, same 18-year window (July 2008 → today), monthly rebalance, signals applied to the following month. Cash earns 0% — a deliberate handicap against the timing rules.</p>
 <div class="learn"><div class="lt">In plain words</div>
@@ -208,7 +310,10 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 <div class="learn"><div class="lt">The three numbers that matter</div>
 <p><b>CAGR</b> — compound annual growth, "what you actually made per year." <b>Sharpe</b> — return per unit of volatility; how much sleep each percent cost. The cutoffs "0.8 decent, 1.0 good" are industry rules of thumb, not laws — but near 1.0 for a simple public rule is genuinely good, because most such rules land well below it. <b>Max drawdown</b> — the worst peak-to-trough fall; the number that decides whether you'd really have stayed in the seat.</p>
 <p>The honest result: the filters <b>gave up ~2.4% CAGR and halved the worst loss.</b> That's not a defect — it's the actual product. You are buying insurance with expected return. Whether that trade is worth it depends on account size, temperament, and when you'll need the money — which is why it's a decision to make in calm markets, in advance.</p></div>
+<details class="quiz"><summary><span class="qlabel">Check yourself</span><span>Buy &amp; hold earned a higher CAGR than every filtered rule. So why isn't &quot;just buy &amp; hold&quot; the obvious winner?</span></summary><div class="qbody"><p>Because CAGR is only the destination — it ignores the ride. Buy &amp; hold spent 2008–09 down <b>46%</b> from its peak; the regime-filtered rules bottomed near <b>−17%</b>. The filters gave up ~2.4% a year of return to roughly halve the worst loss.</p><p>That trade is only &quot;obviously worse&quot; if you're certain you'd have held through a 46% drawdown without selling — and if you'll never need the money during one. The filters are insurance with a known premium. Whether you want it is a personal decision, best made in a calm market rather than during the crash.</p></div></details>
+<a class="nextup" href="learn.html#graph"><div class="nu-body"><div class="nu-k">Next in the playbook</div><div class="nu-t">3 · The relationship graph</div><div class="nu-d">You've seen the rules work. Now meet the system that decides which rules are allowed in at all — every hypothesis put on trial against the evidence.</div></div><div class="nu-arrow" aria-hidden="true">→</div></a>
 
+<div class="ch-eyebrow">Chapter 3 of 6</div>
 <h2 id="graph">3 · The relationship graph — ideas on trial</h2>
 <p class="lede">Indicators are nodes. Hypotheses about how they combine are edges. Every edge must earn its status from walk-forward evidence — and rejected edges are kept, because remembering what <i>doesn't</i> work is half the edge. Click anything.</p>
 <div class="learn"><div class="lt">In plain words</div>
@@ -223,7 +328,10 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 </table></div>
 <div class="learn"><div class="lt">The most valuable negative result in finance</div>
 <p>No edge cleared statistical significance (|t| &gt; 2) for predicting <b>average</b> returns — with only 34–75 stress-months (out of ~217 months total) in the sample, noisy means can't clear that bar. Yet the strategies built on the same signals clearly cut drawdowns. Both are true because of a cornerstone empirical fact: <b>returns are nearly unpredictable; risk is very predictable.</b> Volatility under stress conditions runs 6–8% a month versus ~5% baseline, and it clusters. The signals don't say "the market will fall" — they say "if it falls, it falls harder." De-risking on them is defense on variance, not a forecast of direction.</p></div>
+<details class="quiz"><summary><span class="qlabel">Check yourself</span><span>Every edge in the graph failed the |t| &gt; 2 significance bar for predicting returns. So how can the strategies built on those same signals still work?</span></summary><div class="qbody"><p>Because the signals aren't predicting <b>direction</b> — they're predicting <b>risk</b>. Returns are nearly unpredictable (noisy means, small samples, no edge clears |t| &gt; 2). But volatility is very predictable and it clusters: under stress conditions it runs 6–8% a month versus ~5% baseline.</p><p>So the edge isn't &quot;the market will fall&quot; — it's &quot;if it falls, it falls harder.&quot; De-risking on that is defense against a wider distribution, not a forecast. Two true things at once: the mean is unpredictable, the variance is not.</p></div></details>
+<a class="nextup" href="learn.html#comovement"><div class="nu-body"><div class="nu-k">Next in the playbook</div><div class="nu-t">4 · Companies that move together</div><div class="nu-d">From single indicators to the whole market's wiring: watch stocks self-organize into their real sectors, discovered from price movement alone.</div></div><div class="nu-arrow" aria-hidden="true">→</div></a>
 
+<div class="ch-eyebrow">Chapter 4 of 6</div>
 <h2 id="comovement">4 · Companies that move together</h2>
 <p class="lede">Take 64 stocks, one year of daily returns, and ask a single question: who actually trades together? No sector labels, no industry codes — just correlation. Drag your eyes around; click any node.</p>
 <div class="learn"><div class="lt">In plain words</div>
@@ -247,7 +355,10 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
   <li><b>Co-movement without a story = investigate.</b> A cluster tightening or a stock migrating between clusters before any news is often the market pricing something not yet public. That migration is one of the oldest quiet signals there is.</li>
   <li><b>Diversification is cluster-level, not ticker-level.</b> Owning three names in one cluster is one bet, three times. Check which clusters your holdings actually live in — the ring markers make it visible.</li>
 </ul>
+<details class="quiz"><summary><span class="qlabel">Check yourself</span><span>The headlines are loud about a theme, but the stocks that should benefit aren't actually moving together. What does the co-movement graph tell you to do?</span></summary><div class="qbody"><p><b>Fade the narrative.</b> The graph shows <i>what</i> is really moving together; the news claims <i>why</i>. When a story is loud but the supposed beneficiaries don't correlate, the market doesn't actually believe it — the money isn't being expressed in prices.</p><p>The discipline requires both to agree. Trend + story = trustworthy. Story without co-movement = suspect. And co-movement without any story yet = investigate, because that's often the market quietly pricing something not yet public.</p></div></details>
+<a class="nextup" href="learn.html#positioning"><div class="nu-body"><div class="nu-k">Next in the playbook</div><div class="nu-t">5 · Longs, shorts &amp; flat</div><div class="nu-d">You understand the market. Now the payoff: exactly how all this evidence maps to the only three things you can actually do with money.</div></div><div class="nu-arrow" aria-hidden="true">→</div></a>
 
+<div class="ch-eyebrow">Chapter 5 of 6</div>
 <h2 id="positioning">5 · Longs, shorts, and staying flat</h2>
 <p class="lede">The point of understanding the market is to act intelligently. Here's how evidence maps to the three possible actions.</p>
 <div class="learn"><div class="lt">In plain words</div>
@@ -260,7 +371,10 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 <p>A short fights the drift — the base rate's persistent upward pull: the market's +1%/month average is a headwind you pay every month you're early, on top of borrow costs, and your maximum loss is unbounded. Look at the graph's evidence: even our scariest tested condition — credit stress <i>and</i> broken trend together — still averaged <b>+0.8%/month</b>. Historically, being short in those months lost money on average. The bar for an outright short is an edge with a genuinely <i>negative</i> conditional mean and |t| &gt; 2. Nothing in the graph clears it. What professionals do instead of naked shorts: reduce exposure, buy puts (defined risk, known cost), or go long/short <i>pairs</i> where the market drift cancels out. If the CAPE × credit edge validates with a negative mean once the valuation node is wired in, that becomes this playbook's first legitimate short signal — and that test is precisely why it's next on the roadmap.</p>
 <div class="learn"><div class="lt">The asymmetry to remember</div>
 <p>De-risking needs an edge in <b>variance</b> (easy to find, we have it). Shorting needs an edge in <b>direction</b> (rare, we don't — yet). Confusing the two is how people turn a good storm detector into a losing short book.</p></div>
+<details class="quiz"><summary><span class="qlabel">Check yourself</span><span>A market looks clearly overvalued. Why isn't that — on its own — a reason to short it?</span></summary><div class="qbody"><p>Because &quot;overvalued&quot; is a statement about <b>value</b>, not about <b>direction or timing</b>. Expensive markets have happily gotten more expensive for years (1997–99, 2024–25). A short fights the market's persistent ~+1%/month drift — a headwind you pay every month you're early, plus borrow costs, with unbounded downside.</p><p>Even the scariest tested condition (credit stress <i>and</i> broken trend together) still averaged <b>+0.8%/month</b>. Shorting needs a validated <i>negative</i>-mean edge, and nothing in the graph clears that bar yet. The graveyard is full of people who confused &quot;overvalued&quot; with &quot;about to go down.&quot;</p></div></details>
+<a class="nextup" href="learn.html#newera"><div class="nu-body"><div class="nu-k">Final chapter</div><div class="nu-t">6 · Sentiment &amp; the new era</div><div class="nu-d">One chapter left: where Reddit, satellites, and language models fit — and the honest verdict on what internet noise is, and isn't, worth.</div></div><div class="nu-arrow" aria-hidden="true">→</div></a>
 
+<div class="ch-eyebrow">Chapter 6 of 6</div>
 <h2 id="newera">6 · Sentiment, Reddit, and the new era of data</h2>
 <p class="lede">What billion-dollar funds actually do with alternative data, what internet noise is and isn't worth, and exactly how sentiment will plug into our graph and regime model.</p>
 <div class="learn"><div class="lt">In plain words</div>
@@ -285,10 +399,13 @@ dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
 <p><b>Graduation rule:</b> only if a sentiment feature earns a validated verdict does it get promoted into the regime model as a third emission dimension (return, volatility, <i>sentiment</i>) — at which point the states would sharpen from "calm/mid/stress" into moods like <i>euphoric-calm</i> (quiet tape, greedy crowd — the dangerous one) versus <i>fearful-calm</i> (quiet tape, scarred crowd — historically the best buying weather). Same walk-forward test decides if that richer model earns its keep.</p>
 <div class="learn"><div class="lt">The new-era summary</div>
 <p>Data didn't change what investing is — it changed <i>when you can know things</i>. Funds pay millions to know earnings direction weeks early. Our version of that edge is humbler but real: know the regime, know the crowding, know which trends are confirmed by actual co-movement — and let every new data source, however trendy, stand trial in the graph like everything else.</p></div>
+<details class="quiz"><summary><span class="qlabel">Check yourself</span><span>A ticker goes viral and its search volume spikes. Is that a buy signal?</span></summary><div class="qbody"><p>Closer to a <b>sell</b> signal, actually. The Barber–Odean result: retail investors buy whatever grabbed their attention, that surge pushes price past fair value, and forward returns after attention spikes run <i>below</i> average.</p><p>Two more catches: sentiment's half-life is days, not months, so it fights a monthly cadence; and survivorship bias makes you remember the one GameStop that 100×'d, not the hundred tickers that got the same hype and bled out. Internet sentiment is useful for gauging <i>how crowded and fragile</i> a trade is — not for calling its direction.</p></div></details>
+<a class="nextup" href="strategies.html"><div class="nu-body"><div class="nu-k">You finished the playbook</div><div class="nu-t">The strategy families</div><div class="nu-d">Six chapters down. Next: the ~six fundamental ways anyone makes money in markets — each with a live demo, including the one that fails on purpose.</div></div><div class="nu-arrow" aria-hidden="true">→</div></a>
 
 <div class="footnote">Chapter data regenerates on every backtest run. Sample: July 2008 → 2026-07-24, monthly. All statistics are historical measurement, not prediction.</div>
 
 </main>
+<nav class="toc" aria-label="On this page"><div class="toc-h">On this page</div><a href="#regimes">1 · Market regimes</a><a href="#lab">2 · The strategy lab</a><a href="#graph">3 · The relationship graph</a><a href="#comovement">4 · Companies that move together</a><a href="#positioning">5 · Longs, shorts &amp; flat</a><a href="#newera">6 · Sentiment &amp; new data</a></nav></div>
 
 <script>
 const GRAPH = {"nodes": [{"id": "trend", "name": "SPY price vs 10-month moving average", "source": "yfinance SPY", "status": "live"}, {"id": "credit_spreads", "name": "High-yield credit spread (ICE BofA OAS)", "source": "FRED BAMLH0A0HYM2", "status": "live"}, {"id": "vol_regime", "name": "Volatility regime (3-state HMM)", "source": "derived from SPY", "status": "live"}, {"id": "valuation_cape", "name": "Valuation (Shiller CAPE)", "source": "Shiller/Yale monthly, proxy-extended past 2023-08 via real price growth vs 6%/yr trend earnings", "status": "live"}, {"id": "yield_curve", "name": "10y-3m Treasury curve", "source": "FRED T10Y3M", "status": "pending"}, {"id": "breadth", "name": "% of stocks above 200-day MA", "source": "needs universe data", "status": "pending"}, {"id": "gold", "name": "Gold (GLD)", "source": "yfinance GLD, 2005->", "status": "live"}, {"id": "real_rates", "name": "10y real interest rate (TIPS yield)", "source": "FRED DFII10 \u2014 pending feed", "status": "pending"}, {"id": "fwd_return_1m", "name": "SPY forward 1-month return", "source": "target variable", "status": "live"}], "edges": [{"id": "credit_alone", "from": ["credit_spreads"], "to": "fwd_return_1m", "hypothesis": "When HY spreads are above their 12-month median (credit getting harder), forward equity returns are weaker.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 75, "mean_fwd_1m_pct": 0.81, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 64.0, "vol_of_fwd_pct": 5.89, "t_stat_vs_base": -0.34}}, {"id": "trend_alone", "from": ["trend"], "to": "fwd_return_1m", "hypothesis": "When price is below its 10-month MA, forward returns are weaker and more volatile.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 48, "mean_fwd_1m_pct": 1.08, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 58.3, "vol_of_fwd_pct": 7.2, "t_stat_vs_base": 0.03}}, {"id": "highvol_alone", "from": ["vol_regime"], "to": "fwd_return_1m", "hypothesis": "The high-volatility HMM regime carries weaker risk-adjusted forward returns.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 67, "mean_fwd_1m_pct": 0.9, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 62.7, "vol_of_fwd_pct": 6.38, "t_stat_vs_base": -0.18}}, {"id": "credit_x_trend", "from": ["credit_spreads", "trend"], "to": "fwd_return_1m", "hypothesis": "CONJUNCTION (the bubble-burst fingerprint): credit stress AND broken trend together are far worse than either alone \u2014 this is the tradeable version of 'high valuations + borrowing gets hard = bubbles burst'.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 34, "mean_fwd_1m_pct": 0.8, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 58.8, "vol_of_fwd_pct": 7.73, "t_stat_vs_base": -0.18}}, {"id": "cape_alone", "from": ["valuation_cape"], "to": "fwd_return_1m", "hypothesis": "When CAPE is above its 90th percentile of all history to date (top-decile expensive), forward returns are weaker.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 148, "mean_fwd_1m_pct": 0.99, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 68.2, "vol_of_fwd_pct": 4.06, "t_stat_vs_base": -0.15}}, {"id": "cape_x_credit", "from": ["valuation_cape", "credit_spreads"], "to": "fwd_return_1m", "hypothesis": "High CAPE alone is a poor timing signal (markets stay expensive for years), but high CAPE + tightening credit identifies when expensive markets actually crack.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 46, "mean_fwd_1m_pct": 0.66, "base_mean_fwd_1m_pct": 1.04, "hit_rate_positive_pct": 65.2, "vol_of_fwd_pct": 4.79, "t_stat_vs_base": -0.54}}, {"id": "gold_realrates", "from": ["real_rates", "gold"], "to": "fwd_return_1m", "hypothesis": "Gold's monthly return is negatively related to the CHANGE in 10y real (TIPS) yields \u2014 the opportunity-cost mechanism. The literature's most reliable gold relationship; recently weakened by central-bank buying.", "status": "hypothesis \u2014 queued (needs TIPS feed)", "stats": null}, {"id": "asset_trend", "from": ["trend"], "to": "fwd_return_1m", "hypothesis": "Faber GTAA claim: a 10-month-MA on/off filter applied PER ASSET CLASS roughly matches buy-and-hold return while cutting max drawdown by more than half (1973-2020 evidence: ~9.5% CAGR, -13% maxDD vs -50%+). Test on our 10-ETF basket.", "status": "hypothesis \u2014 queued", "stats": null}, {"id": "gold_hedge", "from": ["gold"], "to": "fwd_return_1m", "hypothesis": "Gold rises in months stocks fall \u2014 the crisis-hedge claim. Tested as: GLD's average return in SPY-down months vs its average in all months.", "status": "tested \u2014 weak/insignificant", "stats": {"n_months": 87, "mean_fwd_1m_pct": 0.63, "base_mean_fwd_1m_pct": 0.94, "hit_rate_positive_pct": 49.4, "vol_of_fwd_pct": 5.43, "t_stat_vs_base": -0.53, "note": "in the 10 worst SPY months (avg -10.1%), gold averaged -0.2%"}}]};
@@ -498,6 +615,145 @@ cv.addEventListener("click", (ev) => {
       <div><b>${partners}</b>strongest correlations</div>
     </div>`;
 });
+</script>
+
+
+<div id="tooltip" role="tooltip" aria-hidden="true"></div>
+<script>
+(function () {
+  var GLOSSARY = {"CAGR": "Compound annual growth rate \u2014 what an investment actually earned per year once compounding is accounted for. The destination number.", "Sharpe ratio": "Average return divided by volatility (annualized). Return per unit of stress. Roughly: 0.5 mediocre, 0.8 decent, 1.0+ good for simple rules.", "Sharpe": "Average return divided by volatility (annualized). Return per unit of stress. Roughly: 0.5 mediocre, 0.8 decent, 1.0+ good for simple rules.", "max drawdown": "Drawdown: how far below your own prior peak you currently sit. Max drawdown: the worst such fall in the whole record. The journey number \u2014 it decides whether you'd actually have held on.", "drawdown": "Drawdown: how far below your own prior peak you currently sit. Max drawdown: the worst such fall in the whole record. The journey number \u2014 it decides whether you'd actually have held on.", "drawdowns": "Drawdown: how far below your own prior peak you currently sit. Max drawdown: the worst such fall in the whole record. The journey number \u2014 it decides whether you'd actually have held on.", "volatility": "How much returns swing, usually annualized standard deviation. ~15% is normal for stocks; 30%+ is storm territory.", "beta": "How much a stock moves per 1% market move. Beta 2 \u2248 doubles every market swing, both directions.", "correlation": "How much two things move together (\u22121 to +1). Low-correlation assets are diversifiers; in crashes, most correlations lurch toward 1.", "correlations": "How much two things move together (\u22121 to +1). Low-correlation assets are diversifiers; in crashes, most correlations lurch toward 1.", "correlated": "How much two things move together (\u22121 to +1). Low-correlation assets are diversifiers; in crashes, most correlations lurch toward 1.", "uncorrelated": "How much two things move together (\u22121 to +1). Low-correlation assets are diversifiers; in crashes, most correlations lurch toward 1.", "regime": "A persistent market 'mood' \u2014 calm, choppy, stressed. Regimes cluster, which is why risk is more predictable than return.", "regimes": "A persistent market 'mood' \u2014 calm, choppy, stressed. Regimes cluster, which is why risk is more predictable than return.", "hidden Markov model": "A statistical model that assumes an unobservable state generates the data, and infers today's state from recent behavior. Our regime detector.", "walk-forward": "Testing discipline where the model only ever uses data available at each historical moment. The difference between a backtest and a fairy tale.", "lookahead bias": "Accidentally letting a backtest peek at the future (e.g., using a month's average price to trade that same month). The most common way backtests lie.", "credit spread": "Extra yield lenders demand from risky borrowers over Treasuries. Widening spreads = 'borrowing is getting harder' = the classic pre-storm signal.", "credit spreads": "Extra yield lenders demand from risky borrowers over Treasuries. Widening spreads = 'borrowing is getting harder' = the classic pre-storm signal.", "OAS": "Extra yield lenders demand from risky borrowers over Treasuries. Widening spreads = 'borrowing is getting harder' = the classic pre-storm signal.", "spread": "Extra yield lenders demand from risky borrowers over Treasuries. Widening spreads = 'borrowing is getting harder' = the classic pre-storm signal.", "spreads": "Extra yield lenders demand from risky borrowers over Treasuries. Widening spreads = 'borrowing is getting harder' = the classic pre-storm signal.", "10-month moving average": "Average of the last ~10 months of prices. Price above it = uptrend intact. Old (1930s), simple, and still the benchmark trend filter.", "10-month average": "Average of the last ~10 months of prices. Price above it = uptrend intact. Old (1930s), simple, and still the benchmark trend filter.", "moving average": "Average of the last ~10 months of prices. Price above it = uptrend intact. Old (1930s), simple, and still the benchmark trend filter.", "base rate": "What happens on average, ignoring all signals \u2014 here, stocks up ~64% of months, +1.04% (~1%) per month. Every trade idea must beat this, not zero.", "t-statistic": "How many standard errors an effect is from zero. |t| > 2 is the conventional 'probably real' bar. Small samples almost never clear it \u2014 respect that.", "t-stat": "How many standard errors an effect is from zero. |t| > 2 is the conventional 'probably real' bar. Small samples almost never clear it \u2014 respect that.", "hit rate": "Percent of months a condition saw positive returns. 64% base rate is why shorting is structurally hard.", "conjunction": "Two signals required together (credit stress AND broken trend). Conjunctions are where real edges usually hide \u2014 single indicators are too crowded.", "conjunctions": "Two signals required together (credit stress AND broken trend). Conjunctions are where real edges usually hide \u2014 single indicators are too crowded.", "equity risk premium": "Expected stock return minus safe bond yield \u2014 the payment for bearing risk. Near zero today, which is what 'expensive market' means in one number.", "transition matrix": "The regime model's table of switching odds: given today's mood, the probability of each mood tomorrow. Big diagonal numbers = moods are sticky = risk is forecastable.", "emission": "What a hidden state 'shows' you \u2014 the daily return and volatility a regime generates. You infer the hidden mood from its visible emissions.", "emissions": "What a hidden state 'shows' you \u2014 the daily return and volatility a regime generates. You infer the hidden mood from its visible emissions.", "Baum\u2013Welch": "The fitting loop for a hidden Markov model: guess the states, sort days into them, re-measure each state, repeat until stable. No hand labels anywhere.", "expectation-maximization": "The fitting loop for a hidden Markov model: guess the states, sort days into them, re-measure each state, repeat until stable. No hand labels anywhere.", "forward algorithm": "The daily Bayes update that turns yesterday's regime probabilities plus today's market move into today's regime probabilities. Cheap, online, no peeking ahead.", "correlation network": "A graph where stocks are dots and strong return correlations are lines. The market's real seating chart \u2014 who actually trades together, whatever the sector label says.", "co-movement graph": "A graph where stocks are dots and strong return correlations are lines. The market's real seating chart \u2014 who actually trades together, whatever the sector label says.", "co-movement": "A graph where stocks are dots and strong return correlations are lines. The market's real seating chart \u2014 who actually trades together, whatever the sector label says.", "label propagation": "Cluster discovery by peer pressure: every stock repeatedly adopts the most common group among its correlated neighbors until the map settles.", "cluster migration": "A stock changing which group it trades with \u2014 often the market repricing its story before the news says why. Worth investigating every time.", "migrating between clusters": "A stock changing which group it trades with \u2014 often the market repricing its story before the news says why. Worth investigating every time.", "prior": "The three beats of a Bayes update: what you believed this morning (prior), how well each possibility explains what you just saw (likelihood), what you believe now (posterior = prior \u00d7 likelihood, rescaled).", "likelihood": "The three beats of a Bayes update: what you believed this morning (prior), how well each possibility explains what you just saw (likelihood), what you believe now (posterior = prior \u00d7 likelihood, rescaled).", "likelihoods": "The three beats of a Bayes update: what you believed this morning (prior), how well each possibility explains what you just saw (likelihood), what you believe now (posterior = prior \u00d7 likelihood, rescaled).", "posterior": "The three beats of a Bayes update: what you believed this morning (prior), how well each possibility explains what you just saw (likelihood), what you believe now (posterior = prior \u00d7 likelihood, rescaled).", "Bayes update": "The three beats of a Bayes update: what you believed this morning (prior), how well each possibility explains what you just saw (likelihood), what you believe now (posterior = prior \u00d7 likelihood, rescaled).", "attention effect": "Barber\u2013Odean: retail investors buy whatever grabbed their attention; the surge overshoots, and returns after attention spikes are below average. Spikes are closer to sell signals.", "attention spike": "Barber\u2013Odean: retail investors buy whatever grabbed their attention; the surge overshoots, and returns after attention spikes are below average. Spikes are closer to sell signals.", "attention spikes": "Barber\u2013Odean: retail investors buy whatever grabbed their attention; the surge overshoots, and returns after attention spikes are below average. Spikes are closer to sell signals.", "Barber\u2013Odean": "Barber\u2013Odean: retail investors buy whatever grabbed their attention; the surge overshoots, and returns after attention spikes are below average. Spikes are closer to sell signals.", "crowding": "How one-sided the positioning in a trade has become. Crowded trades aren't wrong \u2014 they're fragile: everyone heads for the same exit at once.", "crowded": "How one-sided the positioning in a trade has become. Crowded trades aren't wrong \u2014 they're fragile: everyone heads for the same exit at once.", "alternative data": "Anything that estimates fundamentals before they're reported: card panels, satellite images, app downloads, scraped sentiment. The modern arms race in one phrase.", "S&P 500": "The S&P 500 is an index of the 500 largest US public companies \u2014 the default meaning of 'the market' on this site. SPY and VOO are funds that each hold all 500, so owning either is owning a slice of corporate America. We treat them as one position.", "SPY": "The S&P 500 is an index of the 500 largest US public companies \u2014 the default meaning of 'the market' on this site. SPY and VOO are funds that each hold all 500, so owning either is owning a slice of corporate America. We treat them as one position.", "VOO": "The S&P 500 is an index of the 500 largest US public companies \u2014 the default meaning of 'the market' on this site. SPY and VOO are funds that each hold all 500, so owning either is owning a slice of corporate America. We treat them as one position.", "index fund": "A fund that automatically buys every stock in an index instead of picking favorites. Cheap, diversified, and the benchmark every clever strategy here must justify itself against.", "annualized": "A rate rescaled to per-year so periods of different lengths can be compared. '11% annualized volatility' doesn't mean 11% happened \u2014 it means at the current pace, a year would swing that much.", "bond": "A loan to a company or government that pays fixed interest. The lender's best case is merely getting repaid \u2014 which is why bond investors are professionally paranoid, and why they smell trouble first.", "bonds": "A loan to a company or government that pays fixed interest. The lender's best case is merely getting repaid \u2014 which is why bond investors are professionally paranoid, and why they smell trouble first.", "bondholder": "A loan to a company or government that pays fixed interest. The lender's best case is merely getting repaid \u2014 which is why bond investors are professionally paranoid, and why they smell trouble first.", "bond investors": "A loan to a company or government that pays fixed interest. The lender's best case is merely getting repaid \u2014 which is why bond investors are professionally paranoid, and why they smell trouble first.", "Treasuries": "Bonds issued by the US government \u2014 treated as the 'risk-free' baseline that every other investment gets priced against.", "Treasury": "Bonds issued by the US government \u2014 treated as the 'risk-free' baseline that every other investment gets priced against.", "yield": "The effective interest rate a bond pays at its current price. Price and yield move opposite ways: pay less for the same payments, earn more.", "high-yield": "Bonds from risky borrowers, who must pay extra yield to attract lenders. That extra yield over Treasuries is the credit spread \u2014 this system's smoke detector.", "junk-rated": "Bonds from risky borrowers, who must pay extra yield to attract lenders. That extra yield over Treasuries is the credit spread \u2014 this system's smoke detector.", "junk bonds": "Bonds from risky borrowers, who must pay extra yield to attract lenders. That extra yield over Treasuries is the credit spread \u2014 this system's smoke detector.", "CAPE": "Price divided by ten years of inflation-adjusted average earnings \u2014 the long-run gauge of how expensive the market is. Readings above ~40 (today's zone) have only occurred near major tops.", "Shiller CAPE": "Price divided by ten years of inflation-adjusted average earnings \u2014 the long-run gauge of how expensive the market is. Readings above ~40 (today's zone) have only occurred near major tops.", "standard deviation": "The typical distance of outcomes from their average. A 1\u03c3 day is ordinary, 3\u03c3 is rare, and 4.5\u03c3 means 'your definition of normal is being violated.'", "standard error": "The typical distance of outcomes from their average. A 1\u03c3 day is ordinary, 3\u03c3 is rare, and 4.5\u03c3 means 'your definition of normal is being violated.'", "standard errors": "The typical distance of outcomes from their average. A 1\u03c3 day is ordinary, 3\u03c3 is rare, and 4.5\u03c3 means 'your definition of normal is being violated.'", "z-score": "How many standard deviations an observation sits from its average \u2014 the universal 'how weird is this?' unit.", "bell curve": "The shape where most outcomes cluster near the average and extremes fall away fast. Each regime in our model is a bell curve over daily returns with its own width.", "normal distribution": "The shape where most outcomes cluster near the average and extremes fall away fast. Each regime in our model is a bell curve over daily returns with its own width.", "put": "An option is a contract to buy or sell at a fixed price by a fixed date. A put pays off when prices fall \u2014 buying one is crash insurance with a known maximum cost, unlike shorting, where losses are unbounded.", "puts": "An option is a contract to buy or sell at a fixed price by a fixed date. A put pays off when prices fall \u2014 buying one is crash insurance with a known maximum cost, unlike shorting, where losses are unbounded.", "option": "An option is a contract to buy or sell at a fixed price by a fixed date. A put pays off when prices fall \u2014 buying one is crash insurance with a known maximum cost, unlike shorting, where losses are unbounded.", "options": "An option is a contract to buy or sell at a fixed price by a fixed date. A put pays off when prices fall \u2014 buying one is crash insurance with a known maximum cost, unlike shorting, where losses are unbounded.", "Markov property": "Tomorrow depends only on today's state, not the deeper past \u2014 like weather: a stormy day predicts another stormy day, regardless of how long ago summer was.", "Markov": "Tomorrow depends only on today's state, not the deeper past \u2014 like weather: a stormy day predicts another stormy day, regardless of how long ago summer was.", "expanding window": "Refitting a model on all history up to each date \u2014 the training set grows over time and never contains the future. The stricter cousin of walk-forward.", "P&L": "Profit and loss \u2014 what a position or strategy made or lost over some period.", "discounting": "Future money is worth less than money today, so asset prices shrink expected future cash flows back to the present. When interest rates rise, the shrink is harsher \u2014 hitting hardest the assets whose payoffs sit furthest in the future.", "discounted": "Future money is worth less than money today, so asset prices shrink expected future cash flows back to the present. When interest rates rise, the shrink is harsher \u2014 hitting hardest the assets whose payoffs sit furthest in the future.", "discount": "Future money is worth less than money today, so asset prices shrink expected future cash flows back to the present. When interest rates rise, the shrink is harsher \u2014 hitting hardest the assets whose payoffs sit furthest in the future.", "risk-on": "Risk-on: own stocks. Risk-off (de-risk): own fewer or none. Exposure: the share of your money currently in stocks \u2014 the main dial this whole system turns.", "risk-off": "Risk-on: own stocks. Risk-off (de-risk): own fewer or none. Exposure: the share of your money currently in stocks \u2014 the main dial this whole system turns.", "de-risk": "Risk-on: own stocks. Risk-off (de-risk): own fewer or none. Exposure: the share of your money currently in stocks \u2014 the main dial this whole system turns.", "de-risking": "Risk-on: own stocks. Risk-off (de-risk): own fewer or none. Exposure: the share of your money currently in stocks \u2014 the main dial this whole system turns.", "exposure": "Risk-on: own stocks. Risk-off (de-risk): own fewer or none. Exposure: the share of your money currently in stocks \u2014 the main dial this whole system turns.", "half-life": "How long an effect takes to fade to half its strength. Viral sentiment: days. Market regimes: months.", "mean reversion": "The strategy family that buys panic and sells recovery \u2014 betting stretched prices snap back. Wins small and often; loses huge in real crashes. The mirror image of trend following.", "mean-reversion": "The strategy family that buys panic and sells recovery \u2014 betting stretched prices snap back. Wins small and often; loses huge in real crashes. The mirror image of trend following.", "mean-reverter": "The strategy family that buys panic and sells recovery \u2014 betting stretched prices snap back. Wins small and often; loses huge in real crashes. The mirror image of trend following.", "mean-reverts": "The strategy family that buys panic and sells recovery \u2014 betting stretched prices snap back. Wins small and often; loses huge in real crashes. The mirror image of trend following.", "mean-reverting": "The strategy family that buys panic and sells recovery \u2014 betting stretched prices snap back. Wins small and often; loses huge in real crashes. The mirror image of trend following.", "breakout": "Buying when price exceeds its recent range high, betting a new trend is starting. Works on trending instruments (commodities, FX); fails on choppy ones (stock indexes).", "breakouts": "Buying when price exceeds its recent range high, betting a new trend is starting. Works on trending instruments (commodities, FX); fails on choppy ones (stock indexes).", "pairs trading": "Betting the gap between two related assets (Coke vs Pepsi) closes when it stretches unusually wide. Direction-neutral \u2014 you trade the relationship, not the market.", "stat-arb": "Betting the gap between two related assets (Coke vs Pepsi) closes when it stretches unusually wide. Direction-neutral \u2014 you trade the relationship, not the market.", "statistical arbitrage": "Betting the gap between two related assets (Coke vs Pepsi) closes when it stretches unusually wide. Direction-neutral \u2014 you trade the relationship, not the market.", "carry": "Being paid simply to hold: coupons, dividends, sold-option premium. Steady income that hides its risk until the insured event arrives \u2014 'nickels in front of a steamroller.'", "risk premium": "Payment earned for holding something uncomfortable that others want off their books. The honest answer to 'why does this strategy make money' for most strategies that actually do.", "risk premia": "Payment earned for holding something uncomfortable that others want off their books. The honest answer to 'why does this strategy make money' for most strategies that actually do.", "risk-transfer premium": "Payment earned for holding something uncomfortable that others want off their books. The honest answer to 'why does this strategy make money' for most strategies that actually do.", "risk-transfer": "Payment earned for holding something uncomfortable that others want off their books. The honest answer to 'why does this strategy make money' for most strategies that actually do.", "forced seller": "Someone who must sell now regardless of price \u2014 margin calls, fund redemptions, stop-losses. The person on the other side of the mean-reversion trade, and the reason it pays.", "forced sellers": "Someone who must sell now regardless of price \u2014 margin calls, fund redemptions, stop-losses. The person on the other side of the mean-reversion trade, and the reason it pays."};
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- glossary auto-linking ---------- */
+  // Build one case-insensitive regex of all surface phrases, longest first so
+  // "credit spread" wins over "spread". Word-boundaried where it makes sense.
+  var phrases = Object.keys(GLOSSARY).sort(function (a, b) { return b.length - a.length; });
+  var esc = function (s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); };
+  var re = new RegExp("(?:^|\\b)(" + phrases.map(esc).join("|") + ")(?:\\b|$)", "i");
+  var SKIP = { A: 1, CODE: 1, SCRIPT: 1, STYLE: 1, H1: 1, H2: 1, H3: 1, DT: 1,
+               BUTTON: 1, INPUT: 1, SELECT: 1, TEXTAREA: 1, SUMMARY: 1 };
+  // Only link the FIRST occurrence of each definition, so prose isn't peppered.
+  var linked = {};
+  function defFor(word) {
+    var k = word.toLowerCase();
+    for (var key in GLOSSARY) if (key.toLowerCase() === k) return { key: key, def: GLOSSARY[key] };
+    return null;
+  }
+  function walk(node) {
+    if (node.nodeType === 1) {
+      if (SKIP[node.tagName]) return;
+      if (node.classList && node.classList.contains("term")) return;
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var i = 0; i < kids.length; i++) walk(kids[i]);
+      return;
+    }
+    if (node.nodeType !== 3) return;
+    var text = node.nodeValue;
+    var m = re.exec(text);
+    if (!m) return;
+    var matched = m[1];
+    var hit = defFor(matched);
+    if (!hit || linked[hit.def]) return;         // one link per definition
+    linked[hit.def] = true;
+    var start = m.index + m[0].indexOf(matched);
+    var span = document.createElement("span");
+    span.className = "term";
+    span.setAttribute("tabindex", "0");
+    span.setAttribute("role", "button");
+    span.setAttribute("data-def", hit.def);
+    span.setAttribute("aria-label", matched + ": " + hit.def);
+    span.textContent = matched;
+    var after = node.splitText(start);
+    after.nodeValue = after.nodeValue.slice(matched.length);
+    node.parentNode.insertBefore(span, after);
+    walk(after);                                  // continue after the match
+  }
+  var main = document.querySelector("main");
+  if (main) walk(main);
+
+  /* ---------- tooltip ---------- */
+  var tip = document.getElementById("tooltip");
+  var activeTerm = null;
+  function showTip(el) {
+    activeTerm = el;
+    tip.innerHTML = '<span class="tt-term">' + el.textContent + '</span>' + el.getAttribute("data-def");
+    tip.setAttribute("aria-hidden", "false");
+    tip.classList.add("on");
+    var r = el.getBoundingClientRect();
+    // measure, then place above or below depending on room
+    var tw = Math.min(320, tip.offsetWidth), th = tip.offsetHeight;
+    var left = Math.min(Math.max(8, r.left), window.innerWidth - tw - 8);
+    var top = r.bottom + 8;
+    if (top + th > window.innerHeight - 8 && r.top - th - 8 > 8) top = r.top - th - 8;
+    tip.style.left = left + "px";
+    tip.style.top = top + "px";
+  }
+  function hideTip() {
+    activeTerm = null;
+    tip.classList.remove("on");
+    tip.setAttribute("aria-hidden", "true");
+  }
+  document.addEventListener("mouseover", function (e) {
+    var t = e.target.closest ? e.target.closest(".term") : null;
+    if (t) showTip(t);
+  });
+  document.addEventListener("mouseout", function (e) {
+    var t = e.target.closest ? e.target.closest(".term") : null;
+    if (t && t === activeTerm) hideTip();
+  });
+  document.addEventListener("focusin", function (e) {
+    if (e.target.classList && e.target.classList.contains("term")) showTip(e.target);
+  });
+  document.addEventListener("focusout", function (e) {
+    if (e.target.classList && e.target.classList.contains("term")) hideTip();
+  });
+  // tap: toggle on touch, dismiss on outside tap
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest ? e.target.closest(".term") : null;
+    if (t) { e.preventDefault(); (t === activeTerm) ? hideTip() : showTip(t); return; }
+    if (activeTerm) hideTip();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && activeTerm) hideTip();
+    if ((e.key === "Enter" || e.key === " ") && document.activeElement &&
+        document.activeElement.classList && document.activeElement.classList.contains("term")) {
+      e.preventDefault();
+      (document.activeElement === activeTerm) ? hideTip() : showTip(document.activeElement);
+    }
+  });
+  window.addEventListener("scroll", function () { if (activeTerm) hideTip(); }, { passive: true });
+
+  /* ---------- reading progress bar ---------- */
+  var bar = document.querySelector(".progress > i");
+  if (bar) {
+    var onScroll = function () {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      var pct = max > 0 ? (h.scrollTop || document.body.scrollTop) / max : 0;
+      bar.style.width = (pct * 100).toFixed(1) + "%";
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    onScroll();
+  }
+
+  /* ---------- scrollspy for the on-this-page TOC ---------- */
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+  if (tocLinks.length) {
+    var targets = tocLinks.map(function (a) {
+      return document.getElementById(a.getAttribute("href").slice(1));
+    });
+    var spy = function () {
+      var y = window.scrollY + 120, active = 0;
+      for (var i = 0; i < targets.length; i++) {
+        if (targets[i] && targets[i].offsetTop <= y) active = i;
+      }
+      tocLinks.forEach(function (a, i) { a.classList.toggle("active", i === active); });
+    };
+    window.addEventListener("scroll", spy, { passive: true });
+    spy();
+  }
+})();
 </script>
 
 </body>
