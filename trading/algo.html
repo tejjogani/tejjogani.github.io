@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trading Research — The Algo Trader's Path</title>
+<style>
+:root {
+  --bg:#faf8f4; --panel:#ffffff; --ink:#1c1a17; --soft:#6b665e; --line:#e7e2d8;
+  --accent:#7a8a5c; --accent-soft:#eef1e6; --gold:#b28f2c; --red:#c0564f;
+  --blue:#4a7ba6; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --c0:#4a7ba6; --c1:#b28f2c; --c2:#7a8a5c; --c3:#c0564f; --c4:#8a6fb0;
+  --c5:#3e8e7e; --c6:#c07a3f; --c7:#5b6b9e; --c8:#98596b; --c9:#6b8f3d;
+  --c10:#7d7468; --c11:#4f8fb5;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; }
+body { display:grid; grid-template-columns:264px 1fr; min-height:100vh; }
+aside { border-right:1px solid var(--line); padding:32px 24px; position:sticky; top:0;
+  height:100vh; overflow-y:auto; }
+.brand { font-family:var(--serif); font-size:22px; margin:0 0 2px; }
+.brand a { color:var(--ink); text-decoration:none; }
+.tagline { font-size:12.5px; color:var(--soft); margin-bottom:26px; }
+nav .grp { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft);
+  margin:18px 0 6px; font-weight:600; }
+nav a { display:block; padding:5px 10px; margin:1px 0; border-radius:8px; color:var(--ink);
+  text-decoration:none; font-size:14px; }
+nav a:hover { background:var(--accent-soft); }
+nav a.active { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+nav a.sub { padding-left:22px; font-size:13px; color:var(--soft); }
+.backlink { margin-top:28px; font-size:13px; }
+.backlink a { color:var(--soft); }
+main { padding:44px 48px 90px; max-width:840px; }
+.eyebrow { font-size:11.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+  font-weight:650; }
+h1 { font-family:var(--serif); font-weight:400; font-size:34px; margin:6px 0 4px;
+  letter-spacing:-.01em; text-wrap:balance; }
+.sub { color:var(--soft); margin-bottom:26px; }
+h2 { font-family:var(--serif); font-weight:400; font-size:24px; margin:46px 0 8px;
+  padding-top:8px; }
+h3 { font-size:16px; margin:26px 0 6px; }
+p, li { line-height:1.65; font-size:15px; }
+p.lede { color:var(--soft); max-width:66ch; margin-top:0; }
+p, ul { max-width:70ch; }
+.board { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 8px; }
+.pill { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:10px 16px; min-width:148px; }
+.pill .pl { font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--soft); }
+.pill .pv { font-size:16px; font-weight:650; font-variant-numeric:tabular-nums; margin-top:2px; }
+.good .pv { color:var(--accent); } .warn .pv { color:var(--gold); } .bad .pv { color:var(--red); }
+.info .pv { color:var(--blue); }
+.verdict { border-left:3px solid var(--accent); background:var(--panel); padding:14px 18px;
+  border-radius:0 12px 12px 0; margin:16px 0; max-width:72ch; border-top:1px solid var(--line);
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line); }
+table { border-collapse:collapse; width:100%; margin:14px 0; font-variant-numeric:tabular-nums;
+  background:var(--panel); border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+th { text-align:left; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--soft); padding:10px 14px; border-bottom:1px solid var(--line);
+  background:var(--bg); font-weight:600; }
+td { padding:10px 14px; border-bottom:1px solid var(--line); font-size:14px; }
+tr:last-child td { border-bottom:none; }
+.tblwrap { overflow-x:auto; }
+.pos { color:var(--accent); } .neg { color:var(--red); }
+.mono { font-family:var(--mono); font-size:13px; }
+.tag { font-size:11.5px; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.tag.good { background:var(--accent-soft); color:var(--accent); }
+.tag.warn { background:#f5edda; color:var(--gold); }
+.tag.bad { background:#f7e5e3; color:var(--red); }
+.tag.grey { background:#efece6; color:var(--soft); }
+figure { margin:20px 0; }
+figure img { max-width:100%; border:1px solid var(--line); border-radius:12px; background:#fff; }
+figcaption { font-size:13px; color:var(--soft); margin-top:7px; max-width:70ch; }
+.learn { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold);
+  border-radius:0 12px 12px 0; padding:16px 20px; margin:20px 0; max-width:74ch; }
+.learn .lt { font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--gold);
+  font-weight:650; margin-bottom:6px; }
+.learn p { font-size:14px; margin:6px 0; }
+.unlockbox { background:var(--panel); border:1px dashed var(--line); border-radius:12px;
+  padding:26px; text-align:center; margin:16px 0; }
+.unlockbox input { padding:9px 12px; border:1px solid var(--line); border-radius:8px;
+  font-size:14px; margin-right:8px; background:var(--bg); }
+.unlockbox button { padding:9px 18px; border:none; border-radius:8px; background:var(--accent);
+  color:#fff; font-size:14px; cursor:pointer; }
+.unlockbox .err { color:var(--red); font-size:13px; margin-top:10px; display:none; }
+#graphwrap, #netwrap { background:var(--panel); border:1px solid var(--line);
+  border-radius:12px; padding:10px; margin:16px 0; }
+#graphwrap svg { width:100%; height:auto; display:block; }
+#netwrap canvas { width:100%; display:block; cursor:pointer; }
+.cdot { display:inline-block; width:10px; height:10px; border-radius:50%;
+  margin-right:8px; vertical-align:baseline; }
+#edge-detail, #net-detail { background:var(--bg); border:1px solid var(--line);
+  border-radius:10px; padding:14px 18px; margin:10px 4px; min-height:74px; font-size:14px; }
+#edge-detail .stats, #net-detail .stats { display:flex; flex-wrap:wrap; gap:16px;
+  margin-top:8px; font-variant-numeric:tabular-nums; }
+#edge-detail .stats div, #net-detail .stats div { font-size:13px; color:var(--soft); }
+#edge-detail .stats b, #net-detail .stats b { display:block; color:var(--ink); font-size:15px; }
+.next { list-style:none; padding:0; }
+.next li { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:13px 17px; margin:9px 0; max-width:74ch; }
+.next .k { font-weight:650; }
+dl dt { font-weight:650; margin-top:16px; }
+dl dd { margin:4px 0 0 0; color:var(--soft); line-height:1.6; max-width:68ch; }
+.footnote { margin-top:56px; padding-top:16px; border-top:1px solid var(--line);
+  color:var(--soft); font-size:13px; max-width:76ch; }
+@media (max-width: 900px) {
+  body { grid-template-columns:1fr; }
+  aside { position:static; height:auto; border-right:none; border-bottom:1px solid var(--line); }
+  main { padding:28px 20px 70px; }
+}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand"><a href="index.html">Trading Research</a></div>
+  <div class="tagline">regime-aware, walk-forward, honest</div>
+  <nav>
+    <div class="grp">Dashboard</div>
+    <a class="" href="index.html">Today's dashboard</a>
+    <a class="" href="replay.html">Backtest replay ▶</a>
+    <a class="" href="index.html#portfolio">Your portfolio 🔒</a>
+    <a class="" href="index.html#next">Next steps</a>
+    <div class="grp">Learn</div>
+    <a class="" href="learn.html">The playbook</a>
+    <a class="sub" href="learn.html#regimes">1 · Market regimes</a>
+    <a class="sub" href="learn.html#lab">2 · The strategy lab</a>
+    <a class="sub" href="learn.html#graph">3 · The relationship graph</a>
+    <a class="sub" href="learn.html#comovement">4 · Companies that move together</a>
+    <a class="sub" href="learn.html#positioning">5 · Longs, shorts &amp; flat</a>
+    <a class="sub" href="learn.html#newera">6 · Sentiment &amp; the new era</a>
+    <a class="" href="index.html#assets">Across assets</a>
+    <div class="grp">Build</div>
+    <a class="active" href="algo.html">The algo trader's path</a>
+    <div class="grp">Reference</div>
+    <a class="" href="glossary.html">Glossary</a>
+  </nav>
+  <div class="backlink"><a href="../recipes/">← family dashboard</a></div>
+</aside>
+
+<main>
+
+<div class="eyebrow">Build</div>
+<h1>The algo trader's path</h1>
+<div class="sub">From "I understand the dashboard" to "an algorithm trades a small account while I sleep" — staged, honest, and mapped onto what you've already built.</div>
+
+<div class="learn"><div class="lt">In plain words</div>
+<p>Algo trading is not about finding a magic entry. It's a research business: you hunt for a small, explainable edge, test it without fooling yourself, deploy it small, watch it decay, and repeat forever. The trader is the caretaker of a portfolio of edges, not the hero of any single trade. Everything below is sequenced so each stage protects you from the classic way people die at the next one.</p></div>
+
+<h2>Stage 1 — Own one explainable edge (you are here)</h2>
+<p>The bar for every strategy, forever: <b>explain the edge in five minutes.</b> Why does it make money? Who is on the other side, and why do they accept losing? For your current trend+regime system the answers exist and are tested: it earns the <i>risk-transfer premium</i> — in storms, panicked and forced sellers pay whoever will take risk off their hands; the strategy steps aside early and re-enters when they're done. If you can't give that kind of answer for a future strategy, you don't have a strategy — you have a pattern that hasn't betrayed you yet.</p>
+<p><b>Exercise:</b> write the five-minute explanation of the current system in your vault, in your own words. If you can't, reread <a href="learn.html">the playbook</a> — that gap is the curriculum.</p>
+
+<h2>Stage 2 — Deploy something mediocre, small</h2>
+<p>A deployed mediocre algo teaches more than ten beautiful backtests, because backtests can't show slippage, broker fills, API outages, or your own nerves. The first deployment should be the <i>boring</i> monthly exposure dial you already trust — paper-traded first, then tiny real size in the empty agentic account. The goal of stage 2 is not profit; it's discovering every gap between simulation and reality while the cost of discovery is pocket change.</p>
+<p><b>Done when:</b> three month-end signals have executed without you touching anything, and you have a log comparing intended vs actual fills.</p>
+
+<h2>Stage 3 — A portfolio of small, uncorrelated edges</h2>
+<p>One strategy is unstable — its bad month is <i>your</i> bad month. A business is several unrelated edges: a trend follower, a mean-reverter, an asset-class rotator (the <a href="index.html#assets">across-assets table</a> is that strategy's raw material). The measure that matters is the <b>correlation matrix between your strategies' returns</b> — same math as the stock co-movement graph, applied to your own algos. Low or negative correlations mean one strategy's drawdown lands during another's gain, and the combined curve smooths. When two strategies correlate highly, retire one: it's the same bet wearing two hats.</p>
+
+<h2>Stage 4 — Sizing and survival</h2>
+<p>Position size kills more accounts than bad entries. The rules that keep you alive: risk on the order of <b>1% per trade</b>; a written drawdown budget per strategy (at what loss does it get benched — decided before deployment, not during the bleed); and the understanding that <b>drawdowns are the fee the game charges</b> — a strategy optimized until its backtest shows none is a curve-fit fairy tale, not a discovery. Overfitting checks are non-negotiable: out-of-sample data, walk-forward, and parameter sensitivity (if the edge only works at exactly lookback=14, there is no edge).</p>
+
+<h2>Stage 5 — Run the research loop forever</h2>
+<p>Every edge decays — competition arrives, costs catch up, the market regime that fed it ends. So the terminal skill isn't any strategy; it's the loop: <b>idea → encode as a graph edge → walk-forward test → deploy small → monitor → retire → repeat.</b> You already own the infrastructure for this loop; stage 5 is just running it on a schedule. Expect the honest timeline: 3–4 years of samples before you truly know you're good. One great quarter proves nothing — judge the process, not the outcome, because a good trade can lose and a bad trade can win, and the most dangerous event in trading is a bad process that got paid.</p>
+
+<h2>The realities nobody sells</h2>
+<ul>
+  <li><b>Taxes eat active trading.</b> US short-term gains are taxed as income — a strategy must beat buy-and-hold <i>after</i> that drag. Monthly cadence and long holding periods are tax strategy, not just risk strategy.</li>
+  <li><b>Costs and slippage are the house edge against you.</b> Every trade pays the spread. High-turnover ideas that backtest beautifully often die by a thousand 3-cent cuts.</li>
+  <li><b>Individuals can't win the speed game.</b> Intraday and HFT belong to firms with microwave towers. The individual's edges live at daily-to-monthly horizons, in patience, in taking risk others must shed, and in niches too small for funds to bother with.</li>
+  <li><b>Comfort and returns are inversely related.</b> Extra return is payment for holding volatility others refuse. If a strategy feels perfectly comfortable, it's probably priced like bonds.</li>
+  <li><b>The field improves every year.</b> Standing still is falling behind — which is why the research loop, not any strategy, is the asset.</li>
+</ul>
+
+<div class="learn"><div class="lt">The five-line summary</div>
+<p>Explainable edge → deploy small and mediocre → diversify across uncorrelated edges → size to survive → research forever. Every stage has a kill-criterion written in advance. That's the entire profession; everything else is decoration.</p></div>
+
+</main>
+
+</body>
+</html>
