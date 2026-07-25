@@ -114,6 +114,126 @@ const RECIPES = [
     "source": "AmateurProChef"
   },
   {
+    "id": "sheet-pan-chicken-kebabs",
+    "title": "Sheet Pan Chicken Kebabs",
+    "category": "Kebab",
+    "dateAdded": "2026-07-25",
+    "tags": [
+      "chicken",
+      "kebab",
+      "mediterranean",
+      "sheet-pan",
+      "weeknight"
+    ],
+    "note": "Spiced ground chicken kebabs baked flat on a sheet pan — no grill or skewers needed — served with a bright arugula salad and herb tahini sauce.",
+    "sourceUrl": "https://lolajayyum.com/sheet-pan-chicken-kebabs-in-the-oven/",
+    "nutrition": {
+      "servings": 6,
+      "perServing": {
+        "calories": 324
+      },
+      "estimated": true,
+      "note": "As estimated by the recipe creator"
+    },
+    "ingredientGroups": [
+      {
+        "heading": "Chicken kebab base",
+        "items": [
+          "2 lb ground chicken, patted dry (or 1.5 lb boneless skinless chicken thighs + 0.5 lb chicken breast if grinding your own)",
+          "½ cup parsley, loosely packed",
+          "¼ cup dill",
+          "½ cup cilantro, loosely packed",
+          "1 red bell pepper",
+          "3 garlic cloves",
+          "1 medium white onion",
+          "1½ tsp salt",
+          "1 tsp black pepper",
+          "½ tbsp cumin",
+          "2 tsp smoked paprika",
+          "1 tsp turmeric",
+          "1 tsp garlic powder",
+          "1 tbsp extra virgin olive oil"
+        ]
+      },
+      {
+        "heading": "Salad topping",
+        "items": [
+          "½ white or red onion, thinly sliced",
+          "3 cups arugula",
+          "1 tsp sumac",
+          "⅓ cup chopped parsley",
+          "8 oz cherry tomatoes, halved",
+          "1½ tsp olive oil",
+          "1 tbsp reserved water from the veggies",
+          "Salt and pepper, to taste"
+        ]
+      },
+      {
+        "heading": "Herb tahini sauce",
+        "items": [
+          "⅓ cup tahini",
+          "Juice of 1½ lemons",
+          "½ tsp garlic powder",
+          "1 garlic clove, grated",
+          "1 tbsp chopped cilantro",
+          "1 tbsp chopped dill",
+          "2 tbsp Greek yogurt",
+          "3 tbsp reserved veggie water"
+        ]
+      }
+    ],
+    "methodGroups": [
+      {
+        "heading": "Prep",
+        "steps": [
+          "Preheat the oven to 400°F and line a sheet pan with parchment paper."
+        ]
+      },
+      {
+        "heading": "Process the aromatics",
+        "steps": [
+          "Pulse the onion, bell pepper, garlic, parsley, cilantro, dill, and olive oil in a food processor until finely chopped.",
+          "Transfer to cheesecloth and squeeze out as much liquid as you can — save that liquid, it flavors both the salad and the sauce later."
+        ]
+      },
+      {
+        "heading": "Mix the chicken",
+        "steps": [
+          "If grinding your own meat, cut the chicken into chunks and run it through a meat grinder first.",
+          "Combine the ground chicken with the squeezed vegetables, all the spices, and the remaining olive oil. Mix well by hand until evenly combined."
+        ]
+      },
+      {
+        "heading": "Shape and bake",
+        "steps": [
+          "Spread the chicken mixture about 1 inch thick across the sheet pan, then score it into kebab strips (shape further by hand if needed).",
+          "Bake for 18 minutes, then broil on high for 3–5 minutes until the internal temperature reaches 165°F."
+        ]
+      },
+      {
+        "heading": "Make the salad",
+        "steps": [
+          "While the chicken bakes, toss together the sliced onion, arugula, halved cherry tomatoes, parsley, sumac, olive oil, a splash of the reserved veggie water, and salt and pepper to taste."
+        ]
+      },
+      {
+        "heading": "Make the tahini sauce",
+        "steps": [
+          "Whisk the tahini with the lemon juice, grated garlic, garlic powder, cilantro, dill, Greek yogurt, and reserved veggie water.",
+          "Thin with a little cold water, a teaspoon at a time, until it reaches the consistency you want."
+        ]
+      },
+      {
+        "heading": "Serve",
+        "steps": [
+          "Brush the kebabs with any remaining veggie water for shine and extra flavor.",
+          "Serve wrapped in pita or lavash with the salad and tahini sauce, or as a low-carb bowl with extra vegetables."
+        ]
+      }
+    ],
+    "source": "LolaJayyum"
+  },
+  {
     "id": "light-vegetable-stock-soup-soya-croutons",
     "title": "Light Vegetable Stock Soup with Crispy Soya Croutons",
     "category": "Soup",
