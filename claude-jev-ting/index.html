@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>claude-jev-ting · Tej Jogani</title>
+<style>
+  :root {
+    --bg: #faf8f4;
+    --bg-panel: #ffffff;
+    --ink: #1c1a17;
+    --ink-soft: #6b665e;
+    --line: #e7e2d8;
+    --accent: #7a8a5c;
+    --accent-soft: #eef1e6;
+    --warn: #a86b1f;
+    --warn-soft: #f7ecdc;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  body { padding: 48px 20px 80px; font-size: 15px; line-height: 1.6; }
+  main { max-width: 720px; margin: 0 auto; }
+  a { color: var(--accent); }
+  .back { font-size: 13px; color: var(--ink-soft); text-decoration: none; }
+  .back:hover { color: var(--accent); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: 38px; margin: 18px 0 6px; letter-spacing: -0.01em; }
+  h2 { font-family: var(--serif); font-weight: 400; font-size: 24px; margin: 48px 0 12px; }
+  h3 { font-size: 15px; margin: 22px 0 4px; }
+  p { margin: 0 0 14px; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--ink-soft); font-size: 13px; margin-bottom: 28px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-weight: 600; font-size: 12px; letter-spacing: 0.02em; }
+  .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--warn); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+  .lede { font-family: var(--serif); font-size: 20px; line-height: 1.5; margin-bottom: 20px; }
+  .panel { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin: 16px 0; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0; }
+  .stat { background: var(--bg-panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .stat .n { font-family: var(--serif); font-size: 30px; line-height: 1.1; }
+  .stat .l { font-size: 12.5px; color: var(--ink-soft); margin-top: 4px; }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .box { flex: 1 1 150px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 13.5px; }
+  .flow .box b { display: block; font-family: var(--serif); font-weight: 400; font-size: 17px; margin-bottom: 2px; }
+  .flow .box.jev { border-color: var(--accent); background: var(--accent-soft); }
+  .flow .arrow { align-self: center; color: var(--ink-soft); }
+  .table-wrap { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-panel); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 520px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; color: var(--ink-soft); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; }
+  code { font-family: var(--mono); font-size: 0.88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+  ol, ul { padding-left: 20px; margin: 0 0 14px; }
+  li { margin-bottom: 8px; }
+  .status { display: grid; gap: 10px; }
+  .step { display: flex; gap: 12px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .step .tag { flex: 0 0 auto; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; height: fit-content; }
+  .tag.done { background: var(--accent-soft); color: var(--accent); }
+  .tag.now { background: var(--warn-soft); color: var(--warn); }
+  .tag.later { background: #efece6; color: var(--ink-soft); }
+  .step p { margin: 0; font-size: 14px; }
+  .step b { font-weight: 600; }
+  .note { font-size: 13px; color: var(--ink-soft); }
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="/">← Tej Jogani</a>
+  <h1>claude-jev-ting</h1>
+  <div class="meta"><span class="badge">In progress</span><span>Research log · last updated 24 Sep 2026</span></div>
+
+  <p class="lede">Can a coding agent spend far fewer frontier-model tokens on the same work, by handing
+  its many small decisions to a cheap, self-hosted classifier, without getting worse at the job?</p>
+
+  <p>So far: <b>yes, on code search.</b> On 428 questions across 15 real open-source repos, the split
+  system matches a frontier-only agent on quality while using about <b>12× fewer frontier tokens</b>.
+  The next step is making the agent <i>change</i> code, not just find it.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">308 vs 305</div><div class="l">correct answers out of 428, split system vs frontier-only (a statistical tie)</div></div>
+    <div class="stat"><div class="n">~12×</div><div class="l">fewer frontier tokens per correct answer (2,267 vs 26,353)</div></div>
+    <div class="stat"><div class="n">~3×</div><div class="l">faster per task (7 s vs 19 s median)</div></div>
+    <div class="stat"><div class="n">½</div><div class="l">the frontier API spend ($0.99 vs $2.19 for the whole set)</div></div>
+  </div>
+
+  <h2>How it works</h2>
+  <p>A frontier model is good at open-ended reasoning and expensive per token. Most of an agent's
+  steps aren't open-ended: <i>which of these files do I read next? does this excerpt answer the
+  question? which lines are the answer?</i> Those are multiple-choice questions, so the runtime
+  builds the menu and a small model picks from it.</p>
+
+  <div class="flow">
+    <div class="box"><b>Planner</b>Frontier model (OpenAI). Writes the search plan once, and re-plans only when stuck.</div>
+    <div class="arrow">→</div>
+    <div class="box jev"><b>Router + judge</b>OpenJev, a 27B open classifier on a rented H100. Picks from menus the runtime builds.</div>
+    <div class="arrow">→</div>
+    <div class="box"><b>Tools</b>Deterministic and read-only: search, read, list, function outlines.</div>
+  </div>
+
+  <p>Two rules hold everything together. <b>Models propose, the runtime disposes:</b> every model
+  output is schema-validated and policy-checked before anything runs. And <b>truth comes from code
+  and tests, never from a model:</b> answer keys are chosen by our own code before a model writes
+  the question's wording, and the frontier model is one of the systems being measured, not the
+  referee.</p>
+
+  <h2>Results so far</h2>
+  <p>The eval set covers 15 pinned repos in 6 languages (koa, express, axios, commander, pino, got, click,
+  requests, flask, chi, cobra, gin, serde-json, http, gson, jsoup). Questions are phrased two ways:
+  as a user would ask them, and as a precise planner-level lookup. Some questions have no answer in
+  the repo, and the right move is to say so.</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Split system (OpenAI + Jev)</th><th>Frontier-only (OpenAI)</th></tr></thead>
+    <tbody>
+      <tr><td>Correct, all 428</td><td class="num"><b>308</b></td><td class="num">305</td></tr>
+      <tr><td>Paired disagreements</td><td class="num">42 won</td><td class="num">39 won (p = 0.82)</td></tr>
+      <tr><td>With the planner held fixed (309 tasks)</td><td class="num"><b>244</b></td><td class="num">240 (p = 0.64)</td></tr>
+      <tr><td>Frontier input tokens per correct answer</td><td class="num"><b>2,267</b></td><td class="num">26,353</td></tr>
+      <tr><td>Frontier spend, whole set</td><td class="num"><b>$0.99</b></td><td class="num">$2.19</td></tr>
+      <tr><td>Median time per task</td><td class="num"><b>7 s</b></td><td class="num">19 s</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Frontier-only uses OpenAI's cheapest tier for routing and judging. Both use the same
+  planner. The GPU for Jev cost about $0.23 for a 163-question run at 8 tasks in parallel. Idle time
+  and startup cost more than the work itself.</p>
+
+  <h2>What we learned</h2>
+  <ol>
+    <li><b>The planner is the biggest lever.</b> Code-shaped search terms (<code>setTimeout</code>,
+    <code>AbortController</code>) beat the words in the request.</li>
+    <li><b>What the menu offers matters as much as who chooses.</b> Most gains came from the runtime:
+    fair judge wording, file roles, read windows snapped to whole functions. The model weights were
+    the same. At one point, 43 of 50 misses were "the right answer was never on the menu".</li>
+    <li><b>The small model is good at saying no.</b> Early on it answered "not in this repo"
+    correctly 20/21 times vs 14/21, and made up 1 answer vs 7.</li>
+    <li><b>Evaluation hygiene decides what you believe.</b> An unfair judge prompt, an incomplete
+    answer key, and out-of-credit errors graded as misses each produced a convincing wrong number
+    at some point.</li>
+    <li><b>Runs aren't deterministic.</b> The same configuration flipped 13–17% of answers between
+    two runs, because the frontier planner samples differently each time. One "significant" result
+    (p = 0.043) turned out to be noise. Replaying the same plans across configurations cut the flips
+    to 3.3%, and that's now how configurations are compared.</li>
+  </ol>
+
+  <h2>Where it's going</h2>
+  <div class="status">
+    <div class="step"><span class="tag done">Done</span><p><b>Find it.</b> Eval harness, the split
+    agent, a self-hosted classifier, function-level options, and plan replay for fair comparisons.</p></div>
+    <div class="step"><span class="tag now">Now</span><p><b>Fix it.</b> An agent that changes code.
+    Tasks are made by breaking real functions on purpose (mutation testing). The repo's own test
+    suite decides whether a fix worked. Code runs only in a throw-away copy, inside a container
+    with no network.</p></div>
+    <div class="step"><span class="tag later">Next</span><p><b>Confidence cascade.</b> The small model
+    decides, and the frontier is consulted only when it's unsure. That gives a dial between cost and
+    quality, and every consultation is logged as a labelled example.</p></div>
+    <div class="step"><span class="tag later">Later</span><p><b>Distillation, carefully.</b> Train the small
+    model on strong teachers' decisions, possibly from several providers. Teachers are wrong too, so a
+    label is kept only if it agrees with the tests or answer key and with the other teachers, and
+    survives a red-team pass.</p></div>
+  </div>
+
+  <footer>
+    Built with OpenAI models as the frontier and <a href="https://huggingface.co/openjev/openjev">OpenJev</a> (CC BY-NC)
+    as the classifier, served with vLLM on RunPod. Numbers are from a single research log and will
+    change as the work continues.
+  </footer>
+</main>
+</body>
+</html>
