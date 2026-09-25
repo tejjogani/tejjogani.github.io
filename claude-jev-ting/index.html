@@ -76,7 +76,7 @@
 <main>
   <a class="back" href="/">← Tej Jogani</a>
   <h1>claude-jev-ting</h1>
-  <div class="meta"><span class="badge">In progress</span><span>Research log · last updated 25 Sep 2026 (night)</span></div>
+  <div class="meta"><span class="badge">In progress</span><span>Research log · last updated 25 Sep 2026</span></div>
 
   <p class="lede">Can an AI agent do real work for a fraction of the usual cost and time, by letting an expensive
   "frontier" model do only the thinking that needs it, and handing the many small decisions to a cheap,
@@ -89,7 +89,7 @@
   <div class="stats">
     <div class="stat"><div class="n">~12×</div><div class="l">fewer frontier tokens to <b>find</b> code, same accuracy (428 questions, 15 repos)</div></div>
     <div class="stat"><div class="n">~5×</div><div class="l">fewer frontier tokens to <b>fix</b> a failing test, same success rate (160 bugs)</div></div>
-    <div class="stat"><div class="n">78 → 111</div><div class="l">bugs fixed out of 160: old search vs. the new "shortlist" approach with the cheap model</div></div>
+    <div class="stat"><div class="n">38 vs 31</div><div class="l">real bugs fixed out of 60: shortlist + cheap model vs. the frontier model searching alone (9× fewer tokens)</div></div>
     <div class="stat"><div class="n">~$0.007</div><div class="l">frontier spend per fixed bug with the split system</div></div>
   </div>
 
@@ -168,6 +168,32 @@ return this.protocol !== 'https'   // our planted bug → the tests now fail</pr
   confident it's right 99% of the time. So the plan is to ask the frontier only on the few calls where Jev hesitates.
   Replaying this run, that means asking it about 1 time in 9 and matching its results.</p>
 
+  <h2>Step 4: real bugs (done)</h2>
+  <p>Planted one-character bugs are easy to reason about but not realistic, and research warns that results on
+  planted bugs often don't carry over. So we re-ran everything on <b>60 real bugs</b> that developers actually fixed
+  in ESLint, Express, Karma and Hexo (from the public BugsJS dataset), graded by the developer's own tests.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>How the bug is found</th><th>Real bugs fixed (of 60)</th><th>Frontier tokens per fix</th></tr></thead>
+    <tbody>
+      <tr><td>Frontier model searches on its own</td><td class="num">31</td><td class="num">30,407</td></tr>
+      <tr><td>Shortlist, suspects in coverage order</td><td class="num">9</td><td class="num">–</td></tr>
+      <tr><td>Shortlist, frontier orders 32 suspects</td><td class="num">35</td><td class="num">8,440</td></tr>
+      <tr><td><b>Shortlist, Jev orders 32 suspects</b></td><td class="num"><b>38</b></td><td class="num"><b>3,440</b></td></tr>
+    </tbody>
+  </table></div>
+  <p>The approach holds on real bugs: <b>more bugs fixed than the frontier model working alone, with ~9× fewer
+  frontier tokens</b>, and Jev orders suspects in about half a second where the frontier takes 7–8 seconds.
+  Three things changed from the planted bugs, and they're the interesting part:</p>
+  <ul>
+    <li><b>Fixing is harder.</b> Given the right function, the frontier fixes 77% of real bugs (98% of planted ones).</li>
+    <li><b>The shortlist still contains the bug, but its order is poor</b>, so the model has to look at ~32 suspects,
+    not 8. That's the question of how big a menu the cheap model can handle, now with a real reason to answer it.</li>
+    <li><b>Jev gets less sure of itself on bigger menus.</b> It picks the right suspect first 94% of the time out of 8,
+    72% out of 32 (frontier: 93%). Checking suspects one by one makes up the difference, and when Jev is very
+    confident it's still right. But it's confident less often, so "ask the frontier only when unsure" would ask
+    it about half the time on real bugs.</li>
+  </ul>
+
   <h2>What we've learned so far</h2>
   <ol>
     <li><b>The menu matters more than the chooser.</b> Most of our gains came from giving the models better options,
@@ -192,6 +218,8 @@ return this.protocol !== 'https'   // our planted bug → the tests now fail</pr
     tokens; finding the bug is the bottleneck.</p></div>
     <div class="step"><span class="tag done">Done</span><p><b>Shortlist → order → check.</b> 111 of 160 bugs fixed; the cheap
     model orders suspects as well as the frontier.</p></div>
+    <div class="step"><span class="tag done">Done</span><p><b>Real bugs.</b> 60 real fixes: the approach holds (38 vs 31
+    for the frontier alone); the cheap model needs bigger menus and is less sure on them.</p></div>
     <div class="step"><span class="tag now">Next</span><p><b>Ask the frontier only when unsure.</b> The cheap model
     decides; when it's not confident, the frontier model decides instead, giving a dial between cost and quality.</p></div>
     <div class="step"><span class="tag later">Then</span><p><b>The web.</b> Browser workflows for businesses. A web page
