@@ -64,108 +64,134 @@
   .step b { font-weight: 600; }
   .note { font-size: 13px; color: var(--ink-soft); }
   footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--ink-soft); }
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 14px 0; display: grid; gap: 10px; }
+  .steps li { counter-increment: step; position: relative; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px 12px 48px; margin: 0; font-size: 14px; }
+  .steps li::before { content: counter(step); position: absolute; left: 14px; top: 12px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 12px; display: grid; place-items: center; }
+  .steps li b { display: block; }
+  pre.code { font-family: var(--mono); font-size: 13px; background: var(--bg-panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+  .live { border-left: 3px solid var(--warn); background: var(--warn-soft); border-radius: 0 12px 12px 0; padding: 12px 16px; margin: 16px 0; font-size: 14px; }
 </style>
 </head>
 <body>
 <main>
   <a class="back" href="/">← Tej Jogani</a>
   <h1>claude-jev-ting</h1>
-  <div class="meta"><span class="badge">In progress</span><span>Research log · last updated 24 Sep 2026</span></div>
+  <div class="meta"><span class="badge">In progress</span><span>Research log · last updated 25 Sep 2026</span></div>
 
-  <p class="lede">Can a coding agent spend far fewer frontier-model tokens on the same work, by handing
-  its many small decisions to a cheap, self-hosted classifier, without getting worse at the job?</p>
+  <p class="lede">Can an AI agent do real work for a fraction of the usual cost and time, by letting an expensive
+  "frontier" model do only the thinking that needs it, and handing the many small decisions to a cheap,
+  fast model we host ourselves?</p>
 
-  <p>So far: <b>yes, on code search.</b> On 428 questions across 15 real open-source repos, the split
-  system matches a frontier-only agent on quality while using about <b>12× fewer frontier tokens</b>.
-  The next step is making the agent <i>change</i> code, not just find it.</p>
+  <p>The long-term goal is <b>business agents</b> (browser workflows, operations, back-office tasks) that spend
+  far fewer tokens and finish faster. We're proving the idea on code first. Code comes with an honest referee
+  built in: <b>its tests</b>. That means every result can be checked without trusting any AI's opinion.</p>
 
   <div class="stats">
-    <div class="stat"><div class="n">308 vs 305</div><div class="l">correct answers out of 428, split system vs frontier-only (a statistical tie)</div></div>
-    <div class="stat"><div class="n">~12×</div><div class="l">fewer frontier tokens per correct answer (2,267 vs 26,353)</div></div>
-    <div class="stat"><div class="n">~3×</div><div class="l">faster per task (7 s vs 19 s median)</div></div>
-    <div class="stat"><div class="n">½</div><div class="l">the frontier API spend ($0.99 vs $2.19 for the whole set)</div></div>
+    <div class="stat"><div class="n">~12×</div><div class="l">fewer frontier tokens to <b>find</b> code, same accuracy (428 questions, 15 repos)</div></div>
+    <div class="stat"><div class="n">~5×</div><div class="l">fewer frontier tokens to <b>fix</b> a failing test, same success rate (160 bugs)</div></div>
+    <div class="stat"><div class="n">49% → 66%</div><div class="l">bugs found by the old search vs. the new "shortlist" approach (before any AI ranking)</div></div>
+    <div class="stat"><div class="n">~$0.007</div><div class="l">frontier spend per fixed bug with the split system</div></div>
   </div>
 
-  <h2>How it works</h2>
-  <p>A frontier model is good at open-ended reasoning and expensive per token. Most of an agent's
-  steps aren't open-ended: <i>which of these files do I read next? does this excerpt answer the
-  question? which lines are the answer?</i> Those are multiple-choice questions, so the runtime
-  builds the menu and a small model picks from it.</p>
+  <h2>The idea in one picture</h2>
+  <p>Most of an agent's steps aren't open-ended thinking. They're multiple-choice questions: <i>which file next?
+  is this the right function? which suspect first?</i> So the system writes out the options, a small model picks,
+  and something reliable checks the result.</p>
 
   <div class="flow">
-    <div class="box"><b>Planner</b>Frontier model (OpenAI). Writes the search plan once, and re-plans only when stuck.</div>
+    <div class="box"><b>Frontier model</b>Plans, and writes the actual code change. Called rarely.</div>
     <div class="arrow">→</div>
-    <div class="box jev"><b>Router + judge</b>OpenJev, a 27B open classifier on a rented H100. Picks from menus the runtime builds.</div>
+    <div class="box jev"><b>Jev (cheap model)</b>OpenJev, 27B, on a rented GPU. Picks from menus of options. Called often, in ~0.4 s.</div>
     <div class="arrow">→</div>
-    <div class="box"><b>Tools</b>Deterministic and read-only: search, read, list, function outlines.</div>
+    <div class="box"><b>Checks</b>Plain code: search tools, the project's own tests. Decides what actually worked.</div>
   </div>
 
-  <p>Two rules hold everything together. <b>Models propose, the runtime disposes:</b> every model
-  output is schema-validated and policy-checked before anything runs. And <b>truth comes from code
-  and tests, never from a model:</b> answer keys are chosen by our own code before a model writes
-  the question's wording, and the frontier model is one of the systems being measured, not the
-  referee.</p>
+  <p>Two rules hold it together. <b>Models propose, the system disposes:</b> nothing a model says is executed
+  without being checked. <b>Truth comes from code and tests, never from a model:</b> the frontier model is one
+  of the things being measured, not the judge.</p>
 
-  <h2>Results so far</h2>
-  <p>The eval set covers 15 pinned repos in 6 languages (koa, express, axios, commander, pino, got, click,
-  requests, flask, chi, cobra, gin, serde-json, http, gson, jsoup). Questions are phrased two ways:
-  as a user would ask them, and as a precise planner-level lookup. Some questions have no answer in
-  the repo, and the right move is to say so.</p>
-
+  <h2>Step 1: finding code (done)</h2>
+  <p>We asked the agent 428 questions like <i>"where does this library handle timeouts?"</i> across 15 real open-source
+  projects in 6 languages. The answers were chosen by our code in advance, so grading needs no AI.</p>
   <div class="table-wrap"><table>
-    <thead><tr><th></th><th>Split system (OpenAI + Jev)</th><th>Frontier-only (OpenAI)</th></tr></thead>
+    <thead><tr><th></th><th>Split system (frontier + Jev)</th><th>Frontier only</th></tr></thead>
     <tbody>
-      <tr><td>Correct, all 428</td><td class="num"><b>308</b></td><td class="num">305</td></tr>
-      <tr><td>Paired disagreements</td><td class="num">42 won</td><td class="num">39 won (p = 0.82)</td></tr>
-      <tr><td>With the planner held fixed (309 tasks)</td><td class="num"><b>244</b></td><td class="num">240 (p = 0.64)</td></tr>
-      <tr><td>Frontier input tokens per correct answer</td><td class="num"><b>2,267</b></td><td class="num">26,353</td></tr>
-      <tr><td>Frontier spend, whole set</td><td class="num"><b>$0.99</b></td><td class="num">$2.19</td></tr>
-      <tr><td>Median time per task</td><td class="num"><b>7 s</b></td><td class="num">19 s</td></tr>
+      <tr><td>Correct, out of 428</td><td class="num"><b>308</b></td><td class="num">305 (a statistical tie)</td></tr>
+      <tr><td>Frontier tokens per correct answer</td><td class="num"><b>2,267</b></td><td class="num">26,353</td></tr>
+      <tr><td>Median time per question</td><td class="num"><b>7 s</b></td><td class="num">19 s</td></tr>
     </tbody>
   </table></div>
-  <p class="note">Frontier-only uses OpenAI's cheapest tier for routing and judging. Both use the same
-  planner. The GPU for Jev cost about $0.23 for a 163-question run at 8 tasks in parallel. Idle time
-  and startup cost more than the work itself.</p>
 
-  <h2>What we learned</h2>
+  <h2>Step 2: fixing bugs (done, first version)</h2>
+  <p>Finding code isn't doing work, so next the agent had to <b>fix</b> things. To grade that honestly, we broke
+  real code on purpose, one tiny change at a time, and kept only breaks that the project's own tests catch:</p>
+  <pre class="code">return this.protocol === 'https'   // original
+return this.protocol !== 'https'   // our planted bug → the tests now fail</pre>
+  <p>160 bugs like this, in two popular JavaScript projects (koa and commander). The agent sees only what a
+  developer would ("these tests fail"), has to find the broken function, write a fix, and run the tests,
+  all inside a locked-down container with no internet.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Split system</th><th>Frontier only</th></tr></thead>
+    <tbody>
+      <tr><td>Bugs fixed, out of 160</td><td class="num"><b>81</b> (repeat run: 75)</td><td class="num">79 (a tie)</td></tr>
+      <tr><td>Frontier tokens per fix</td><td class="num"><b>8,293</b></td><td class="num">44,121</td></tr>
+      <tr><td>Frontier spend, all 160</td><td class="num"><b>$0.55</b></td><td class="num">$1.13</td></tr>
+    </tbody>
+  </table></div>
+  <p>The interesting part was <i>why</i> it failed. Handed the broken function, the frontier model fixes it
+  <b>98%</b> of the time, so <b>fixing is easy and finding is hard.</b> The search found the right function
+  only about half the time. It behaves like someone skimming files who stops at the first thing that looks
+  relevant. But many functions are <i>about</i> the same topic, and only one has the bug.</p>
+
+  <h2>Step 3: a better way to find bugs (running now)</h2>
+  <p>So we changed the shape of the agent from "search until something looks right" to
+  <b>make a shortlist → put it in order → check each one</b>:</p>
+  <ol class="steps">
+    <li><b>Shortlist, with no AI</b>Run the tests and record which functions the failing tests actually use.
+    The bug has to be one of them, usually one of 25–70. Functions used mostly by failing tests go first.</li>
+    <li><b>Order the shortlist, with the cheap model</b>Jev reads the top 8 suspects and puts the likeliest first.</li>
+    <li><b>Check, with the tests</b>Fix suspect #1 and run the tests. If they still fail, undo and try #2, up to 5.</li>
+  </ol>
+  <p>Before involving any AI, step 1 alone puts the broken function in the top 5 for <b>66%</b> of bugs,
+  compared with 49% found by the old search.</p>
+  <div class="live"><b>Running right now:</b> the same 160 bugs, with the shortlist ordered by (A) nothing,
+  (B) Jev, or (C) the frontier model, plus the old search for comparison. The question: can the cheap model
+  order suspects as well as the expensive one? Results will appear here.</div>
+
+  <h2>What we've learned so far</h2>
   <ol>
-    <li><b>The planner is the biggest lever.</b> Code-shaped search terms (<code>setTimeout</code>,
-    <code>AbortController</code>) beat the words in the request.</li>
-    <li><b>What the menu offers matters as much as who chooses.</b> Most gains came from the runtime:
-    fair judge wording, file roles, read windows snapped to whole functions. The model weights were
-    the same. At one point, 43 of 50 misses were "the right answer was never on the menu".</li>
-    <li><b>The small model is good at saying no.</b> Early on it answered "not in this repo"
-    correctly 20/21 times vs 14/21, and made up 1 answer vs 7.</li>
-    <li><b>Evaluation hygiene decides what you believe.</b> An unfair judge prompt, an incomplete
-    answer key, and out-of-credit errors graded as misses each produced a convincing wrong number
-    at some point.</li>
-    <li><b>Runs aren't deterministic.</b> The same configuration flipped 13–17% of answers between
-    two runs, because the frontier planner samples differently each time. One "significant" result
-    (p = 0.043) turned out to be noise. Replaying the same plans across configurations cut the flips
-    to 3.3%, and that's now how configurations are compared.</li>
+    <li><b>The menu matters more than the chooser.</b> Most of our gains came from giving the models better options,
+    not better models. If the right answer isn't on the menu, no model can pick it.</li>
+    <li><b>The cheap model is at least as good at choosing.</b> Decision by decision on the bug-fixing runs, Jev was
+    right slightly more often than the frontier model (e.g. 67% vs 59% when judging code, 86% vs 79% when picking lines).</li>
+    <li><b>Measure honestly, or you'll fool yourself.</b> The same setup run twice disagrees on 6–17% of answers.
+    One "significant" result turned out to be noise, so we compare with the plans held fixed and repeat runs.</li>
+    <li><b>Tests are a good referee, not a perfect one.</b> A few "fixes" passed by deleting logic the tests happened
+    not to check. Any training data has to be cleaned for that.</li>
+    <li><b>The hard part is knowing where to look.</b> Which options even make the menu is where domain knowledge lives.
+    For code, test coverage tells us; for other domains the system will need to learn how to build its own menus.</li>
   </ol>
 
   <h2>Where it's going</h2>
   <div class="status">
-    <div class="step"><span class="tag done">Done</span><p><b>Find it.</b> Eval harness, the split
-    agent, a self-hosted classifier, function-level options, and plan replay for fair comparisons.</p></div>
-    <div class="step"><span class="tag now">Now</span><p><b>Fix it.</b> An agent that changes code.
-    Tasks are made by breaking real functions on purpose (mutation testing). The repo's own test
-    suite decides whether a fix worked. Code runs only in a throw-away copy, inside a container
-    with no network.</p></div>
-    <div class="step"><span class="tag later">Next</span><p><b>Confidence cascade.</b> The small model
-    decides, and the frontier is consulted only when it's unsure. That gives a dial between cost and
-    quality, and every consultation is logged as a labelled example.</p></div>
-    <div class="step"><span class="tag later">Later</span><p><b>Distillation, carefully.</b> Train the small
-    model on strong teachers' decisions, possibly from several providers. Teachers are wrong too, so a
-    label is kept only if it agrees with the tests or answer key and with the other teachers, and
-    survives a red-team pass.</p></div>
+    <div class="step"><span class="tag done">Done</span><p><b>Find code.</b> Split system matches frontier-only
+    at ~12× fewer frontier tokens.</p></div>
+    <div class="step"><span class="tag done">Done</span><p><b>Fix bugs (v1).</b> Matches frontier-only at ~5× fewer
+    tokens; finding the bug is the bottleneck.</p></div>
+    <div class="step"><span class="tag now">Now</span><p><b>Shortlist → order → check.</b> Does the cheap model rank
+    suspects as well as the frontier?</p></div>
+    <div class="step"><span class="tag later">Next</span><p><b>Ask the frontier only when unsure.</b> The cheap model
+    decides; when it's not confident, the frontier model decides instead, giving a dial between cost and quality.</p></div>
+    <div class="step"><span class="tag later">Then</span><p><b>The web.</b> Browser workflows for businesses. A web page
+    already lists every button and field, a ready-made menu, and the web is where the cheap model was trained.</p></div>
+    <div class="step"><span class="tag later">Later</span><p><b>Our own model.</b> Train a small model on the checked decisions
+    of strong teachers, keeping only examples the tests (or other checks) confirm.</p></div>
   </div>
 
   <footer>
     Built with OpenAI models as the frontier and <a href="https://huggingface.co/openjev/openjev">OpenJev</a> (CC BY-NC)
-    as the classifier, served with vLLM on RunPod. Numbers are from a single research log and will
-    change as the work continues.
+    as the cheap model, served with vLLM on RunPod. Numbers come from one research log and will change as the
+    work continues.
   </footer>
 </main>
 </body>
