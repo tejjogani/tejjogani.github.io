@@ -153,10 +153,12 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
 .pscore{font-size:34px;font-weight:900;min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
 .pscore.bump{animation:bump .4s ease-out}
 .pbtns{display:flex;gap:8px;align-items:center}
-.minus{width:54px;height:58px;border-radius:10px;font-size:18px;font-weight:800;color:var(--dim);background:var(--card2);border:2px solid var(--line)}
-.minus:hover{color:var(--blood)}
-.minus:active{transform:scale(.94)}
-.win{height:58px;min-width:140px;padding:0 18px;font-size:19px;font-weight:900}
+input.pts{width:150px;height:54px;text-align:right;font-weight:800;font-size:22px;font-variant-numeric:tabular-nums}
+input.pts::placeholder{font-weight:600;font-size:16px;color:#5d5262}
+input.pts.bad{border-color:var(--blood);background:#2a1214}
+.applybar{display:flex;align-items:center;justify-content:flex-end;gap:14px;margin-top:6px}
+.applybar .btn{padding:16px 28px;font-size:20px}
+.applymsg{color:var(--blood);font-weight:700}
 .chips{display:flex;gap:6px}
 .chip{min-width:64px;height:52px;padding:0 8px;border-radius:10px;border:2px solid #000;opacity:.3;font-weight:800;font-size:13px;color:#140d10;transition:opacity .1s}
 .chip:hover{opacity:.6}
@@ -168,12 +170,11 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
 .teamtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;font-weight:700}
 .btn.tc.on{background:var(--bone);color:#140d10;border-color:var(--bone)}
 .teampanel h2{font-family:var(--serif);font-size:22px;margin-bottom:10px}
-.winbtns{display:flex;flex-direction:column;gap:10px}
-.winbtn{display:flex;align-items:baseline;gap:14px;padding:16px 18px;border-radius:12px;font-size:22px;font-weight:900;color:#140d10;text-align:left;
-  border:2px solid #000;box-shadow:4px 4px 0 #000;transition:transform .06s,box-shadow .06s}
-.winbtn:active:not(:disabled){transform:translate(4px,4px);box-shadow:0 0 0 #000}
-.winbtn:disabled{opacity:.3;cursor:default}
-.winbtn small{font-size:15px;font-weight:700;opacity:.8}
+.teamrow{display:flex;align-items:center;gap:14px;padding:10px 12px 10px 16px;border-radius:12px;background:var(--card);border:2px solid var(--line);border-left-width:10px;margin-bottom:10px}
+.teamrow .tname{font-size:20px;font-weight:900;flex:none}
+.teamrow small{flex:1;min-width:0;color:var(--dim);font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.teamrow input:disabled{opacity:.35}
+.teamrow[hidden],#soloBar[hidden]{display:none}
 #emptyC{color:var(--dim);text-align:center;padding:36px 0;font-size:18px}
 .footer{margin-top:26px;padding-top:18px;border-top:2px dashed var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .confirm{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;border:2px solid var(--blood);background:#2a1214}
@@ -182,7 +183,7 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
 @media (max-width:640px){
   .player{grid-template-columns:1fr auto}
   .pbtns{grid-column:1/-1;justify-content:space-between;flex-wrap:wrap}
-  .win{flex:1}
+  input.pts{flex:1}
 }
 </style>
 </head>
@@ -237,6 +238,10 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
   </form>
   <div id="plist"></div>
   <div id="emptyC">No players yet.</div>
+  <div class="applybar" id="soloBar">
+    <span class="applymsg" id="soloMsg"></span>
+    <button class="btn orange" id="applySolo">Add points</button>
+  </div>
   <div class="teampanel" id="teamPanel">
     <div class="teamtools">
       <span>Number of teams:</span>
@@ -245,8 +250,12 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
       <button class="btn tc" data-n="4">4</button>
       <button class="btn" id="shuffleBtn">Shuffle teams</button>
     </div>
-    <h2>Who won?</h2>
-    <div class="winbtns" id="winBtns"></div>
+    <h2>Points per team</h2>
+    <div id="teamRows"></div>
+    <div class="applybar">
+      <span class="applymsg" id="teamMsg"></span>
+      <button class="btn orange" id="applyTeam">Add team points</button>
+    </div>
   </div>
   <div class="footer">
     <button class="btn" id="resetBtn">Reset scores</button>
@@ -402,27 +411,85 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
       inp.focus();
     };
 
-    // One undo step per award, even when a whole team scores.
-    function award(ids, delta, label, team) {
-      const ps = state.players.filter(x => ids.includes(x.id));
-      if (!ps.length) return;
-      commit(label, () => ps.forEach(p => { p.score += delta; }),
-        { type: 'score', ids: ps.map(p => p.id), delta, team });
-      ps.forEach(p => {
-        const sc = rowEls.get(p.id)?.querySelector('.pscore');
+    const fmt = n => n.toLocaleString('en-US');
+    const signed = n => (n > 0 ? '+' : '') + fmt(n);
+    // Accepts "500", "+500", "-200", "1,000". Returns null if it isn't a whole number.
+    function parsePts(raw) {
+      const t = raw.replace(/[,\s]/g, '').replace(/^\+/, '');
+      if (!/^-?\d{1,9}$/.test(t)) return null;
+      return parseInt(t, 10);
+    }
+    // Reads the boxes; marks bad ones red. Returns [[input, points]...] or null if any are bad.
+    function readBoxes(inputs, msgEl) {
+      let bad = false;
+      const out = [];
+      inputs.forEach(inp => {
+        inp.classList.remove('bad');
+        const raw = inp.value.trim();
+        if (!raw) return;
+        const n = parsePts(raw);
+        if (n === null) { inp.classList.add('bad'); bad = true; }
+        else if (n !== 0) out.push([inp, n]);
+      });
+      msgEl.textContent = bad ? 'Whole numbers only (e.g. 500 or -200)' : '';
+      return bad ? null : out;
+    }
+    // One undo step per round, however many players got points.
+    function applyPoints(deltas, label, extra) {
+      commit(label, ps => ps.forEach(p => { if (deltas[p.id]) p.score += deltas[p.id]; }),
+        Object.assign({ type: 'score', deltas }, extra));
+      Object.keys(deltas).forEach(id => {
+        const sc = rowEls.get(+id)?.querySelector('.pscore');
         if (sc) { sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump'); }
       });
     }
-    function scoreBy(id, delta) {
-      const p = state.players.find(x => x.id === id);
-      if (!p) return;
-      award([id], delta, delta > 0 ? `${p.name} won (+1)` : `−1 ${p.name}`);
+    function applySolo() {
+      const inputs = [...list.querySelectorAll('.player input.pts')];
+      const vals = readBoxes(inputs, $('#soloMsg'));
+      if (!vals || !vals.length) return;
+      const deltas = {}, parts = [];
+      vals.forEach(([inp, n]) => {
+        const id = +inp.closest('.player').dataset.id;
+        const p = state.players.find(x => x.id === id);
+        if (!p) return;
+        deltas[id] = n;
+        parts.push(`${p.name} ${signed(n)}`);
+      });
+      inputs.forEach(inp => { inp.value = ''; });
+      applyPoints(deltas, parts.join(', '));
     }
+    $('#applySolo').onclick = applySolo;
+
     const teamMembers = t => state.players.filter(p => state.teamOf[p.id] === t);
-    function teamWins(t) {
-      const ms = teamMembers(t);
-      award(ms.map(p => p.id), 1, `${TEAMS[t].name} won (+1 each)`, TEAMS[t].name);
+    const teamRows = TEAMS.map((t, i) => {
+      const r = document.createElement('div');
+      r.className = 'teamrow';
+      r.dataset.team = i;
+      r.style.borderLeftColor = t.color;
+      r.innerHTML = '<span class="tname"></span><small></small>' +
+        '<input class="text pts" inputmode="numeric" placeholder="points" aria-label="Points for team">';
+      r.querySelector('.tname').textContent = t.name;
+      r.querySelector('.tname').style.color = t.color;
+      r.querySelector('input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyTeam(); } });
+      $('#teamRows').appendChild(r);
+      return r;
+    });
+    function applyTeam() {
+      const inputs = teamRows.filter((r, t) => t < state.teamCount && teamMembers(t).length).map(r => r.querySelector('input'));
+      const vals = readBoxes(inputs, $('#teamMsg'));
+      if (!vals || !vals.length) return;
+      const deltas = {}, parts = [];
+      vals.forEach(([inp, n]) => {
+        const t = +inp.closest('.teamrow').dataset.team;
+        teamMembers(t).forEach(p => { deltas[p.id] = (deltas[p.id] || 0) + n; });
+        parts.push(`${TEAMS[t].name} ${signed(n)}`);
+      });
+      teamRows.forEach(r => { r.querySelector('input').value = ''; });
+      const extra = vals.length === 1 && vals[0][1] > 0
+        ? { team: TEAMS[+vals[0][0].closest('.teamrow').dataset.team].name, teamPts: vals[0][1] } : {};
+      applyPoints(deltas, parts.join(', ') + ' (each)', extra);
     }
+    $('#applyTeam').onclick = applyTeam;
 
     document.querySelectorAll('#modeSeg button').forEach(b => {
       b.onclick = () => setMeta(s => { s.roundMode = b.dataset.mode; });
@@ -446,13 +513,13 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
     function makeRow(id) {
       const el = document.createElement('div');
       el.className = 'player';
+      el.dataset.id = id;
       el.innerHTML =
         '<div class="pname"><span class="prank"></span>' +
         '<input class="text name-in" maxlength="30" aria-label="Player name" title="Click to rename"></div>' +
         '<div class="pscore"></div>' +
         '<div class="pbtns">' +
-        '<button class="minus solo-only" data-d="-1" title="Take a point back">−1</button>' +
-        '<button class="btn orange win solo-only" data-d="1">Won +1</button>' +
+        '<input class="text pts solo-only" inputmode="numeric" placeholder="points" aria-label="Points this round">' +
         '<div class="chips team-only"></div>' +
         '<button class="rm" title="Remove player">✕</button></div>';
       const cur = () => state.players.find(x => x.id === id);
@@ -490,7 +557,7 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
         if (!v || v === p.name) { inp.value = p.name; return; }
         commit('Rename ' + p.name, () => { p.name = v; });
       });
-      el.querySelectorAll('[data-d]').forEach(b => { b.onclick = () => scoreBy(id, +b.dataset.d); });
+      el.querySelector('input.pts').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applySolo(); } });
       el.querySelector('.rm').onclick = () => {
         const p = cur();
         if (!p) return;
@@ -513,7 +580,7 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
         seen.add(p.id);
         const inp = el.querySelector('.name-in');
         if (document.activeElement !== inp) inp.value = p.name;
-        el.querySelector('.pscore').textContent = p.score;
+        el.querySelector('.pscore').textContent = fmt(p.score);
         const rk = el.querySelector('.prank');
         rk.textContent = '#' + ranks.get(p.id);
         rk.classList.toggle('first', ranks.get(p.id) === 1 && p.score > 0);
@@ -531,27 +598,19 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
       document.querySelectorAll('.solo-only').forEach(e => { e.style.display = team ? 'none' : ''; });
       document.querySelectorAll('.team-only').forEach(e => { e.style.display = team ? '' : 'none'; });
       $('#modeHint').textContent = team
-        ? 'Put each player on a team, then tap the team that won. Everyone on it gets 1 point.'
-        : 'Tap "Won +1" on whoever won the round. Use −1 to fix a mistake.';
+        ? 'Put each player on a team, then type points for each team. Everyone on a team gets that many points.'
+        : 'At the end of a round, type points next to each player (e.g. 500 for 1st), then press Add points or Enter.';
       $('#teamPanel').style.display = team && state.players.length ? '' : 'none';
+      $('#soloBar').style.display = !team && state.players.length ? '' : 'none';
       document.querySelectorAll('.tc').forEach(b => b.classList.toggle('on', +b.dataset.n === state.teamCount));
-      const wb = $('#winBtns');
-      wb.innerHTML = '';
-      for (let t = 0; t < state.teamCount; t++) {
+      teamRows.forEach((r, t) => {
         const ms = teamMembers(t);
-        const b = document.createElement('button');
-        b.className = 'winbtn';
-        b.dataset.team = t;
-        b.style.background = TEAMS[t].color;
-        if (t === 1) b.style.color = '#fff';
-        b.disabled = !ms.length;
-        b.append(`${TEAMS[t].name} won`);
-        const sm = document.createElement('small');
-        sm.textContent = ms.length ? ms.map(p => p.name).join(', ') : 'nobody on this team';
-        b.appendChild(sm);
-        b.onclick = () => teamWins(t);
-        wb.appendChild(b);
-      }
+        r.hidden = t >= state.teamCount;
+        r.querySelector('small').textContent = ms.length ? ms.map(p => p.name).join(', ') : 'nobody on this team';
+        const inp = r.querySelector('input');
+        inp.disabled = !ms.length;
+        if (!ms.length) { inp.value = ''; inp.classList.remove('bad'); }
+      });
 
       const u = state.undo[state.undo.length - 1];
       $('#undoBtn').disabled = !u;
@@ -643,9 +702,10 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
         dot.classList.toggle('show', t != null && t < state.teamCount);
         if (t != null && TEAMS[t]) dot.style.background = TEAMS[t].color;
         const sv = el.querySelector('.sv');
-        if (sv.textContent !== String(p.score)) {
+        const shown = p.score.toLocaleString('en-US');
+        if (sv.textContent !== shown) {
           if (!fresh.has(p.id)) { sv.classList.remove('bump'); void sv.offsetWidth; sv.classList.add('bump'); }
-          sv.textContent = p.score;
+          sv.textContent = shown;
         }
         el.classList.toggle('leader', p.rank === 1 && p.score > 0);
       });
@@ -676,34 +736,36 @@ input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
         moved.forEach(el => { el.style.transition = ''; el.style.transform = ''; el.style.opacity = ''; });
       }
 
-      // "+1" pop and a flash on everyone who just scored.
+      // "+500" pop and a flash on everyone who just scored.
       const L = state.last;
       const isScore = live && L && L.rev === state.rev && L.type === 'score';
-      if (isScore) for (const id of L.ids || []) {
-        const el = rowEls.get(id);
-        if (!el) continue;
+      const deltas = !isScore ? {} : L.deltas || Object.fromEntries((L.ids || []).map(id => [id, L.delta]));
+      const gainers = Object.keys(deltas).filter(id => deltas[id] > 0).map(Number);
+      for (const [id, d] of Object.entries(deltas)) {
+        const el = rowEls.get(+id);
+        if (!el || !d) continue;
         const pop = document.createElement('span');
-        pop.className = 'pop' + (L.delta < 0 ? ' neg' : '');
-        pop.textContent = (L.delta > 0 ? '+' : '−') + Math.abs(L.delta);
+        pop.className = 'pop' + (d < 0 ? ' neg' : '');
+        pop.textContent = (d > 0 ? '+' : '−') + Math.abs(d).toLocaleString('en-US');
         el.querySelector('.score').appendChild(pop);
         pop.addEventListener('animationend', () => pop.remove());
         el.classList.remove('flash', 'flash-neg');
         void el.offsetWidth;
         el.classList.add('flash');
-        if (L.delta < 0) el.classList.add('flash-neg');
+        if (d < 0) el.classList.add('flash-neg');
       }
 
       // Celebrate when someone new reaches 1st (or a team wins).
       const leaders = list.filter(p => p.rank === 1 && p.score > 0);
-      if (isScore && L.delta > 0 && prevLeaders) {
+      if (gainers.length && prevLeaders) {
         const newcomers = leaders.filter(p => !prevLeaders.has(p.id));
         // Breaking a tie for 1st also counts as taking the lead.
-        const brokeTie = leaders.length === 1 && prevLeaders.size > 1 && L.ids.includes(leaders[0].id);
+        const brokeTie = leaders.length === 1 && prevLeaders.size > 1 && gainers.includes(leaders[0].id);
         if (newcomers.length || brokeTie) {
           const names = (leaders.length > 1 || brokeTie ? leaders : newcomers).map(p => p.name).join(' & ');
           celebrate('🎃 ' + names, leaders.length > 1 ? 'Tied for 1st' : 'New leader');
         } else if (L.team) {
-          celebrate(L.team + ' win', '+1 each', true);
+          celebrate(L.team + ' win', '+' + L.teamPts.toLocaleString('en-US') + ' each', true);
         }
       }
       prevLeaders = new Set(leaders.map(p => p.id));
