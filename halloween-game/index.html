@@ -3,259 +3,258 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Game Night Leaderboard</title>
+<title>Halloween Game Night</title>
 <style>
 :root{
-  --gold:#ffd54a;--silver:#d6dee8;--bronze:#e8a46a;
-  --pink:#ff4fa3;--cyan:#3de0ff;--green:#4dff9a;--red:#ff5b6e;
-  --text:#f6f2ff;--muted:#a79bc9;
+  --night:#110c14;--card:#1c1520;--card2:#251c2a;--line:#33283a;
+  --bone:#efe6cf;--dim:#9a8f86;--pumpkin:#ff7518;--pumpkin-dk:#b84d05;
+  --slime:#a5d63a;--blood:#e0403a;--witch:#8e5cc4;
+  --serif:Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(ellipse at 15% -10%,#4a148c 0%,transparent 55%),
-    radial-gradient(ellipse at 95% 110%,#0d47a1 0%,transparent 55%),
-    radial-gradient(ellipse at 60% 50%,#2a0a4a 0%,transparent 70%),
-    #07030f;
-  background-attachment:fixed;
-  overflow-x:hidden;
-}
+body{font-family:var(--sans);color:var(--bone);background:var(--night);overflow-x:hidden}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 #home,#tv,#control{display:none}
 body.mode-home #home{display:grid}
 body.mode-tv #tv{display:block}
 body.mode-control #control{display:block}
 
+/* Shared "cut paper" button */
+.btn{padding:11px 18px;border-radius:10px;font-weight:700;font-size:16px;background:var(--card2);
+  border:2px solid var(--line);box-shadow:3px 3px 0 #000;transition:transform .06s,box-shadow .06s}
+.btn:hover:not(:disabled){border-color:#4a3c52}
+.btn:active:not(:disabled){transform:translate(3px,3px);box-shadow:0 0 0 #000}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.orange{background:var(--pumpkin);border-color:var(--pumpkin-dk);color:#1a0d02}
+.btn.blood{background:var(--blood);border-color:#8e1f1b;color:#fff}
+
 /* ---------- Home ---------- */
 #home{min-height:100vh;place-items:center;text-align:center;padding:40px 20px}
-#home h1{font-size:clamp(32px,6vw,64px);font-weight:900;margin-bottom:12px}
-#home p{color:var(--muted);font-size:18px;margin-bottom:36px}
-.home-btns{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
-.big-btn{padding:28px 40px;border-radius:22px;font-size:24px;font-weight:800;min-width:260px;
-  box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .15s}
-.big-btn:hover{transform:translateY(-3px)}
-.big-btn small{display:block;font-size:14px;font-weight:600;opacity:.8;margin-top:6px}
-.big-btn.tv{background:linear-gradient(135deg,var(--pink),#8e2de2)}
-.big-btn.ctl{background:linear-gradient(135deg,#11a6c9,#1fd67a)}
+#home h1{font-family:var(--serif);font-size:clamp(36px,6vw,68px);font-weight:700;letter-spacing:.02em;margin-bottom:10px}
+#home h1 span{color:var(--pumpkin)}
+#home p{color:var(--dim);font-size:18px;margin-bottom:34px}
+.home-btns{display:flex;gap:22px;justify-content:center;flex-wrap:wrap}
+.home-btns .btn{padding:24px 34px;font-size:22px;min-width:250px;box-shadow:5px 5px 0 #000}
+.home-btns .btn small{display:block;font-size:14px;font-weight:600;opacity:.75;margin-top:6px}
 
 /* ---------- TV ---------- */
-#tv{height:100vh;overflow:hidden;padding:3vh 4vw 0;position:relative}
-#tv header{height:10vh;display:flex;align-items:center;justify-content:center}
-#tv h1{
-  font-size:6.5vh;font-weight:900;letter-spacing:.35em;text-transform:uppercase;padding-left:.35em;
-  background:linear-gradient(90deg,var(--pink),var(--gold),var(--cyan),var(--pink));background-size:300% 100%;
-  -webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 8s linear infinite;
-}
-@keyframes shimmer{to{background-position:300% 0}}
+#tv{height:100vh;overflow:hidden;padding:3vh 4vw 0;position:relative;
+  background:radial-gradient(ellipse at 50% 120%,#24122c 0%,transparent 60%),var(--night)}
+.moon{position:absolute;top:-9vh;right:6vw;width:26vh;height:26vh;border-radius:50%;
+  background:radial-gradient(circle at 35% 40%,rgba(0,0,0,.07) 0 9%,transparent 10%),
+             radial-gradient(circle at 62% 66%,rgba(0,0,0,.06) 0 6%,transparent 7%),
+             radial-gradient(circle at 70% 30%,rgba(0,0,0,.05) 0 4%,transparent 5%),#e9dfc0;
+  box-shadow:0 0 12vh rgba(233,223,192,.12);opacity:.9}
+.deco-bat{position:absolute;fill:#000;opacity:.85}
+#tv header{position:relative;height:10vh;display:flex;align-items:center;gap:1.5vw}
+#tv h1{font-family:var(--serif);font-size:6.4vh;font-weight:700;letter-spacing:.02em;line-height:1}
+#tv h1 span{color:var(--pumpkin)}
 #board{position:relative;height:83vh;display:flex;flex-direction:column;gap:var(--gap,1.6vh);padding-top:1vh}
 .row{
   position:relative;flex:none;height:var(--rowh,12vh);
-  display:flex;align-items:center;gap:2.5vw;padding:0 3vw;
-  border-radius:calc(var(--rowh,12vh)*.3);
-  background:rgba(255,255,255,.06);border:.25vh solid rgba(255,255,255,.08);
-  box-shadow:0 .6vh 2.5vh rgba(0,0,0,.35);
+  display:flex;align-items:center;gap:2.4vw;padding:0 3vw 0 1.6vw;
+  border-radius:1.4vh;background:var(--card);border:.35vh solid var(--line);
+  box-shadow:.7vh .7vh 0 #000;
   transition:transform .85s cubic-bezier(.2,.9,.25,1),opacity .6s ease,background .5s,border-color .5s;
   will-change:transform;
 }
-.row::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;
-  background:radial-gradient(ellipse at 85% 50%,rgba(77,255,154,.55),rgba(77,255,154,.08) 70%)}
-.row.flash-neg::after{background:radial-gradient(ellipse at 85% 50%,rgba(255,91,110,.55),rgba(255,91,110,.08) 70%)}
+.row::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;background:rgba(165,214,58,.28)}
+.row.flash-neg::after{background:rgba(224,64,58,.3)}
 .row.flash::after{animation:flash 1s ease-out}
 @keyframes flash{0%{opacity:1}100%{opacity:0}}
-.rank{flex:none;width:calc(var(--rowh,12vh)*.95);font-size:calc(var(--rowh,12vh)*.5);font-weight:900;
-  text-align:center;font-variant-numeric:tabular-nums;color:var(--muted)}
-.row[data-rank="1"] .rank{color:var(--gold);text-shadow:0 0 2vh rgba(255,213,74,.6)}
-.row[data-rank="2"] .rank{color:var(--silver)}
-.row[data-rank="3"] .rank{color:var(--bronze)}
+/* rank sits on a little tombstone */
+.rank{flex:none;width:calc(var(--rowh,12vh)*.78);height:calc(var(--rowh,12vh)*.8);
+  display:grid;place-items:center;padding-top:calc(var(--rowh,12vh)*.07);line-height:1;
+  border-radius:50% 50% .8vh .8vh/38% 38% .8vh .8vh;background:#3b3440;color:#cfc6b4;
+  font-family:var(--serif);font-size:calc(var(--rowh,12vh)*.42);font-weight:700;font-variant-numeric:lining-nums tabular-nums}
+.row[data-rank="1"] .rank{background:var(--pumpkin);color:#1a0d02}
 .name{flex:1;min-width:0;font-size:calc(var(--rowh,12vh)*.46);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.crown{display:none;margin-right:.25em}
-.row.leader .crown{display:inline-block;animation:bob 1.8s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-12%) rotate(8deg)}}
-.score{position:relative;flex:none;font-size:calc(var(--rowh,12vh)*.6);font-weight:900;font-variant-numeric:tabular-nums;min-width:2.5ch;text-align:right}
+.lantern{display:none;margin-right:.25em}
+.row.leader .lantern{display:inline-block;animation:wobble 2.2s ease-in-out infinite}
+@keyframes wobble{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.score{position:relative;flex:none;font-size:calc(var(--rowh,12vh)*.62);font-weight:900;font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}
 .sv{display:inline-block}
 .sv.bump{animation:bump .55s cubic-bezier(.2,.9,.25,1.4)}
 @keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.35)}100%{transform:scale(1)}}
-.row.leader{
-  background:linear-gradient(90deg,rgba(255,213,74,.24),rgba(255,79,163,.14) 60%,rgba(255,255,255,.05));
-  border-color:rgba(255,213,74,.85);animation:glow 2.4s ease-in-out infinite;
+.row.leader{background:#2a1608;border-color:var(--pumpkin);animation:candle 3s infinite}
+.row.leader .score{color:var(--pumpkin)}
+/* irregular flicker, like a candle inside a pumpkin */
+@keyframes candle{
+  0%,100%{box-shadow:.7vh .7vh 0 #000,0 0 3vh rgba(255,117,24,.35)}
+  12%{box-shadow:.7vh .7vh 0 #000,0 0 5vh rgba(255,117,24,.55)}
+  19%{box-shadow:.7vh .7vh 0 #000,0 0 2.5vh rgba(255,117,24,.3)}
+  33%{box-shadow:.7vh .7vh 0 #000,0 0 4.5vh rgba(255,117,24,.5)}
+  58%{box-shadow:.7vh .7vh 0 #000,0 0 3vh rgba(255,117,24,.38)}
+  64%{box-shadow:.7vh .7vh 0 #000,0 0 6vh rgba(255,117,24,.6)}
+  80%{box-shadow:.7vh .7vh 0 #000,0 0 3.5vh rgba(255,117,24,.42)}
 }
-.row.leader .score{color:var(--gold)}
-@keyframes glow{
-  0%,100%{box-shadow:0 0 2vh rgba(255,213,74,.35),0 .6vh 2.5vh rgba(0,0,0,.35)}
-  50%{box-shadow:0 0 6vh rgba(255,213,74,.75),0 .6vh 2.5vh rgba(0,0,0,.35)}
-}
+.tdot{display:none;width:.55em;height:.55em;border-radius:50%;margin-right:.35em;vertical-align:middle;border:.3vh solid #000}
+.tdot.show{display:inline-block}
 .pop{position:absolute;right:calc(100% + .25em);top:0;font-size:.8em;font-weight:900;white-space:nowrap;
-  color:var(--green);text-shadow:0 0 2.5vh rgba(77,255,154,.9);pointer-events:none;animation:pop 1.5s ease-out forwards}
-.pop.neg{color:var(--red);text-shadow:0 0 2.5vh rgba(255,91,110,.9)}
+  color:var(--slime);text-shadow:.4vh .4vh 0 #000;pointer-events:none;animation:pop 1.5s ease-out forwards}
+.pop.neg{color:var(--blood)}
 @keyframes pop{
   0%{opacity:0;transform:translateY(40%) scale(.4)}
   15%{opacity:1;transform:translateY(-10%) scale(1.3)}
   30%{transform:translateY(-20%) scale(1)}
   100%{opacity:0;transform:translateY(-120%) scale(1)}
 }
-#tvEmpty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:5vh;font-weight:700;color:var(--muted);padding:0 10vw}
+#tvEmpty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--serif);font-size:5vh;color:var(--dim);padding:0 10vw}
 #tvEmpty[hidden]{display:none}
 #celebrate{position:fixed;inset:0;pointer-events:none;z-index:5;display:grid;place-items:center;overflow:hidden}
-.banner{max-width:88vw;text-align:center;font-size:10vh;font-weight:900;line-height:1.1;overflow-wrap:anywhere;
-  padding:3vh 5vw 4vh;border-radius:4vh;background:rgba(12,5,32,.88);border:.5vh solid var(--gold);
-  box-shadow:0 0 10vh rgba(255,213,74,.6);animation:banner 3.4s cubic-bezier(.2,.9,.25,1) forwards}
-.banner small{display:block;font-size:4vh;color:var(--gold);letter-spacing:.3em;text-transform:uppercase;margin-bottom:1vh}
+.banner{max-width:86vw;text-align:center;font-family:var(--serif);font-size:10vh;font-weight:700;line-height:1.1;overflow-wrap:anywhere;
+  padding:3vh 5vw 4vh;border-radius:2vh;background:var(--bone);color:#140d10;border:.6vh solid #000;
+  box-shadow:1.4vh 1.4vh 0 #000;animation:banner 3.4s cubic-bezier(.2,.9,.25,1) forwards}
+.banner small{display:block;font-family:var(--sans);font-size:3.6vh;font-weight:900;color:var(--pumpkin-dk);letter-spacing:.25em;text-transform:uppercase;margin-bottom:1vh}
 @keyframes banner{
-  0%{opacity:0;transform:scale(.3) rotate(-8deg)}
-  12%{opacity:1;transform:scale(1.08) rotate(1deg)}
-  20%{transform:scale(1) rotate(0)}
-  85%{opacity:1;transform:scale(1)}
-  100%{opacity:0;transform:scale(1.08)}
+  0%{opacity:0;transform:scale(.3) rotate(-6deg)}
+  12%{opacity:1;transform:scale(1.06) rotate(-1deg)}
+  20%{transform:scale(1) rotate(-1.5deg)}
+  85%{opacity:1;transform:scale(1) rotate(-1.5deg)}
+  100%{opacity:0;transform:scale(1.05) rotate(-1.5deg)}
 }
-.confetti{position:absolute;top:-5vh;border-radius:.3vh;animation:fall linear forwards}
-@keyframes fall{to{transform:translate(var(--dx),115vh) rotate(var(--rot))}}
-#fsBtn{position:fixed;top:2vh;right:2vw;z-index:10;padding:10px 16px;border-radius:12px;
-  background:rgba(255,255,255,.14);font-size:16px;font-weight:700;transition:opacity .5s,background .2s}
-#fsBtn:hover{background:rgba(255,255,255,.25)}
+.flybat{position:absolute;left:0;top:0;fill:#0a070c;animation:fly linear forwards}
+.flybat svg{display:block;width:100%;height:auto;animation:flap .18s ease-in-out infinite alternate}
+@keyframes fly{from{transform:translate(var(--x0),var(--y0))}to{transform:translate(var(--x1),var(--y1))}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.35)}}
+#fsBtn{position:fixed;top:2vh;right:2vw;z-index:10;transition:opacity .5s}
 body.idle #fsBtn{opacity:0;pointer-events:none}
 body.idle.mode-tv{cursor:none}
 
 /* ---------- Control ---------- */
-#control{max-width:920px;margin:0 auto;padding:24px 20px 80px}
-.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
-.topbar h1{font-size:26px;font-weight:900;flex:1;min-width:200px}
-.status{font-size:14px;font-weight:600;color:var(--muted);padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.06)}
-.status.on{color:var(--green);background:rgba(77,255,154,.1)}
-.btn{padding:12px 18px;border-radius:12px;background:rgba(255,255,255,.1);font-weight:700;font-size:16px;transition:background .15s,transform .1s}
-.btn:hover:not(:disabled){background:rgba(255,255,255,.18)}
-.btn:active:not(:disabled){transform:scale(.96)}
-.btn:disabled{opacity:.35;cursor:default}
-.btn.primary{background:linear-gradient(135deg,var(--pink),#a34bff)}
-.btn.danger{background:rgba(255,91,110,.16);color:#ffb3bd}
-.btn.danger.solid{background:var(--red);color:#fff}
+#control{max-width:920px;margin:0 auto;padding:22px 20px 80px}
+.topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.topbar h1{font-family:var(--serif);font-size:30px;font-weight:700;flex:1;min-width:200px}
+.topbar h1 span{color:var(--pumpkin)}
+.status{font-size:14px;font-weight:700;color:var(--dim);padding:7px 12px;border-radius:8px;border:2px dashed var(--line)}
+.status.on{color:var(--slime);border-color:#4e6620}
 #undoBtn{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:150px}
-#undoLbl{font-size:12px;font-weight:600;opacity:.7;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.add{display:flex;gap:10px;margin-bottom:18px}
+#undoLbl{font-size:12px;font-weight:600;opacity:.7;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{display:flex;gap:8px;margin-bottom:8px}
+.seg button{flex:1;padding:14px;border-radius:10px;font-size:18px;font-weight:800;color:var(--dim);
+  background:var(--card);border:2px solid var(--line)}
+.seg button.on{background:var(--bone);color:#140d10;border-color:var(--bone);box-shadow:3px 3px 0 #000}
+.modehint{color:var(--dim);font-size:14px;margin:4px 2px 16px}
+.add{display:flex;gap:10px;margin-bottom:16px}
 .add input{flex:1;min-width:0}
-input.text{font:inherit;font-size:18px;padding:12px 14px;border-radius:12px;border:2px solid rgba(255,255,255,.12);
-  background:rgba(0,0,0,.25);color:var(--text);outline:none;transition:border-color .15s}
-input.text:focus{border-color:var(--cyan)}
-.player{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:14px;padding:12px 12px 12px 16px;
-  border-radius:16px;background:rgba(255,255,255,.06);margin-bottom:10px}
+input.text{font:inherit;font-size:18px;padding:12px 14px;border-radius:10px;border:2px solid var(--line);
+  background:#0c080e;color:var(--bone);outline:none}
+input.text:focus{border-color:var(--pumpkin)}
+.player{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:14px;padding:10px 12px 10px 14px;
+  border-radius:12px;background:var(--card);border:2px solid var(--line);margin-bottom:10px}
 .pname{display:flex;align-items:center;gap:10px;min-width:0}
-.prank{flex:none;font-size:13px;font-weight:800;color:var(--muted);background:rgba(255,255,255,.08);padding:4px 8px;border-radius:8px;font-variant-numeric:tabular-nums}
-.prank.first{color:#1a1200;background:var(--gold)}
-.name-in{width:100%;min-width:0;font-weight:800!important;font-size:20px!important;background:transparent!important;border-color:transparent!important}
-.name-in:hover{border-color:rgba(255,255,255,.12)!important}
-.name-in:focus{border-color:var(--cyan)!important;background:rgba(0,0,0,.25)!important}
-.pscore{font-size:36px;font-weight:900;min-width:2.5ch;text-align:right;font-variant-numeric:tabular-nums}
+.prank{flex:none;font-size:13px;font-weight:800;color:var(--dim);background:var(--card2);padding:4px 8px;border-radius:6px;font-variant-numeric:tabular-nums}
+.prank.first{color:#1a0d02;background:var(--pumpkin)}
+input.name-in{width:100%;min-width:0;font-weight:800;font-size:20px;background:transparent;border-color:transparent}
+input.name-in:hover{border-color:var(--line)}
+input.name-in:focus{background:#0c080e;border-color:var(--pumpkin)}
+.pscore{font-size:34px;font-weight:900;min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
 .pscore.bump{animation:bump .4s ease-out}
 .pbtns{display:flex;gap:8px;align-items:center}
-.sbtn{width:70px;height:62px;border-radius:14px;font-size:22px;font-weight:900;transition:transform .08s,filter .15s}
-.sbtn:hover{filter:brightness(1.2)}
-.sbtn:active{transform:scale(.92)}
-.minus{background:rgba(255,91,110,.18);color:#ff9aa6}
-.plus{background:rgba(77,255,154,.16);color:var(--green)}
-.plus5{background:linear-gradient(135deg,#1fd67a,#11a6c9);color:#fff}
-.rm{width:42px;height:62px;border-radius:12px;color:var(--muted);font-size:20px}
-.rm:hover{color:var(--red);background:rgba(255,91,110,.12)}
-.seg{display:flex;gap:6px;padding:6px;border-radius:16px;background:rgba(255,255,255,.06);margin-bottom:8px}
-.seg button{flex:1;padding:14px;border-radius:12px;font-size:18px;font-weight:800;color:var(--muted);transition:background .15s,color .15s}
-.seg button.on{background:linear-gradient(135deg,var(--pink),#a34bff);color:#fff}
-.modehint{color:var(--muted);font-size:14px;margin:0 4px 16px}
-.wbtn{min-width:150px;height:62px;padding:0 18px;border-radius:14px;font-size:20px;font-weight:900;color:#fff;
-  background:linear-gradient(135deg,#1fd67a,#11a6c9);transition:transform .08s,filter .15s}
-.wbtn:hover{filter:brightness(1.15)}
-.wbtn:active{transform:scale(.94)}
+.minus{width:54px;height:58px;border-radius:10px;font-size:18px;font-weight:800;color:var(--dim);background:var(--card2);border:2px solid var(--line)}
+.minus:hover{color:var(--blood)}
+.minus:active{transform:scale(.94)}
+.win{height:58px;min-width:140px;padding:0 18px;font-size:19px;font-weight:900}
 .chips{display:flex;gap:6px}
-.chip{width:52px;height:52px;border-radius:12px;border:3px solid transparent;opacity:.35;font-weight:900;font-size:13px;color:#10051f;transition:opacity .12s,transform .08s}
-.chip:hover{opacity:.7}
-.chip.on{opacity:1;border-color:#fff;transform:scale(1.05)}
-.chip.out{background:rgba(255,255,255,.15);color:var(--text)}
-.teampanel{margin-top:16px;padding:16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.chip{min-width:64px;height:52px;padding:0 8px;border-radius:10px;border:2px solid #000;opacity:.3;font-weight:800;font-size:13px;color:#140d10;transition:opacity .1s}
+.chip:hover{opacity:.6}
+.chip.on{opacity:1;box-shadow:3px 3px 0 #000;outline:2px solid var(--bone);outline-offset:1px}
+.chip.out{background:var(--card2);color:var(--bone);border-color:var(--line)}
+.rm{width:40px;height:58px;border-radius:10px;color:var(--dim);font-size:20px}
+.rm:hover{color:var(--blood)}
+.teampanel{margin-top:14px;padding:16px;border-radius:12px;border:2px dashed var(--line)}
 .teamtools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;font-weight:700}
-.btn.tc.on{background:var(--cyan);color:#04121a}
-.teampanel h2{font-size:18px;margin-bottom:10px}
+.btn.tc.on{background:var(--bone);color:#140d10;border-color:var(--bone)}
+.teampanel h2{font-family:var(--serif);font-size:22px;margin-bottom:10px}
 .winbtns{display:flex;flex-direction:column;gap:10px}
-.winbtn{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;font-size:22px;font-weight:900;color:#10051f;text-align:left;transition:transform .08s,filter .15s}
-.winbtn:hover:not(:disabled){filter:brightness(1.1)}
-.winbtn:active:not(:disabled){transform:scale(.98)}
+.winbtn{display:flex;align-items:baseline;gap:14px;padding:16px 18px;border-radius:12px;font-size:22px;font-weight:900;color:#140d10;text-align:left;
+  border:2px solid #000;box-shadow:4px 4px 0 #000;transition:transform .06s,box-shadow .06s}
+.winbtn:active:not(:disabled){transform:translate(4px,4px);box-shadow:0 0 0 #000}
 .winbtn:disabled{opacity:.3;cursor:default}
 .winbtn small{font-size:15px;font-weight:700;opacity:.8}
-.tdot{display:none;width:.55em;height:.55em;border-radius:50%;margin-right:.35em;vertical-align:middle;box-shadow:0 0 1.5vh currentColor}
-.tdot.show{display:inline-block}
-#emptyC{color:var(--muted);text-align:center;padding:40px 0;font-size:18px}
-.footer{margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.confirm{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:14px;background:rgba(255,91,110,.12);border:1px solid rgba(255,91,110,.4)}
+#emptyC{color:var(--dim);text-align:center;padding:36px 0;font-size:18px}
+.footer{margin-top:26px;padding-top:18px;border-top:2px dashed var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.confirm{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;border:2px solid var(--blood);background:#2a1214}
 .confirm[hidden],#resetBtn[hidden]{display:none}
 .confirm span{font-weight:700}
-.hint{color:var(--muted);font-size:13px;margin-left:auto}
 @media (max-width:640px){
   .player{grid-template-columns:1fr auto}
-  .pbtns{grid-column:1/-1;justify-content:space-between}
-  .sbtn{flex:1}
+  .pbtns{grid-column:1/-1;justify-content:space-between;flex-wrap:wrap}
+  .win{flex:1}
 }
 </style>
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="bat" viewBox="0 0 100 50">
+    <path d="M50 17c-2-5-5-6-7-2-5-6-15-9-28-7 7 4 9 10 7 16-5-3-12-3-18 0 10 3 16 10 18 18 6-6 14-8 20-5 2-4 5-6 8-3 3-3 6-1 8 3 6-3 14-1 20 5 2-8 8-15 18-18-6-3-13-3-18 0-2-6 0-12 7-16-13-2-23 1-28 7-2-4-5-3-7 2z"/>
+  </symbol>
+</svg>
+
 <!-- ============ HOME ============ -->
 <section id="home">
   <div>
-    <h1>🎲 Game Night Leaderboard</h1>
-    <p>Open the TV window, drag it to the TV, then use this window as the control panel.</p>
+    <h1><span>Halloween</span> Game Night</h1>
+    <p>Open the TV window, drag it onto the TV, and keep this window as your scorekeeper.</p>
     <div class="home-btns">
-      <button class="big-btn tv" id="openTv">📺 Open TV window<small>opens a new window to drag onto the TV</small></button>
-      <button class="big-btn ctl" id="openControl">🎛️ Open Control<small>uses this window</small></button>
+      <button class="btn orange" id="openTv">Open TV window<small>new window for the TV</small></button>
+      <button class="btn" id="openControl">Open scorekeeper<small>uses this window</small></button>
     </div>
   </div>
 </section>
 
 <!-- ============ TV ============ -->
 <section id="tv">
-  <button id="fsBtn">⛶ Fullscreen</button>
-  <header><h1>Game Night</h1></header>
+  <div class="moon"></div>
+  <svg class="deco-bat" style="top:13vh;right:4vw;width:7vh"><use href="#bat"/></svg>
+  <svg class="deco-bat" style="top:5vh;right:24vw;width:4.5vh;transform:rotate(-12deg)"><use href="#bat"/></svg>
+  <button class="btn" id="fsBtn">Fullscreen</button>
+  <header><h1><span>Halloween</span> Game Night</h1></header>
   <div id="board"></div>
-  <div id="tvEmpty">Waiting for players…<br>add them on the control screen</div>
+  <div id="tvEmpty">Nobody here yet…<br>add players on the scorekeeper</div>
   <div id="celebrate"></div>
 </section>
 
 <!-- ============ CONTROL ============ -->
 <section id="control">
   <div class="topbar">
-    <h1>🎛️ Scorekeeper</h1>
-    <span class="status" id="tvStatus">📺 TV not detected</span>
+    <h1><span>Score</span>keeper</h1>
+    <span class="status" id="tvStatus">TV not detected</span>
     <button class="btn" id="openTv2">Open TV window</button>
-    <button class="btn" id="undoBtn" disabled><span>↶ Undo</span><span id="undoLbl">nothing to undo</span></button>
+    <button class="btn" id="undoBtn" disabled><span>Undo</span><span id="undoLbl">nothing to undo</span></button>
   </div>
   <div class="seg" id="modeSeg">
-    <button data-mode="solo">🏆 Individual round</button>
-    <button data-mode="team">👥 Team round</button>
+    <button data-mode="solo">Individual round</button>
+    <button data-mode="team">Team round</button>
   </div>
   <p class="modehint" id="modeHint"></p>
   <form class="add" id="addForm" autocomplete="off">
-    <input class="text" id="newName" maxlength="30" placeholder="Add a player…">
-    <button class="btn primary" type="submit">Add</button>
+    <input class="text" id="newName" maxlength="30" placeholder="Add a player">
+    <button class="btn orange" type="submit">Add</button>
   </form>
   <div id="plist"></div>
-  <div id="emptyC">No players yet. Add someone above.</div>
+  <div id="emptyC">No players yet.</div>
   <div class="teampanel" id="teamPanel">
     <div class="teamtools">
-      <span>Teams:</span>
+      <span>Number of teams:</span>
       <button class="btn tc" data-n="2">2</button>
       <button class="btn tc" data-n="3">3</button>
       <button class="btn tc" data-n="4">4</button>
-      <button class="btn" id="shuffleBtn">🔀 Shuffle teams</button>
+      <button class="btn" id="shuffleBtn">Shuffle teams</button>
     </div>
-    <h2>Who won this round?</h2>
+    <h2>Who won?</h2>
     <div class="winbtns" id="winBtns"></div>
   </div>
   <div class="footer">
-    <button class="btn danger" id="resetBtn">Reset scores</button>
+    <button class="btn" id="resetBtn">Reset scores</button>
     <div class="confirm" id="resetConfirm" hidden>
-      <span>Reset every score to 0?</span>
-      <button class="btn danger solid" id="resetYes">Yes, reset</button>
+      <span>Set every score back to 0?</span>
+      <button class="btn blood" id="resetYes">Yes, reset</button>
       <button class="btn" id="resetNo">Cancel</button>
     </div>
-    <span class="hint">Ctrl/⌘+Z = undo · players keep their order here so buttons don't move</span>
   </div>
 </section>
 
@@ -278,10 +277,10 @@ input.text:focus{border-color:var(--cyan)}
 
   // ---------- State + sync ----------
   const TEAMS = [
-    { name: 'Red', color: '#ff5b6e' },
-    { name: 'Blue', color: '#4d9bff' },
-    { name: 'Green', color: '#2ee68a' },
-    { name: 'Yellow', color: '#ffd54a' },
+    { name: 'Pumpkins', color: '#ff7518' },
+    { name: 'Witches', color: '#8e5cc4' },
+    { name: 'Zombies', color: '#a5d63a' },
+    { name: 'Ghosts', color: '#efe6cf' },
   ];
   // teamOf maps player id -> team index; missing means sitting out.
   const blank = () => ({ rev: 0, nextId: 1, players: [], undo: [], last: null, roundMode: 'solo', teamCount: 2, teamOf: {} });
@@ -303,7 +302,7 @@ input.text:focus{border-color:var(--cyan)}
     if (bc) bc.postMessage({ type: 'state', state });
   }
 
-  // Every change snapshots the player list so Undo can restore it.
+  // Every score/player change snapshots the player list so Undo can restore it.
   function commit(label, mutate, last) {
     state.undo.push({ label, players: JSON.parse(JSON.stringify(state.players)) });
     if (state.undo.length > 200) state.undo.shift();
@@ -378,7 +377,7 @@ input.text:focus{border-color:var(--cyan)}
       const on = Date.now() - lastPing < 5000;
       const el = $('#tvStatus');
       el.classList.toggle('on', on);
-      el.textContent = on ? '📺 TV connected' : '📺 TV not detected';
+      el.textContent = on ? 'TV connected' : 'TV not detected';
     }
     onPing = () => { lastPing = Date.now(); updStatus(); };
     setInterval(updStatus, 1000);
@@ -397,7 +396,7 @@ input.text:focus{border-color:var(--cyan)}
       e.preventDefault();
       const inp = $('#newName');
       const name = inp.value.trim().slice(0, 30);
-      if (!name) return;
+      if (!name) { inp.value = ''; return; }
       commit('Add ' + name, ps => ps.push({ id: state.nextId++, name, score: 0 }));
       inp.value = '';
       inp.focus();
@@ -417,12 +416,12 @@ input.text:focus{border-color:var(--cyan)}
     function scoreBy(id, delta) {
       const p = state.players.find(x => x.id === id);
       if (!p) return;
-      award([id], delta, delta > 0 ? `${p.name} wins (+1)` : `−1 ${p.name}`);
+      award([id], delta, delta > 0 ? `${p.name} won (+1)` : `−1 ${p.name}`);
     }
     const teamMembers = t => state.players.filter(p => state.teamOf[p.id] === t);
     function teamWins(t) {
       const ms = teamMembers(t);
-      award(ms.map(p => p.id), 1, `${TEAMS[t].name} wins (+1 each)`, TEAMS[t].name);
+      award(ms.map(p => p.id), 1, `${TEAMS[t].name} won (+1 each)`, TEAMS[t].name);
     }
 
     document.querySelectorAll('#modeSeg button').forEach(b => {
@@ -452,25 +451,26 @@ input.text:focus{border-color:var(--cyan)}
         '<input class="text name-in" maxlength="30" aria-label="Player name" title="Click to rename"></div>' +
         '<div class="pscore"></div>' +
         '<div class="pbtns">' +
-        '<span class="solo-only"><button class="sbtn minus" data-d="-1" title="Fix a mistake">−1</button></span>' +
-        '<button class="wbtn solo-only" data-d="1">🏆 Won +1</button>' +
+        '<button class="minus solo-only" data-d="-1" title="Take a point back">−1</button>' +
+        '<button class="btn orange win solo-only" data-d="1">Won +1</button>' +
         '<div class="chips team-only"></div>' +
         '<button class="rm" title="Remove player">✕</button></div>';
+      const cur = () => state.players.find(x => x.id === id);
       const chips = el.querySelector('.chips');
       TEAMS.forEach((t, i) => {
         const c = document.createElement('button');
         c.className = 'chip';
         c.dataset.t = i;
         c.style.background = t.color;
+        if (i === 1) c.style.color = '#fff';
         c.textContent = t.name;
-        c.title = t.name + ' team';
         chips.appendChild(c);
       });
       const out = document.createElement('button');
       out.className = 'chip out';
       out.dataset.t = '-1';
       out.textContent = 'Out';
-      out.title = 'Sitting out this round';
+      out.title = 'Sitting out';
       chips.appendChild(out);
       chips.querySelectorAll('.chip').forEach(c => {
         c.onclick = () => setMeta(s => {
@@ -478,7 +478,6 @@ input.text:focus{border-color:var(--cyan)}
           if (t < 0) delete s.teamOf[id]; else s.teamOf[id] = t;
         });
       });
-      const cur = () => state.players.find(x => x.id === id);
       const inp = el.querySelector('.name-in');
       inp.addEventListener('keydown', e => {
         if (e.key === 'Enter') inp.blur();
@@ -524,13 +523,16 @@ input.text:focus{border-color:var(--cyan)}
           c.classList.toggle('on', t < 0 ? state.teamOf[p.id] == null : state.teamOf[p.id] === t);
         });
       });
+      rowEls.forEach((el, id) => { if (!seen.has(id)) { el.remove(); rowEls.delete(id); } });
+      $('#emptyC').style.display = state.players.length ? 'none' : 'block';
+
       const team = state.roundMode === 'team';
       document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.roundMode));
       document.querySelectorAll('.solo-only').forEach(e => { e.style.display = team ? 'none' : ''; });
       document.querySelectorAll('.team-only').forEach(e => { e.style.display = team ? '' : 'none'; });
       $('#modeHint').textContent = team
-        ? 'Tap a color to put each player on a team, then tap the team that won. Everyone on it gets +1.'
-        : 'Tap “Won +1” on whoever won the round. −1 is for fixing mistakes.';
+        ? 'Put each player on a team, then tap the team that won. Everyone on it gets 1 point.'
+        : 'Tap "Won +1" on whoever won the round. Use −1 to fix a mistake.';
       $('#teamPanel').style.display = team && state.players.length ? '' : 'none';
       document.querySelectorAll('.tc').forEach(b => b.classList.toggle('on', +b.dataset.n === state.teamCount));
       const wb = $('#winBtns');
@@ -539,17 +541,18 @@ input.text:focus{border-color:var(--cyan)}
         const ms = teamMembers(t);
         const b = document.createElement('button');
         b.className = 'winbtn';
+        b.dataset.team = t;
         b.style.background = TEAMS[t].color;
+        if (t === 1) b.style.color = '#fff';
         b.disabled = !ms.length;
-        b.append(`🏆 ${TEAMS[t].name} won`);
+        b.append(`${TEAMS[t].name} won`);
         const sm = document.createElement('small');
-        sm.textContent = ms.length ? ms.map(p => p.name).join(', ') : 'no players yet';
+        sm.textContent = ms.length ? ms.map(p => p.name).join(', ') : 'nobody on this team';
         b.appendChild(sm);
         b.onclick = () => teamWins(t);
         wb.appendChild(b);
       }
-      rowEls.forEach((el, id) => { if (!seen.has(id)) { el.remove(); rowEls.delete(id); } });
-      $('#emptyC').style.display = state.players.length ? 'none' : 'block';
+
       const u = state.undo[state.undo.length - 1];
       $('#undoBtn').disabled = !u;
       $('#undoLbl').textContent = u ? u.label : 'nothing to undo';
@@ -586,12 +589,12 @@ input.text:focus{border-color:var(--cyan)}
     function makeRow() {
       const el = document.createElement('div');
       el.className = 'row';
-      el.innerHTML = '<div class="rank"></div><div class="name"><span class="crown">👑</span><span class="tdot"></span><span class="nm"></span></div>' +
+      el.innerHTML = '<div class="rank"></div><div class="name"><span class="lantern">🎃</span><span class="tdot"></span><span class="nm"></span></div>' +
                      '<div class="score"><span class="sv"></span></div>';
       return el;
     }
 
-    function celebrate(text, kicker, small) {
+    function celebrate(text, kicker, fewBats) {
       const box = $('#celebrate');
       clearTimeout(celebrateTimer);
       box.innerHTML = '';
@@ -601,18 +604,21 @@ input.text:focus{border-color:var(--cyan)}
       sm.textContent = kicker;
       b.append(sm, text);
       box.appendChild(b);
-      const colors = ['#ffd54a', '#ff4fa3', '#3de0ff', '#4dff9a', '#b388ff', '#ff8a3d'];
-      for (let i = 0; i < (small ? 40 : 110); i++) {
-        const c = document.createElement('div');
-        c.className = 'confetti';
-        const w = 0.8 + Math.random() * 1.2;
-        c.style.cssText =
-          `left:${Math.random() * 100}vw;width:${w}vh;height:${w * 1.8}vh;background:${colors[i % colors.length]};` +
-          `--dx:${(Math.random() - 0.5) * 30}vw;--rot:${360 + Math.random() * 900}deg;` +
-          `animation-duration:${2.2 + Math.random() * 2}s;animation-delay:${Math.random() * 0.6}s`;
-        box.appendChild(c);
+      // A swarm of bats flies across the screen.
+      const W = innerWidth, H = innerHeight;
+      for (let i = 0; i < (fewBats ? 8 : 22); i++) {
+        const bat = document.createElement('div');
+        bat.className = 'flybat';
+        const size = H * (0.04 + Math.random() * 0.07);
+        const fromLeft = Math.random() < 0.5;
+        const y0 = H * (0.3 + Math.random() * 0.7), y1 = y0 - H * (0.3 + Math.random() * 0.6);
+        bat.style.cssText =
+          `width:${size}px;--x0:${fromLeft ? -size * 2 : W + size}px;--x1:${fromLeft ? W + size : -size * 2}px;` +
+          `--y0:${y0}px;--y1:${y1}px;animation-duration:${1.6 + Math.random() * 1.6}s;animation-delay:${Math.random() * 0.9}s`;
+        bat.innerHTML = '<svg viewBox="0 0 100 50"><use href="#bat"/></svg>';
+        box.appendChild(bat);
       }
-      celebrateTimer = setTimeout(() => { box.innerHTML = ''; }, 5200);
+      celebrateTimer = setTimeout(() => { box.innerHTML = ''; }, 4600);
     }
 
     render = live => {
@@ -629,12 +635,13 @@ input.text:focus{border-color:var(--cyan)}
         if (board.children[i] !== el) board.insertBefore(el, board.children[i] || null);
         seen.add(p.id);
         el.dataset.rank = p.rank;
+        el.dataset.id = p.id;
         el.querySelector('.rank').textContent = p.rank;
         el.querySelector('.nm').textContent = p.name;
         const dot = el.querySelector('.tdot');
         const t = state.roundMode === 'team' ? state.teamOf[p.id] : null;
         dot.classList.toggle('show', t != null && t < state.teamCount);
-        if (t != null && TEAMS[t]) { dot.style.background = TEAMS[t].color; dot.style.color = TEAMS[t].color; }
+        if (t != null && TEAMS[t]) dot.style.background = TEAMS[t].color;
         const sv = el.querySelector('.sv');
         if (sv.textContent !== String(p.score)) {
           if (!fresh.has(p.id)) { sv.classList.remove('bump'); void sv.offsetWidth; sv.classList.add('bump'); }
@@ -669,30 +676,35 @@ input.text:focus{border-color:var(--cyan)}
         moved.forEach(el => { el.style.transition = ''; el.style.transform = ''; el.style.opacity = ''; });
       }
 
-      // Score pop + row flash for the player who just scored.
+      // "+1" pop and a flash on everyone who just scored.
       const L = state.last;
       const isScore = live && L && L.rev === state.rev && L.type === 'score';
       if (isScore) for (const id of L.ids || []) {
         const el = rowEls.get(id);
-        if (el) {
-          const pop = document.createElement('span');
-          pop.className = 'pop' + (L.delta < 0 ? ' neg' : '');
-          pop.textContent = (L.delta > 0 ? '+' : '−') + Math.abs(L.delta);
-          el.querySelector('.score').appendChild(pop);
-          pop.addEventListener('animationend', () => pop.remove());
-          el.classList.remove('flash', 'flash-neg');
-          void el.offsetWidth;
-          el.classList.add('flash');
-          if (L.delta < 0) el.classList.add('flash-neg');
-        }
+        if (!el) continue;
+        const pop = document.createElement('span');
+        pop.className = 'pop' + (L.delta < 0 ? ' neg' : '');
+        pop.textContent = (L.delta > 0 ? '+' : '−') + Math.abs(L.delta);
+        el.querySelector('.score').appendChild(pop);
+        pop.addEventListener('animationend', () => pop.remove());
+        el.classList.remove('flash', 'flash-neg');
+        void el.offsetWidth;
+        el.classList.add('flash');
+        if (L.delta < 0) el.classList.add('flash-neg');
       }
 
-      // Celebrate when someone new reaches 1st.
+      // Celebrate when someone new reaches 1st (or a team wins).
       const leaders = list.filter(p => p.rank === 1 && p.score > 0);
       if (isScore && L.delta > 0 && prevLeaders) {
         const newcomers = leaders.filter(p => !prevLeaders.has(p.id));
-        if (newcomers.length) celebrate('👑 ' + newcomers.map(p => p.name).join(' & '), leaders.length > 1 ? 'Tied for 1st!' : 'New leader!');
-        else if (L.team) celebrate('🏆 ' + L.team + ' team', '+1 each', true);
+        // Breaking a tie for 1st also counts as taking the lead.
+        const brokeTie = leaders.length === 1 && prevLeaders.size > 1 && L.ids.includes(leaders[0].id);
+        if (newcomers.length || brokeTie) {
+          const names = (leaders.length > 1 || brokeTie ? leaders : newcomers).map(p => p.name).join(' & ');
+          celebrate('🎃 ' + names, leaders.length > 1 ? 'Tied for 1st' : 'New leader');
+        } else if (L.team) {
+          celebrate(L.team + ' win', '+1 each', true);
+        }
       }
       prevLeaders = new Set(leaders.map(p => p.id));
     };
@@ -706,7 +718,7 @@ input.text:focus{border-color:var(--cyan)}
     fsBtn.onclick = toggleFs;
     board.addEventListener('dblclick', toggleFs);
     document.addEventListener('fullscreenchange', () => {
-      fsBtn.textContent = document.fullscreenElement ? '✕ Exit fullscreen' : '⛶ Fullscreen';
+      fsBtn.textContent = document.fullscreenElement ? 'Exit fullscreen' : 'Fullscreen';
       setTimeout(layout, 50);
     });
     let idleTimer = 0;
